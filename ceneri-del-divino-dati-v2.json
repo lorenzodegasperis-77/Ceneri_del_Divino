@@ -1,0 +1,666 @@
+{
+  "pool": [
+    {
+      "id": "glw2z7np",
+      "name": "Mercenario veterano",
+      "type": "personaggio",
+      "legendary": false,
+      "costInf": 2,
+      "costCor": 0,
+      "costPre": 0,
+      "forza": 2,
+      "resistenza": 2,
+      "prestigio": 0,
+      "ritoTipo": "immediato",
+      "fase": "",
+      "effetto": "",
+      "fazione": "Comune",
+      "tipologia": "Umano"
+    },
+    {
+      "id": "mu90lh4g",
+      "name": "Milizia di confine",
+      "type": "personaggio",
+      "legendary": false,
+      "costInf": 1,
+      "costCor": 0,
+      "costPre": 0,
+      "forza": 1,
+      "resistenza": 2,
+      "prestigio": 0,
+      "ritoTipo": "immediato",
+      "fase": "",
+      "effetto": "",
+      "fazione": "Comune",
+      "tipologia": "Umano"
+    },
+    {
+      "id": "ahyooo0d",
+      "name": "Esploratore",
+      "type": "personaggio",
+      "legendary": false,
+      "costInf": 2,
+      "costCor": 0,
+      "costPre": 0,
+      "forza": 1,
+      "resistenza": 2,
+      "prestigio": 0,
+      "ritoTipo": "immediato",
+      "fase": "",
+      "effetto": "Quando entra in gioco, guarda la prima carta del tuo mazzo. Puoi lasciarla in cima oppure metterla in fondo.",
+      "fazione": "Comune",
+      "tipologia": "Umano"
+    },
+    {
+      "id": "6019gsuh",
+      "name": "Ponte sul Lyr",
+      "type": "luogo",
+      "legendary": false,
+      "costInf": 2,
+      "costCor": 0,
+      "costPre": 0,
+      "forza": 0,
+      "resistenza": 0,
+      "prestigio": 2,
+      "ritoTipo": "immediato",
+      "fase": "",
+      "effetto": "",
+      "fazione": "Comune",
+      "tipologia": ""
+    },
+    {
+      "id": "7meb4fbx",
+      "name": "Santuario dimenticato",
+      "type": "luogo",
+      "legendary": false,
+      "costInf": 1,
+      "costCor": 0,
+      "costPre": 0,
+      "forza": 0,
+      "resistenza": 0,
+      "prestigio": 1,
+      "ritoTipo": "immediato",
+      "fase": "",
+      "effetto": "Quando il controllo del Luogo cambia, il controllore rimuove 1 Corruzione da sé.",
+      "fazione": "Comune",
+      "tipologia": ""
+    },
+    {
+      "id": "flvbptc1",
+      "name": "Accordo precario",
+      "type": "rito",
+      "legendary": false,
+      "costInf": 1,
+      "costCor": 1,
+      "costPre": 0,
+      "forza": 0,
+      "resistenza": 0,
+      "prestigio": 0,
+      "ritoTipo": "immediato",
+      "fase": "",
+      "effetto": "Ottieni 2 Influenza, senza superare il limite di 10. Poi il rito viene scartato.",
+      "fazione": "Comune",
+      "tipologia": ""
+    },
+    {
+      "id": "xj8v3iup",
+      "name": "E-don, il Padre Spezzato",
+      "type": "rito",
+      "legendary": false,
+      "costInf": 5,
+      "costCor": 0,
+      "costPre": 0,
+      "forza": 0,
+      "resistenza": 0,
+      "prestigio": 0,
+      "ritoTipo": "persistente",
+      "fase": "",
+      "effetto": "Quando entra in gioco, rimuovi 1 danno da ciascuno dei tuoi personaggi.\n\nDurante il tuo turno, una volta per turno, puoi rimuovere 1 danno da uno dei tuoi personaggi.",
+      "fazione": "Comune",
+      "tipologia": ""
+    },
+    {
+      "id": "f3ih9aq3",
+      "name": "Il Martello della Redenzione",
+      "type": "rito",
+      "legendary": false,
+      "costInf": 4,
+      "costCor": 0,
+      "costPre": 0,
+      "forza": 0,
+      "resistenza": 0,
+      "prestigio": 0,
+      "ritoTipo": "immediato",
+      "fase": "",
+      "effetto": "Un tuo personaggio ottiene +2 Forza durante uno scontro di presidio. Se sconfigge il proprio avversario, subisce 1 danno.",
+      "fazione": "Comune",
+      "tipologia": ""
+    },
+    {
+      "id": "iomwsfaw",
+      "name": "Il Silenzio della Mietitrice",
+      "type": "rito",
+      "legendary": false,
+      "costInf": 3,
+      "costCor": 0,
+      "costPre": 0,
+      "forza": 0,
+      "resistenza": 0,
+      "prestigio": 0,
+      "ritoTipo": "immediato",
+      "fase": "",
+      "effetto": "Scegli un personaggio con Forza 2 o inferiore. Fino all'inizio del prossimo turno del suo controllore, non può essere schierato né scelto come difensore in uno scontro di presidio.",
+      "fazione": "Comune",
+      "tipologia": ""
+    },
+    {
+      "id": "67vyshbp",
+      "name": "Zamorbelle",
+      "type": "luogo",
+      "legendary": false,
+      "costInf": 4,
+      "costCor": 0,
+      "costPre": 0,
+      "forza": 0,
+      "resistenza": 0,
+      "prestigio": 1,
+      "ritoTipo": "immediato",
+      "fase": "",
+      "effetto": "Quando viene costruito, ottieni 1 Influenza per ogni altro luogo che controlli, fino a un massimo di 2.\n\nIl bonus dipende dal controllo effettivo, non dalla semplice presenza di luoghi sulla plancia.",
+      "fazione": "Comune",
+      "tipologia": ""
+    },
+    {
+      "id": "smdbf24p",
+      "name": "Lago Occhi di Giada",
+      "type": "luogo",
+      "legendary": false,
+      "costInf": 4,
+      "costCor": 0,
+      "costPre": 0,
+      "forza": 0,
+      "resistenza": 0,
+      "prestigio": 2,
+      "ritoTipo": "immediato",
+      "fase": "",
+      "effetto": "Quando il controllo del Luogo cambia, il nuovo controllore guarda le prime 2 carte del proprio Mazzo e le rimette in cima nell'ordine che preferisce.",
+      "fazione": "Comune",
+      "tipologia": ""
+    },
+    {
+      "id": "9j2ffjr7",
+      "name": "Miniere di Luminaria",
+      "type": "luogo",
+      "legendary": false,
+      "costInf": 3,
+      "costCor": 0,
+      "costPre": 0,
+      "forza": 0,
+      "resistenza": 0,
+      "prestigio": 1,
+      "ritoTipo": "immediato",
+      "fase": "",
+      "effetto": "Una volta per turno, quando giochi un personaggio con costo 2 o inferiore, recuperi 1 Influenza.",
+      "fazione": "Comune",
+      "tipologia": ""
+    },
+    {
+      "id": "0q15q277",
+      "name": "Resti che camminano",
+      "type": "personaggio",
+      "legendary": false,
+      "costInf": 2,
+      "costCor": 0,
+      "costPre": 0,
+      "forza": 1,
+      "resistenza": 2,
+      "prestigio": 0,
+      "ritoTipo": "immediato",
+      "fase": "",
+      "effetto": "Quando questa carta viene rimossa dalla partita a causa di una soglia di Corruzione, puoi accumulare 1 Corruzione aggiuntiva per riprenderla in mano.",
+      "fazione": "Comune",
+      "tipologia": "Non morto"
+    },
+    {
+      "id": "zegx17j7",
+      "name": "Custode dei sepolcri",
+      "type": "personaggio",
+      "legendary": false,
+      "costInf": 3,
+      "costCor": 0,
+      "costPre": 0,
+      "forza": 2,
+      "resistenza": 4,
+      "prestigio": 0,
+      "ritoTipo": "immediato",
+      "fase": "",
+      "effetto": "Finché è schierato in un Luogo, il primo personaggio non morto che controlli in quel luogo ottiene +1 Resistenza.",
+      "fazione": "Comune",
+      "tipologia": "Non morto"
+    },
+    {
+      "id": "p6iykbe4",
+      "name": "Profanatore",
+      "type": "personaggio",
+      "legendary": false,
+      "costInf": 2,
+      "costCor": 2,
+      "costPre": 0,
+      "forza": 0,
+      "resistenza": 3,
+      "prestigio": 0,
+      "ritoTipo": "immediato",
+      "fase": "",
+      "effetto": "Quando viene schierato infligge immediatamente 3 danni ad un personaggio a scelta.",
+      "fazione": "Comune",
+      "tipologia": ""
+    },
+    {
+      "id": "6wyk1f0k",
+      "name": "Notte delle Luci Danzanti",
+      "type": "evento",
+      "legendary": false,
+      "costInf": 3,
+      "costCor": 0,
+      "costPre": 0,
+      "forza": 0,
+      "resistenza": 0,
+      "prestigio": 0,
+      "ritoTipo": "immediato",
+      "fase": "",
+      "effetto": "Ogni volta che un personaggio viene schierato in un luogo dove sono già presenti personaggi avversari, il controllore del personaggio può scegliere di accumulare 1 Corruzione per conferirgli +1 Forza durante il primo scontro di presidio che affronta in quel turno.",
+      "fazione": "Comune",
+      "tipologia": ""
+    },
+    {
+      "id": "rugbd3rg",
+      "name": "Sovrintendente delle provviste",
+      "type": "personaggio",
+      "legendary": false,
+      "costInf": 2,
+      "costCor": 0,
+      "costPre": 0,
+      "forza": 1,
+      "resistenza": 3,
+      "prestigio": 0,
+      "ritoTipo": "immediato",
+      "fase": "",
+      "effetto": "Nel tuo turno, quando costruisci un luogo, recuperi 1 Influenza.",
+      "fazione": "Le Terre Contese",
+      "tipologia": ""
+    },
+    {
+      "id": "yj26m0yk",
+      "name": "Capitano di casata",
+      "type": "personaggio",
+      "legendary": false,
+      "costInf": 3,
+      "costCor": 0,
+      "costPre": 0,
+      "forza": 3,
+      "resistenza": 3,
+      "prestigio": 0,
+      "ritoTipo": "immediato",
+      "fase": "",
+      "effetto": "Quando viene schierato in un luogo dove sono presenti personaggi avversari, ottiene +1 Forza durante il primo scontro di presidio che affronta in quel turno.",
+      "fazione": "Le Terre Contese",
+      "tipologia": ""
+    },
+    {
+      "id": "xb71olyq",
+      "name": "Inviato della Città",
+      "type": "personaggio",
+      "legendary": false,
+      "costInf": 2,
+      "costCor": 0,
+      "costPre": 0,
+      "forza": 1,
+      "resistenza": 3,
+      "prestigio": 0,
+      "ritoTipo": "immediato",
+      "fase": "",
+      "effetto": "Quando entra in gioco, ottieni 1 Prestigio se controlli almeno un luogo. Questo effetto si attiva una sola volta, quando la carta viene giocata.",
+      "fazione": "Le Terre Contese",
+      "tipologia": ""
+    },
+    {
+      "id": "4gqe8t7c",
+      "name": "Darsene fortificate",
+      "type": "luogo",
+      "legendary": false,
+      "costInf": 4,
+      "costCor": 0,
+      "costPre": 0,
+      "forza": 0,
+      "resistenza": 0,
+      "prestigio": 3,
+      "ritoTipo": "immediato",
+      "fase": "",
+      "effetto": "I personaggi in difesa ottengono +1 Resistenza durante uno scontro di presidio in questo luogo.",
+      "fazione": "Le Terre Contese",
+      "tipologia": ""
+    },
+    {
+      "id": "0tsoy2gb",
+      "name": "Difesa disperata",
+      "type": "rito",
+      "legendary": false,
+      "costInf": 2,
+      "costCor": 0,
+      "costPre": 0,
+      "forza": 0,
+      "resistenza": 0,
+      "prestigio": 0,
+      "ritoTipo": "immediato",
+      "fase": "II",
+      "effetto": "Un tuo personaggio ottiene +2 Resistenza fino all'inizio del tuo prossimo turno. Il bonus non rimuove i danni già subiti.",
+      "fazione": "Le Terre Contese",
+      "tipologia": ""
+    },
+    {
+      "id": "cr1cth65",
+      "name": "Ritirata strategica",
+      "type": "rito",
+      "legendary": false,
+      "costInf": 1,
+      "costCor": 0,
+      "costPre": 0,
+      "forza": 0,
+      "resistenza": 0,
+      "prestigio": 0,
+      "ritoTipo": "immediato",
+      "fase": "",
+      "effetto": "Riprendi in mano un tuo personaggio assegnato a un luogo e rimuovi tutti i danni che ha subito. Se il luogo rimane senza personaggi tuoi, il suo controllo viene ricalcolato normalmente.",
+      "fazione": "Le Terre Contese",
+      "tipologia": ""
+    },
+    {
+      "id": "cv6xe6ck",
+      "name": "Tessitore errante",
+      "type": "personaggio",
+      "legendary": false,
+      "costInf": 2,
+      "costCor": 0,
+      "costPre": 0,
+      "forza": 3,
+      "resistenza": 1,
+      "prestigio": 0,
+      "ritoTipo": "immediato",
+      "fase": "",
+      "effetto": "Quando entra in gioco, puoi accumulare 1 Corruzione per pescare 1 carta.",
+      "fazione": "Le Accademie del Velo",
+      "tipologia": ""
+    },
+    {
+      "id": "lcz8l3ej",
+      "name": "Studioso del Velo",
+      "type": "personaggio",
+      "legendary": false,
+      "costInf": 3,
+      "costCor": 0,
+      "costPre": 0,
+      "forza": 2,
+      "resistenza": 3,
+      "prestigio": 0,
+      "ritoTipo": "immediato",
+      "fase": "",
+      "effetto": "Una volta per turno, quando giochi un rito, puoi accumulare 1 Corruzione per ottenere 1 Influenza.",
+      "fazione": "Le Accademie del Velo",
+      "tipologia": ""
+    },
+    {
+      "id": "vy2zizmv",
+      "name": "Osservatorio spezzato",
+      "type": "luogo",
+      "legendary": false,
+      "costInf": 3,
+      "costCor": 0,
+      "costPre": 0,
+      "forza": 0,
+      "resistenza": 0,
+      "prestigio": 1,
+      "ritoTipo": "immediato",
+      "fase": "",
+      "effetto": "Se controlli questo luogo, una volta per turno, quando giochi un rito, guarda la prima carta del tuo mazzo. Puoi lasciarla in cima oppure metterla negli scarti.",
+      "fazione": "Le Accademie del Velo",
+      "tipologia": ""
+    },
+    {
+      "id": "is2xg1i9",
+      "name": "Tessitura proibita",
+      "type": "rito",
+      "legendary": false,
+      "costInf": 1,
+      "costCor": 1,
+      "costPre": 0,
+      "forza": 0,
+      "resistenza": 0,
+      "prestigio": 0,
+      "ritoTipo": "persistente",
+      "fase": "",
+      "effetto": "Un tuo personaggio ottiene +2 Forza fino alla fine del turno.",
+      "fazione": "Le Accademie del Velo",
+      "tipologia": ""
+    },
+    {
+      "id": "h8uuq41j",
+      "name": "Squarcio nel Velo",
+      "type": "rito",
+      "legendary": false,
+      "costInf": 2,
+      "costCor": 1,
+      "costPre": 0,
+      "forza": 0,
+      "resistenza": 0,
+      "prestigio": 0,
+      "ritoTipo": "immediato",
+      "fase": "",
+      "effetto": "Infliggi 2 danni a un personaggio presente in qualsiasi luogo.",
+      "fazione": "Le Accademie del Velo",
+      "tipologia": ""
+    },
+    {
+      "id": "y7jf8wka",
+      "name": "Prezzo del sangue",
+      "type": "rito",
+      "legendary": false,
+      "costInf": 0,
+      "costCor": 2,
+      "costPre": 0,
+      "forza": 0,
+      "resistenza": 0,
+      "prestigio": 0,
+      "ritoTipo": "immediato",
+      "fase": "",
+      "effetto": "Pesca 2 carte. Poi puoi scartare una carta dalla tua mano e mettere un'altra carta dalla tua mano in fondo al Mazzo.",
+      "fazione": "Le Accademie del Velo",
+      "tipologia": ""
+    }
+  ],
+  "decklists": [
+    [
+      {
+        "cardId": "mu90lh4g",
+        "qty": 3
+      },
+      {
+        "cardId": "glw2z7np",
+        "qty": 2
+      },
+      {
+        "cardId": "ahyooo0d",
+        "qty": 1
+      },
+      {
+        "cardId": "0q15q277",
+        "qty": 1
+      },
+      {
+        "cardId": "p6iykbe4",
+        "qty": 1
+      },
+      {
+        "cardId": "zegx17j7",
+        "qty": 1
+      },
+      {
+        "cardId": "rugbd3rg",
+        "qty": 1
+      },
+      {
+        "cardId": "yj26m0yk",
+        "qty": 1
+      },
+      {
+        "cardId": "6019gsuh",
+        "qty": 2
+      },
+      {
+        "cardId": "7meb4fbx",
+        "qty": 2
+      },
+      {
+        "cardId": "67vyshbp",
+        "qty": 1
+      },
+      {
+        "cardId": "smdbf24p",
+        "qty": 1
+      },
+      {
+        "cardId": "9j2ffjr7",
+        "qty": 3
+      },
+      {
+        "cardId": "flvbptc1",
+        "qty": 2
+      },
+      {
+        "cardId": "f3ih9aq3",
+        "qty": 2
+      },
+      {
+        "cardId": "iomwsfaw",
+        "qty": 1
+      },
+      {
+        "cardId": "xj8v3iup",
+        "qty": 1
+      },
+      {
+        "cardId": "0tsoy2gb",
+        "qty": 1
+      },
+      {
+        "cardId": "cr1cth65",
+        "qty": 1
+      },
+      {
+        "cardId": "xb71olyq",
+        "qty": 1
+      },
+      {
+        "cardId": "6wyk1f0k",
+        "qty": 1
+      }
+    ],
+    [
+      {
+        "cardId": "mu90lh4g",
+        "qty": 2
+      },
+      {
+        "cardId": "glw2z7np",
+        "qty": 1
+      },
+      {
+        "cardId": "ahyooo0d",
+        "qty": 2
+      },
+      {
+        "cardId": "0q15q277",
+        "qty": 1
+      },
+      {
+        "cardId": "zegx17j7",
+        "qty": 1
+      },
+      {
+        "cardId": "p6iykbe4",
+        "qty": 1
+      },
+      {
+        "cardId": "cv6xe6ck",
+        "qty": 1
+      },
+      {
+        "cardId": "lcz8l3ej",
+        "qty": 2
+      },
+      {
+        "cardId": "6019gsuh",
+        "qty": 1
+      },
+      {
+        "cardId": "7meb4fbx",
+        "qty": 1
+      },
+      {
+        "cardId": "9j2ffjr7",
+        "qty": 1
+      },
+      {
+        "cardId": "67vyshbp",
+        "qty": 1
+      },
+      {
+        "cardId": "vy2zizmv",
+        "qty": 1
+      },
+      {
+        "cardId": "flvbptc1",
+        "qty": 2
+      },
+      {
+        "cardId": "iomwsfaw",
+        "qty": 2
+      },
+      {
+        "cardId": "f3ih9aq3",
+        "qty": 1
+      },
+      {
+        "cardId": "xj8v3iup",
+        "qty": 1
+      },
+      {
+        "cardId": "is2xg1i9",
+        "qty": 2
+      },
+      {
+        "cardId": "h8uuq41j",
+        "qty": 2
+      },
+      {
+        "cardId": "y7jf8wka",
+        "qty": 1
+      },
+      {
+        "cardId": "0tsoy2gb",
+        "qty": 1
+      },
+      {
+        "cardId": "cr1cth65",
+        "qty": 1
+      },
+      {
+        "cardId": "6wyk1f0k",
+        "qty": 1
+      }
+    ]
+  ],
+  "deckFaction": [
+    "Le Terre Contese",
+    "Le Accademie del Velo"
+  ]
+}
