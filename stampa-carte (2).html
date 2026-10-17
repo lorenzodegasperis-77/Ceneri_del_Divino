@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Le Ceneri del Divino — Stampa Carte</title>
+<style>
+:root{
+  --bg:#f5f2ec; --surface:#ffffff; --surface2:#eee9df; --border:#d8d0c0;
+  --text:#2a2420; --muted:#726a5e; --accent:#7a2e2e; --accent2:#2e4a3f;
+  --warn:#a85c1f;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#1b1815; --surface:#262220; --surface2:#2f2a26; --border:#443d36;
+    --text:#ece6dd; --muted:#a89d8d; --accent:#d98a8a; --accent2:#8fd1b8; --warn:#e0a35c;
+    color-scheme: dark;
+  }
+}
+*{box-sizing:border-box;-webkit-print-color-adjust:exact;print-color-adjust:exact;color-adjust:exact}
+body{margin:0;background:var(--bg);color:var(--text);font-family:Georgia,'Iowan Old Style',serif;font-size:14px}
+h1,h2,h3,h4{font-family:Georgia,serif;margin:.2em 0}
+header{padding:12px 16px;border-bottom:2px solid var(--accent);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px}
+header h1{font-size:1.1rem;color:var(--accent)}
+nav{display:flex;gap:6px}
+nav button{background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:6px 12px;border-radius:6px;cursor:pointer;font-size:.85rem}
+nav button.active{background:var(--accent);color:#fff;border-color:var(--accent)}
+main{padding:12px 16px;max-width:1300px;margin:0 auto}
+.tab{display:none} .tab.active{display:block}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px;margin-bottom:12px}
+.row{display:flex;gap:14px;flex-wrap:wrap}
+.col{flex:1;min-width:280px}
+.formgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px}
+label{display:block;font-size:.72rem;color:var(--muted);margin-bottom:2px}
+input,select,textarea{width:100%;background:var(--surface2);border:1px solid var(--border);color:var(--text);border-radius:5px;padding:5px 7px;font-size:.82rem;font-family:inherit}
+textarea{min-height:52px}
+.btn{background:var(--accent2);color:#fff;border:none;padding:7px 12px;border-radius:6px;cursor:pointer;font-size:.8rem;margin:2px 4px 2px 0}
+.btn.alt{background:var(--accent)} .btn.ghost{background:transparent;border:1px solid var(--border);color:var(--text)}
+.small{font-size:.72rem;color:var(--muted)}
+.poollist{display:flex;flex-wrap:wrap;gap:10px}
+.poolrow{display:flex;align-items:center;gap:8px;border:1px solid var(--border);border-radius:8px;padding:6px 8px;background:var(--surface2)}
+.poolrow input[type=number]{width:52px}
+hr.sep{border:none;border-top:1px solid var(--border);margin:12px 0}
+
+/* ---- carta ---- */
+.pcard{width:var(--cw,63.5mm);height:var(--ch,88.9mm);background:#efe6d2;color:#2a2420;border:0.4mm solid #b7943f;border-radius:2.5mm;
+  position:relative;overflow:hidden;display:flex;flex-direction:column;font-family:Georgia,serif;box-shadow:0 1px 4px rgba(0,0,0,.25)}
+.pc-top{background:#1c1712;color:#e9dcb8;padding:1.8mm 2.2mm 1mm;position:relative}
+.pc-legendary{font-size:1.6mm;letter-spacing:.3mm;color:#d9b24a;font-weight:bold;display:block;margin-bottom:.4mm}
+.pc-name{font-variant:small-caps;font-weight:bold;font-size:3mm;line-height:1.15;padding-right:11mm}
+.pc-badge{position:absolute;top:1.5mm;width:5.4mm;height:5.4mm;display:flex;align-items:center;justify-content:center;font-weight:bold;font-size:2.3mm}
+.pc-badge.inf{right:1.5mm;background:#d9b24a;color:#1c1712;clip-path:polygon(50% 0,100% 20%,100% 100%,0 100%,0 20%)}
+.pc-badge.cor{right:7.9mm;color:#8a5fc9}
+.pc-badge.cor svg{position:absolute;inset:0;width:100%;height:100%}
+.pc-badge.cor em{position:relative;font-style:normal;background:#efe6d2;border-radius:50%;width:3mm;height:3mm;display:flex;align-items:center;justify-content:center;font-size:2mm;color:#8a5fc9;box-shadow:0 0 0 .3mm #8a5fc9}
+.pc-badge svg{width:3mm;height:3mm}
+.pc-art{height:34%;background:repeating-linear-gradient(135deg,#d8cba0,#d8cba0 3px,#ccbd8e 3px,#ccbd8e 6px);
+  display:flex;align-items:center;justify-content:center;overflow:hidden}
+.pc-art img{width:100%;height:100%;object-fit:cover}
+.pc-art svg{width:40%;height:40%;opacity:.35}
+.pc-subtitle{background:#1c1712;color:#cbb278;text-align:center;font-size:2mm;letter-spacing:.3mm;padding:.8mm 1mm;font-variant:small-caps}
+.pc-body{flex:1;position:relative;padding:2mm 2.4mm;display:flex;flex-direction:column}
+.pc-watermark{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;opacity:.1;pointer-events:none}
+.pc-watermark svg{width:70%;height:70%}
+.pc-effect{position:relative;font-size:2.5mm;line-height:1.35;white-space:pre-wrap}
+.pc-flavor{position:relative;margin-top:auto;text-align:center;font-style:italic;font-size:2.1mm;color:#55493a;padding-top:1.2mm}
+.pc-rule{display:flex;align-items:center;gap:1mm;margin-bottom:1mm}
+.pc-rule::before,.pc-rule::after{content:"";flex:1;border-top:.2mm solid #b7943f}
+.pc-foot{background:#1c1712;color:#e9dcb8;display:flex;justify-content:space-between;align-items:center;padding:1mm 2.4mm;font-size:2.4mm;font-weight:bold}
+.pc-foot.center{justify-content:center}
+.pc-foot svg{width:3mm;height:3mm;vertical-align:-.5mm;margin:0 .6mm}
+.pc-prestige-big{display:flex;align-items:center;gap:1.2mm;font-size:4.4mm}
+.pc-prestige-big svg{width:5mm;height:5mm}
+
+.preview-wrap{display:flex;justify-content:center;padding:10px;background:var(--surface2);border-radius:8px}
+
+/* ---- stampa ---- */
+.sheets{display:flex;flex-direction:column;gap:16px;align-items:flex-start}
+.sheet-scale{zoom:.42}
+.sheet{width:210mm;height:297mm;background:#fff;position:relative;box-shadow:0 1px 6px rgba(0,0,0,.3)}
+.pcell{position:absolute;border:0.2mm dashed #999}
+@media print{
+  html,body{-webkit-print-color-adjust:exact;print-color-adjust:exact;color-adjust:exact;background:#fff}
+  body *{visibility:hidden}
+  #print-area,#print-area *{visibility:visible}
+  #print-area{position:absolute;left:0;top:0;margin:0;padding:0}
+  .sheet-scale{zoom:1 !important}
+  .sheet{box-shadow:none;page-break-after:always}
+  @page{size:A4;margin:0}
+}
+</style>
+</head>
+<body>
+<header>
+  <h1>⚜ Le Ceneri del Divino — Stampa Carte</h1>
+  <nav id="tabs"></nav>
+</header>
+<main>
+  <div class="tab active" id="tab-editor"></div>
+  <div class="tab" id="tab-stampa"></div>
+</main>
+
+<script>
+/* ====================== FAZIONI / ICONE ====================== */
+const FACTIONS = [
+ {name:"Comune", color:"#8a8070", icon:""},
+ {name:"La Comunione", color:"#c9a227", icon:`<circle cx="50" cy="50" r="14" fill="currentColor"/><g stroke="currentColor" stroke-width="5" stroke-linecap="round"><line x1="50" y1="8" x2="50" y2="24"/><line x1="50" y1="76" x2="50" y2="92"/><line x1="8" y1="50" x2="24" y2="50"/><line x1="76" y1="50" x2="92" y2="50"/><line x1="19" y1="19" x2="30" y2="30"/><line x1="70" y1="70" x2="81" y2="81"/><line x1="81" y1="19" x2="70" y2="30"/><line x1="30" y1="70" x2="19" y2="81"/></g>`},
+ {name:"Creature della notte", color:"#6a3f91", icon:`<path d="M62 12a36 36 0 100 76 29 29 0 010-76z" fill="currentColor"/>`},
+ {name:"Devoti dei Primi Figli", color:"#4a7a4a", icon:`<path d="M50 8 L70 45 L30 45 Z" fill="currentColor"/><path d="M50 28 L76 68 L24 68 Z" fill="currentColor"/><rect x="44" y="68" width="12" height="22" fill="currentColor"/>`},
+ {name:"Gli Spontanei", color:"#c45a2e", icon:`<path d="M50 8C28 34 24 56 40 72 34 56 46 50 48 61 53 50 67 56 60 74 82 60 76 33 50 8Z" fill="currentColor"/>`},
+ {name:"Le Accademie del Velo", color:"#3a5a8f", icon:`<path d="M8 50C25 18 75 18 92 50 75 82 25 82 8 50Z" fill="none" stroke="currentColor" stroke-width="6"/><circle cx="50" cy="50" r="13" fill="currentColor"/>`},
+ {name:"I Ducati del Nord", color:"#6b6b6b", icon:`<path d="M6 82 L34 32 L50 55 L66 22 L94 82Z" fill="currentColor"/>`},
+ {name:"La Corona di Velaria", color:"#a8862e", icon:`<path d="M14 76 L20 32 L40 55 L50 20 L60 55 L80 32 L86 76Z" fill="currentColor"/><rect x="14" y="76" width="72" height="9" fill="currentColor"/>`},
+ {name:"Il Regno delle Luci", color:"#c9a93a", icon:`<path d="M50 4 L59 38 L92 24 L64 48 L92 76 L59 62 L50 96 L41 62 L8 76 L36 48 L8 24 L41 38Z" fill="currentColor"/>`},
+ {name:"I Domini del Ponente", color:"#2e7a7a", icon:`<path d="M4 54 Q19 34 34 54 T64 54 T94 54" fill="none" stroke="currentColor" stroke-width="7" stroke-linecap="round"/><path d="M4 73 Q19 53 34 73 T64 73 T94 73" fill="none" stroke="currentColor" stroke-width="7" stroke-linecap="round"/>`},
+ {name:"Le Terre Contese", color:"#7a2e2e", icon:`<g stroke="currentColor" stroke-width="6" stroke-linecap="round"><line x1="14" y1="14" x2="86" y2="86"/><line x1="86" y1="14" x2="14" y2="86"/></g><circle cx="50" cy="50" r="7" fill="currentColor"/>`}
+];
+const factionOf = n => FACTIONS.find(f=>f.name===n) || FACTIONS[0];
+const ICO = {
+ shield:`<path d="M12 2l7 3v6c0 5-3 8-7 9-4-1-7-4-7-9V5z" fill="currentColor"/>`,
+ spiral:`<path d="M12 4a8 8 0 1 0 8 8" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M12 7a5 5 0 1 0 5 5" fill="none" stroke="currentColor" stroke-width="1.8"/><circle cx="12" cy="12" r="1.3" fill="currentColor"/>`,
+ sword:`<path d="M20 4l-9 9-3-3 9-9 3 3zM10 14l-7 7 3 3 7-7-3-3z" fill="currentColor"/>`,
+ star:`<path d="M12 2l2.6 6.9L22 9.5l-5.6 4.8L18 22l-6-4-6 4 1.6-7.7L2 9.5l7.4-.6z" fill="currentColor"/>`,
+};
+const TYPE_LABEL = {personaggio:'Personaggio', luogo:'Luogo', rito:'Rito', evento:'Evento'};
+const uid = ()=>Math.random().toString(36).slice(2,10);
+const esc = s => (s||'').replace(/[&<>]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[m]));
+
+/* ====================== STATO ====================== */
+let pool = [];
+let editingId = null;
+let printDims = {w:63.5, h:88.9, margin:8, gap:3};
+let printQty = {}; // id -> copie
+let sheetsHTML = '';
+let busy = false;
+
+/* ====================== RENDER CARTA ====================== */
+function subtitleOf(c){
+  const parts = [TYPE_LABEL[c.type]];
+  if(c.type==='personaggio' && c.tipologia) parts.push(c.tipologia);
+  if(c.type==='rito') parts.push(c.ritoTipo==='persistente'?'Persistente':'Immediato');
+  parts.push(c.fazione||'Comune');
+  return parts.join(' — ');
+}
+function cardHTML(c){
+  const fac = factionOf(c.fazione);
+  const watermark = fac.icon ? `<div class="pc-watermark" style="color:${fac.color}"><svg viewBox="0 0 100 100">${fac.icon}</svg></div>` : '';
+  let foot = '', footClass = '';
+  if(c.type==='personaggio') foot = `<span>${ICO.sword} ${c.forza||0} Forza</span><span>${c.resistenza||0} Resistenza ${ICO.shield}</span>`;
+  else if(c.type==='luogo'){ foot = `<span class="pc-prestige-big">${ICO.star}${c.prestigio||0}</span>`; footClass='center'; }
+  else foot = '<span></span><span></span>';
+  return `<div class="pcard" style="--cw:${printDims.w}mm;--ch:${printDims.h}mm">
+    <div class="pc-top">
+      ${c.legendary?'<span class="pc-legendary">Leggendaria</span>':''}
+      <div class="pc-name">${esc(c.name||'Senza nome')}</div>
+      ${c.costCor?`<span class="pc-badge cor"><svg viewBox="0 0 24 24">${ICO.spiral}</svg><em>${c.costCor}</em></span>`:''}
+      ${c.costInf?`<span class="pc-badge inf">${c.costInf}</span>`:''}
+    </div>
+    <div class="pc-art">${c.image?`<img src="${c.image}">`:`<svg viewBox="0 0 100 100"><path d="M20 70 L40 45 L55 60 L70 35 L85 70Z" fill="#b7943f"/><circle cx="30" cy="32" r="6" fill="#b7943f"/></svg>`}</div>
+    <div class="pc-subtitle">${esc(subtitleOf(c))}</div>
+    <div class="pc-body">
+      ${watermark}
+      <div class="pc-effect">${esc(c.effetto||'')}</div>
+      ${c.flavor?`<div class="pc-flavor"><div class="pc-rule"></div>“${esc(c.flavor)}”<div class="pc-rule" style="margin-top:1mm"></div></div>`:''}
+    </div>
+    <div class="pc-foot ${footClass}">${foot}</div>
+  </div>`;
+}
+
+/* ====================== FORM CARD ====================== */
+function blankCard(){ return {id:uid(), name:'', type:'personaggio', legendary:false, fazione:'Comune',
+  costInf:0, costCor:0, tipologia:'', forza:0, resistenza:0, ritoTipo:'immediato', prestigio:0,
+  effetto:'', flavor:'', image:''}; }
+let draft = blankCard();
+
+function setDraftField(k,v){ draft[k]=v; updatePreview(); }
+function setDraftFieldAndRerender(k,v){ draft[k]=v; render(); }
+function updatePreview(){ const el=document.getElementById('pc-preview'); if(el) el.innerHTML = cardHTML(draft); }
+function pickImage(input){
+  if(!input.files || !input.files[0]) return;
+  busy = true; render();
+  const reader = new FileReader();
+  reader.onload = ()=>{ draft.image = reader.result; };
+  reader.onerror = ()=>{ alert('Impossibile leggere l\'immagine.'); };
+  reader.onloadend = ()=>{ try{ } finally { busy=false; render(); } };
+  reader.readAsDataURL(input.files[0]);
+}
+function removeImage(){ draft.image=''; render(); }
+function saveDraft(){
+  if(!draft.name.trim()){ alert('Dai un nome alla carta.'); return; }
+  const i = pool.findIndex(c=>c.id===draft.id);
+  const copy = JSON.parse(JSON.stringify(draft));
+  if(i>=0) pool[i]=copy; else pool.push(copy);
+  editingId = null; draft = blankCard(); render();
+}
+function editCard(id){ const c=pool.find(x=>x.id===id); if(!c) return; draft=JSON.parse(JSON.stringify(c)); editingId=id; render(); window.scrollTo({top:0,behavior:'smooth'}); }
+function duplicateCard(id){ const c=pool.find(x=>x.id===id); if(!c) return; const d=JSON.parse(JSON.stringify(c)); d.id=uid(); d.name=d.name+' (copia)'; pool.push(d); render(); }
+function deleteCard(id){ pool=pool.filter(c=>c.id!==id); delete printQty[id]; render(); }
+function newCard(){ draft=blankCard(); editingId=null; render(); }
+
+/* ====================== IMPORT / EXPORT ====================== */
+function exportJSON(){
+  const data = JSON.stringify({pool}, null, 2);
+  const blob = new Blob([data],{type:'application/json'});
+  const a = document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='ceneri-del-divino-stampa.json'; a.click();
+}
+function importJSON(input){
+  if(!input.files || !input.files[0]) return;
+  busy=true; render();
+  const reader = new FileReader();
+  reader.onload = ()=>{
+    try{
+      const o = JSON.parse(reader.result);
+      const src = o.pool || o;
+      if(!Array.isArray(src)) throw new Error('formato non valido');
+      src.forEach(c=>{ pool.push({ id:uid(), name:c.name||'', type:c.type||'personaggio', legendary:!!c.legendary,
+        fazione:c.fazione||'Comune', costInf:c.costInf||0, costCor:c.costCor||0, tipologia:c.tipologia||'',
+        forza:c.forza||0, resistenza:c.resistenza||0, ritoTipo:c.ritoTipo||'immediato', prestigio:c.prestigio||0,
+        effetto:c.effetto||'', flavor:c.flavor||'', image:c.image||'' }); });
+    }catch(e){ alert('File non valido: '+e.message); }
+  };
+  reader.onerror = ()=>{ alert('Impossibile leggere il file.'); };
+  reader.onloadend = ()=>{ try{ } finally { busy=false; input.value=''; render(); } };
+  reader.readAsText(input.files[0]);
+}
+
+/* ====================== STAMPA ====================== */
+function setDim(k,v){ printDims[k]=parseFloat(v)||0; sheetsHTML=''; render(); }
+function setQty(id,v){ printQty[id]=Math.max(0, parseInt(v)||0); }
+function buildSheets(){
+  busy=true; render();
+  try{
+    const list=[];
+    pool.forEach(c=>{ const n=printQty[c.id]||0; for(let i=0;i<n;i++) list.push(c); });
+    if(!list.length){ sheetsHTML='<p class="small">Nessuna copia selezionata: imposta almeno una quantità nella lista qui sopra.</p>'; return; }
+    const {w,h,margin,gap} = printDims;
+    const cols = Math.max(1, Math.floor((210 - 2*margin + gap) / (w + gap)));
+    const rows = Math.max(1, Math.floor((297 - 2*margin + gap) / (h + gap)));
+    const perSheet = cols*rows;
+    const pages = Math.ceil(list.length/perSheet);
+    let html='';
+    for(let p=0;p<pages;p++){
+      let cells='';
+      for(let i=0;i<perSheet;i++){
+        const idx=p*perSheet+i; if(idx>=list.length) break;
+        const col=i%cols, row=Math.floor(i/cols);
+        const left = margin + col*(w+gap), top = margin + row*(h+gap);
+        cells += `<div class="pcell" style="left:${left}mm;top:${top}mm;width:${w}mm;height:${h}mm">${cardHTML(list[idx])}</div>`;
+      }
+      html += `<div class="sheet">${cells}</div>`;
+    }
+    sheetsHTML = `<p class="small">${list.length} carte · ${cols}×${rows} = ${perSheet} per foglio · ${pages} foglio/i A4.</p><div id="print-area" class="sheet-scale sheets">${html}</div>`;
+  } finally { busy=false; render(); }
+}
+function doPrint(){ if(!sheetsHTML){ alert('Genera prima l\'anteprima.'); return; } window.print(); }
+
+/* ====================== RENDER ====================== */
+let activeTab='editor';
+function setTab(t){ activeTab=t; render(); }
+function render(){
+  document.getElementById('tabs').innerHTML = [['editor','Editor carte'],['stampa','Stampa']]
+    .map(([k,l])=>`<button class="${activeTab===k?'active':''}" onclick="setTab('${k}')">${l}</button>`).join('');
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById('tab-'+activeTab).classList.add('active');
+  renderEditor(); renderStampa();
+}
+
+function renderEditor(){
+  const el = document.getElementById('tab-editor');
+  const facOpts = FACTIONS.map(f=>`<option value="${f.name}" ${draft.fazione===f.name?'selected':''}>${f.name}</option>`).join('');
+  el.innerHTML = `
+  <div class="card">
+    <h2>${editingId?'Modifica carta':'Nuova carta'}</h2>
+    <div class="formgrid">
+      <div><label>Nome</label><input value="${esc(draft.name)}" oninput="setDraftField('name',this.value)"></div>
+      <div><label>Tipo</label><select onchange="setDraftFieldAndRerender('type',this.value)">
+        ${Object.keys(TYPE_LABEL).map(t=>`<option value="${t}" ${draft.type===t?'selected':''}>${TYPE_LABEL[t]}</option>`).join('')}</select></div>
+      <div><label>Fazione</label><select onchange="setDraftField('fazione',this.value)">${facOpts}</select></div>
+      <div><label><input type="checkbox" style="width:auto" ${draft.legendary?'checked':''} onchange="setDraftField('legendary',this.checked)"> Leggendaria</label></div>
+      <div><label>Costo Influenza</label><input type="number" min="0" value="${draft.costInf}" oninput="setDraftField('costInf',+this.value||0)"></div>
+      <div><label>Costo Corruzione</label><input type="number" min="0" value="${draft.costCor}" oninput="setDraftField('costCor',+this.value||0)"></div>
+      ${draft.type==='personaggio'?`
+        <div><label>Tipologia</label><input value="${esc(draft.tipologia)}" placeholder="Umano, Non morto…" oninput="setDraftField('tipologia',this.value)"></div>
+        <div><label>Forza</label><input type="number" min="0" value="${draft.forza}" oninput="setDraftField('forza',+this.value||0)"></div>
+        <div><label>Resistenza</label><input type="number" min="0" value="${draft.resistenza}" oninput="setDraftField('resistenza',+this.value||0)"></div>`:''}
+      ${draft.type==='rito'?`
+        <div><label>Tipo di rito</label><select onchange="setDraftField('ritoTipo',this.value)">
+          <option value="immediato" ${draft.ritoTipo==='immediato'?'selected':''}>Immediato</option>
+          <option value="persistente" ${draft.ritoTipo==='persistente'?'selected':''}>Persistente</option></select></div>`:''}
+      ${draft.type==='luogo'?`<div><label>Prestigio prodotto</label><input type="number" min="0" value="${draft.prestigio}" oninput="setDraftField('prestigio',+this.value||0)"></div>`:''}
+      <div style="grid-column:1/-1"><label>Effetto</label><textarea oninput="setDraftField('effetto',this.value)">${esc(draft.effetto)}</textarea></div>
+      <div style="grid-column:1/-1"><label>Testo flavor (opzionale)</label><textarea oninput="setDraftField('flavor',this.value)">${esc(draft.flavor)}</textarea></div>
+      <div style="grid-column:1/-1"><label>Immagine (opzionale)</label>
+        <input type="file" accept="image/*" onchange="pickImage(this)">
+        ${draft.image?`<button class="btn ghost" onclick="removeImage()">Rimuovi immagine</button>`:''}
+      </div>
+    </div>
+    <div style="margin-top:8px">
+      <button class="btn" onclick="saveDraft()" ${busy?'disabled':''}>${editingId?'Salva modifiche':'Aggiungi al pool'}</button>
+      <button class="btn ghost" onclick="newCard()">Nuova carta vuota</button>
+    </div>
+  </div>
+  <div class="card"><h3>Anteprima</h3><div class="preview-wrap" id="pc-preview">${cardHTML(draft)}</div></div>
+  <div class="card">
+    <div class="row" style="justify-content:space-between;align-items:center">
+      <h2>Pool carte (${pool.length})</h2>
+      <div>
+        <button class="btn ghost" onclick="exportJSON()">⬇ Esporta JSON</button>
+        <label class="btn ghost" style="display:inline-block">⬆ Importa JSON<input type="file" accept=".json" style="display:none" onchange="importJSON(this)"></label>
+      </div>
+    </div>
+    <p class="small">Il formato è compatibile con il pool del simulatore (il campo "pool" dell'export) — i campi flavor e immagine non esistono lì e vengono aggiunti qui.</p>
+    <div class="poollist">${pool.map(c=>`<div class="poolrow">
+      <b>${esc(c.name)}</b><span class="small">${TYPE_LABEL[c.type]}</span>
+      <button class="btn ghost" onclick="editCard('${c.id}')">✎</button>
+      <button class="btn ghost" onclick="duplicateCard('${c.id}')">⧉</button>
+      <button class="btn ghost" onclick="deleteCard('${c.id}')">🗑</button>
+    </div>`).join('')||'<span class="small">Nessuna carta ancora: compila il modulo sopra oppure importa un JSON.</span>'}</div>
+  </div>`;
+}
+
+function renderStampa(){
+  const el = document.getElementById('tab-stampa');
+  el.innerHTML = `
+  <div class="card">
+    <h2>Impostazioni foglio</h2>
+    <div class="formgrid">
+      <div><label>Larghezza carta (mm)</label><input type="number" step="0.1" value="${printDims.w}" oninput="setDim('w',this.value)"></div>
+      <div><label>Altezza carta (mm)</label><input type="number" step="0.1" value="${printDims.h}" oninput="setDim('h',this.value)"></div>
+      <div><label>Margine foglio (mm)</label><input type="number" step="0.5" value="${printDims.margin}" oninput="setDim('margin',this.value)"></div>
+      <div><label>Spazio tra carte (mm)</label><input type="number" step="0.5" value="${printDims.gap}" oninput="setDim('gap',this.value)"></div>
+    </div>
+    <p class="small">Default: formato Magic/Poker 63,5×88,9&nbsp;mm. Le dimensioni sono completamente modificabili. Vengono mostrate solo linee guida leggere per il taglio, nessun crocino di registro. Il dorso della carta non è incluso (solo fronte).</p>
+  </div>
+  <div class="card">
+    <h2>Quante copie di ogni carta</h2>
+    <div class="poollist">${pool.map(c=>`<div class="poolrow">
+      <span>${esc(c.name)}</span>
+      <input type="number" min="0" value="${printQty[c.id]||0}" oninput="setQty('${c.id}',this.value)">
+    </div>`).join('')||'<span class="small">Il pool è vuoto: aggiungi carte dalla scheda Editor.</span>'}</div>
+    <div style="margin-top:8px"><button class="btn" onclick="buildSheets()" ${busy?'disabled':''}>Genera anteprima di stampa</button>
+    <button class="btn alt" onclick="doPrint()">🖨 Stampa / Salva come PDF</button></div>
+    <p class="small">Il pulsante di stampa apre la finestra di stampa del browser, impaginata a grandezza reale su fogli A4: scegliendo come destinazione "Salva come PDF" si ottiene direttamente il file PDF pronto per la stampante.</p>
+  </div>
+  <div class="card"><h2>Anteprima</h2>
+    <div class="sheets">${sheetsHTML||'<p class="small">Nessuna anteprima generata.</p>'}</div>
+  </div>`;
+}
+
+render();
+</script>
+</body>
+</html>
