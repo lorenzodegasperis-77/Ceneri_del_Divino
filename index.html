@@ -85,6 +85,7 @@ textarea{width:100%;min-height:40px}
 .gc-dmg{font-size:.68rem;color:var(--accent);margin-top:3px;font-weight:bold}
 .gc-stat{border:1px solid var(--border);border-radius:5px;
   padding:1px 7px;font-size:.68rem;background:var(--surface);font-weight:bold;text-align:center;line-height:1.4}
+.gc-art{width:100%;max-height:110px;object-fit:cover;border-radius:5px;margin-bottom:4px;display:block;background:var(--surface)}
 .loc{border:1px solid var(--border);border-radius:8px;padding:6px;min-height:90px;background:var(--surface2);font-size:.72rem}
 .loc.neutrale{border-color:var(--border)}
 .loc.occ1{border-color:var(--p1)}
@@ -100,12 +101,14 @@ textarea{width:100%;min-height:40px}
 .banner{background:var(--warn);color:#1b1815;border-radius:8px;padding:10px;margin-bottom:10px;font-weight:bold}
 .scorepip{display:inline-block;width:10px;height:10px;border-radius:50%;background:var(--border);margin-right:2px}
 .scorepip.won{background:var(--accent)}
+.navlink{display:inline-block;background:transparent;border:1px solid var(--border);color:var(--text);padding:6px 12px;border-radius:6px;font-size:.85rem;text-decoration:none}
 </style>
 </head>
 <body>
 <header>
   <h1>⚜ Le Ceneri del Divino</h1>
   <nav id="tabs"></nav>
+  <a class="navlink" href="stampa-carte.html">Stampa carte →</a>
 </header>
 <main>
   <div class="tab active" id="tab-partita"></div>
@@ -597,6 +600,7 @@ function cardFace(c, inst){
   if(c.type==='rito') sub.push(c.ritoTipo==='persistente'?'Persistente':'Immediato');
   if(c.costPre) sub.push('Costo Prestigio '+c.costPre);
   if(c.legendary) sub.push('Leggendaria');
+  const art = (c.imagePath||c.image) ? `<img class="gc-art" src="${esc(c.imagePath||c.image)}" onerror="this.style.display='none'">` : '';
   return `<div class="gamecard type-${c.type} ${isOpen?'open':''}">
     <div class="gc-rightcol">
       ${c.type==='personaggio'?`<div class="gc-stat">F ${c.forza||0}<br>R ${c.resistenza||0}</div>`:''}
@@ -609,6 +613,7 @@ function cardFace(c, inst){
       <button class="gc-toggle" onclick="event.stopPropagation();toggleCardOpen('${key}')" title="Mostra/nascondi dettagli">${isOpen?'▲':'ⓘ'}</button>
     </div>
     <div class="gc-full">
+      ${art}
       <div class="gc-sub">${sub.join(' · ')}</div>
       <div class="gc-effect">${esc(c.effetto||'')||'<span class=\"small\">(nessun testo effetto)</span>'}</div>
       ${dmg}
@@ -787,6 +792,7 @@ function renderCarte(){
       <input name="resistenza" type="number" min="0" placeholder="Resistenza" value="${editing?editing.resistenza||0:0}">
       <input name="prestigio" type="number" min="0" placeholder="Prestigio prodotto" value="${editing?editing.prestigio||0:0}">
       <select name="ritoTipo"><option value="immediato" ${editing&&editing.ritoTipo==='immediato'?'selected':''}>Rito immediato</option><option value="persistente" ${editing&&editing.ritoTipo==='persistente'?'selected':''}>Rito persistente</option></select>
+      <input name="imagePath" placeholder="Percorso immagine (es. img/nome.png)" value="${editing?esc(editing.imagePath||''):''}" style="grid-column:1/-1">
       <textarea name="effetto" placeholder="Testo effetto" style="grid-column:1/-1">${editing?esc(editing.effetto||''):''}</textarea>
       <div style="grid-column:1/-1"><button class="btn" onclick="submitCardForm()">${editing?'Salva modifiche':'Aggiungi al pool'}</button>${editing?'<button class="btn ghost" onclick="editingCard=null;render()">Annulla</button>':''}</div>
     </form></div>
@@ -802,7 +808,7 @@ function submitCardForm(){
   upsertCard({ name:f.name.value.trim()||'Senza nome', type:f.type.value, fazione:f.fazione.value, tipologia:f.tipologia.value.trim(),
     legendary:f.legendary.checked, costInf:+f.costInf.value||0, costCor:+f.costCor.value||0, costPre:+f.costPre.value||0,
     forza:+f.forza.value||0, resistenza:+f.resistenza.value||0, prestigio:+f.prestigio.value||0,
-    ritoTipo:f.ritoTipo.value, effetto:f.effetto.value.trim() });
+    ritoTipo:f.ritoTipo.value, imagePath:f.imagePath.value.trim(), effetto:f.effetto.value.trim() });
 }
 
 function renderMazzi(){

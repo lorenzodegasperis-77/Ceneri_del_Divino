@@ -26,6 +26,7 @@ header h1{font-size:1.1rem;color:var(--accent)}
 nav{display:flex;gap:6px}
 nav button{background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:6px 12px;border-radius:6px;cursor:pointer;font-size:.85rem}
 nav button.active{background:var(--accent);color:#fff;border-color:var(--accent)}
+.navlink{display:inline-block;background:transparent;border:1px solid var(--border);color:var(--text);padding:6px 12px;border-radius:6px;font-size:.85rem;text-decoration:none}
 main{padding:12px 16px;max-width:1300px;margin:0 auto}
 .tab{display:none} .tab.active{display:block}
 .card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px;margin-bottom:12px}
@@ -95,6 +96,7 @@ hr.sep{border:none;border-top:1px solid var(--border);margin:12px 0}
 <header>
   <h1>⚜ Le Ceneri del Divino — Stampa Carte</h1>
   <nav id="tabs"></nav>
+  <a class="navlink" href="index.html">← Simulatore</a>
 </header>
 <main>
   <div class="tab active" id="tab-editor"></div>
@@ -123,6 +125,7 @@ const ICO = {
  sword:`<path d="M20 4l-9 9-3-3 9-9 3 3zM10 14l-7 7 3 3 7-7-3-3z" fill="currentColor"/>`,
  star:`<path d="M12 2l2.6 6.9L22 9.5l-5.6 4.8L18 22l-6-4-6 4 1.6-7.7L2 9.5l7.4-.6z" fill="currentColor"/>`,
 };
+const ART_PLACEHOLDER = `<svg viewBox="0 0 100 100"><path d="M20 70 L40 45 L55 60 L70 35 L85 70Z" fill="#b7943f"/><circle cx="30" cy="32" r="6" fill="#b7943f"/></svg>`;
 const TYPE_LABEL = {personaggio:'Personaggio', luogo:'Luogo', rito:'Rito', evento:'Evento'};
 const uid = ()=>Math.random().toString(36).slice(2,10);
 const esc = s => (s||'').replace(/[&<>]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[m]));
@@ -157,7 +160,7 @@ function cardHTML(c){
       ${c.costCor?`<span class="pc-badge cor"><svg viewBox="0 0 24 24">${ICO.spiral}</svg><em>${c.costCor}</em></span>`:''}
       ${c.costInf?`<span class="pc-badge inf">${c.costInf}</span>`:''}
     </div>
-    <div class="pc-art">${c.image?`<img src="${c.image}">`:`<svg viewBox="0 0 100 100"><path d="M20 70 L40 45 L55 60 L70 35 L85 70Z" fill="#b7943f"/><circle cx="30" cy="32" r="6" fill="#b7943f"/></svg>`}</div>
+    <div class="pc-art">${(c.image||c.imagePath)?`<img src="${esc(c.image||c.imagePath)}" onerror="this.outerHTML=ART_PLACEHOLDER">`:ART_PLACEHOLDER}</div>
     <div class="pc-subtitle">${esc(subtitleOf(c))}</div>
     <div class="pc-body">
       ${watermark}
@@ -171,8 +174,9 @@ function cardHTML(c){
 /* ====================== FORM CARD ====================== */
 function blankCard(){ return {id:uid(), name:'', type:'personaggio', legendary:false, fazione:'Comune',
   costInf:0, costCor:0, tipologia:'', forza:0, resistenza:0, ritoTipo:'immediato', prestigio:0,
-  effetto:'', flavor:'', image:''}; }
+  effetto:'', flavor:'', image:'', imagePath:''}; }
 let draft = blankCard();
+let passthrough = {decklists:null, deckFaction:null};
 
 function setDraftField(k,v){ draft[k]=v; updatePreview(); }
 function setDraftFieldAndRerender(k,v){ draft[k]=v; render(); }
@@ -201,9 +205,11 @@ function newCard(){ draft=blankCard(); editingId=null; render(); }
 
 /* ====================== IMPORT / EXPORT ====================== */
 function exportJSON(){
-  const data = JSON.stringify({pool}, null, 2);
-  const blob = new Blob([data],{type:'application/json'});
-  const a = document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='ceneri-del-divino-stampa.json'; a.click();
+  const data = {pool};
+  if(passthrough.decklists) data.decklists = passthrough.decklists;
+  if(passthrough.deckFaction) data.deckFaction = passthrough.deckFaction;
+  const blob = new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
+  const a = document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='ceneri-del-divino-dati.json'; a.click();
 }
 function importJSON(input){
   if(!input.files || !input.files[0]) return;
@@ -214,10 +220,12 @@ function importJSON(input){
       const o = JSON.parse(reader.result);
       const src = o.pool || o;
       if(!Array.isArray(src)) throw new Error('formato non valido');
-      src.forEach(c=>{ pool.push({ id:uid(), name:c.name||'', type:c.type||'personaggio', legendary:!!c.legendary,
+      if(o.decklists) passthrough.decklists = o.decklists;
+      if(o.deckFaction) passthrough.deckFaction = o.deckFaction;
+      src.forEach(c=>{ pool.push({ ...c, id:uid(), name:c.name||'', type:c.type||'personaggio', legendary:!!c.legendary,
         fazione:c.fazione||'Comune', costInf:c.costInf||0, costCor:c.costCor||0, tipologia:c.tipologia||'',
         forza:c.forza||0, resistenza:c.resistenza||0, ritoTipo:c.ritoTipo||'immediato', prestigio:c.prestigio||0,
-        effetto:c.effetto||'', flavor:c.flavor||'', image:c.image||'' }); });
+        effetto:c.effetto||'', flavor:c.flavor||'', image:c.image||'', imagePath:c.imagePath||'' }); });
     }catch(e){ alert('File non valido: '+e.message); }
   };
   reader.onerror = ()=>{ alert('Impossibile leggere il file.'); };
@@ -291,9 +299,11 @@ function renderEditor(){
       ${draft.type==='luogo'?`<div><label>Prestigio prodotto</label><input type="number" min="0" value="${draft.prestigio}" oninput="setDraftField('prestigio',+this.value||0)"></div>`:''}
       <div style="grid-column:1/-1"><label>Effetto</label><textarea oninput="setDraftField('effetto',this.value)">${esc(draft.effetto)}</textarea></div>
       <div style="grid-column:1/-1"><label>Testo flavor (opzionale)</label><textarea oninput="setDraftField('flavor',this.value)">${esc(draft.flavor)}</textarea></div>
-      <div style="grid-column:1/-1"><label>Immagine (opzionale)</label>
+      <div style="grid-column:1/-1"><label>Percorso immagine (es. img/nome.png — usato anche dal simulatore)</label>
+        <input value="${esc(draft.imagePath)}" oninput="setDraftField('imagePath',this.value)"></div>
+      <div style="grid-column:1/-1"><label>Oppure carica un'immagine da incorporare nel PDF (opzionale, ha priorità sul percorso)</label>
         <input type="file" accept="image/*" onchange="pickImage(this)">
-        ${draft.image?`<button class="btn ghost" onclick="removeImage()">Rimuovi immagine</button>`:''}
+        ${draft.image?`<button class="btn ghost" onclick="removeImage()">Rimuovi immagine caricata</button>`:''}
       </div>
     </div>
     <div style="margin-top:8px">
@@ -310,7 +320,7 @@ function renderEditor(){
         <label class="btn ghost" style="display:inline-block">⬆ Importa JSON<input type="file" accept=".json" style="display:none" onchange="importJSON(this)"></label>
       </div>
     </div>
-    <p class="small">Il formato è compatibile con il pool del simulatore (il campo "pool" dell'export) — i campi flavor e immagine non esistono lì e vengono aggiunti qui.</p>
+    <p class="small">Stesso formato del file esportato dal simulatore (ceneri-del-divino-dati.json): un unico import/export serve per entrambi gli strumenti. Mazzi e fazioni, se presenti nel file, vengono conservati anche se qui non sono modificabili.</p>
     <div class="poollist">${pool.map(c=>`<div class="poolrow">
       <b>${esc(c.name)}</b><span class="small">${TYPE_LABEL[c.type]}</span>
       <button class="btn ghost" onclick="editCard('${c.id}')">✎</button>
