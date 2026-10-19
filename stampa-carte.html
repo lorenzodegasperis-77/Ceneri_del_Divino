@@ -129,7 +129,7 @@ const factionOf = n => FACTIONS.find(f=>f.name===n) || FACTIONS[0];
 const ICO = {
  gem:`<path d="M12 2L22 9L12 22L2 9Z" fill="#8a6914"/><path d="M12 2L22 9L12 9Z" fill="#e9c468"/><path d="M2 9L12 9L12 2Z" fill="#caa23c"/>`,
  spiral:`<path d="M12 4a8 8 0 1 0 8 8" fill="none" stroke="#6a3f91" stroke-width="2"/><path d="M12 7a5 5 0 1 0 5 5" fill="none" stroke="#b98ee0" stroke-width="2"/><circle cx="12" cy="12" r="1.4" fill="#6a3f91"/>`,
- sword:`<path d="M20 4l-9 9-3-3 9-9 3 3z" fill="#e9c468"/><path d="M10 14l-7 7 3 3 7-7-3-3z" fill="#8a6914"/>`,
+ sword:`<path fill="#8a6914" d="M7.936,11.97a1,1,0,1,0-1.415,1.414l.373.372L3.3,17.35a1.024,1.024,0,0,0,0,1.448l1.9,1.9a1.024,1.024,0,0,0,1.448,0l3.593-3.593.372.372a1,1,0,0,0,1.414-1.415Z"/><polygon fill="#e9c468" points="14.3 3 9.015 10.928 13.071 14.985 21 9.7 21 3 14.3 3"/>`,
  shield:`<path d="M12 2l7 3v6c0 5-3 8-7 9" fill="#8a6914"/><path d="M12 2L5 5v6c0 5 3 8 7 9" fill="#e9c468"/>`,
  castle:`<path d="M4 22V11H6V8H8V11H10V5H11V8H13V5H14V11H16V8H18V11H20V22Z" fill="#8a6914"/><path d="M4 22V11H6V8H8V11H9V22Z" fill="#e9c468"/><path d="M9 22V16H15V22Z" fill="#15110d"/>`,
 };
@@ -158,17 +158,17 @@ function cardHTML(c){
   const fac = factionOf(c.fazione);
   const watermark = fac.icon ? `<div class="pc-watermark" style="color:${fac.color}"><svg viewBox="0 0 100 100">${fac.icon}</svg></div>` : '';
   let foot = '', footClass = '';
-  if(c.type==='personaggio') foot = `<div class="pc-stat"><svg viewBox="0 0 24 24">${ICO.sword}</svg><span>${c.forza||0}</span></div>
-    <div class="pc-stat"><span>${c.resistenza||0}</span><svg viewBox="0 0 24 24">${ICO.shield}</svg></div>`;
-  else if(c.type==='luogo'){ foot = `<span class="pc-prestige-big"><svg viewBox="0 0 24 24">${ICO.castle}</svg><em>${c.prestigio||0}</em></span>`; footClass='center'; }
+  if(c.type==='personaggio') foot = `<div class="pc-stat"><svg viewBox="0 0 22 22">${ICO.sword}</svg><span>${c.forza||0}</span></div>
+    <div class="pc-stat"><span>${c.resistenza||0}</span><svg viewBox="0 0 22 22">${ICO.shield}</svg></div>`;
+  else if(c.type==='luogo'){ foot = `<span class="pc-prestige-big"><svg viewBox="0 0 22 22">${ICO.castle}</svg><em>${c.prestigio||0}</em></span>`; footClass='center'; }
   return `<div class="pcard" style="--cw:${printDims.w}mm;--ch:${printDims.h}mm">
     <div class="pc-artwrap">
       <div class="pc-art">${(c.image||c.imagePath)?`<img src="${esc(c.image||c.imagePath)}" onerror="this.outerHTML=ART_PLACEHOLDER">`:ART_PLACEHOLDER}</div>
       <div class="pc-top">
         ${c.legendary?'<span class="pc-legendary">Leggendaria</span>':''}
         <div class="pc-name">${esc(c.name||'Senza nome')}</div>
-        ${c.costCor?`<span class="pc-badge cor"><svg viewBox="0 0 24 24">${ICO.spiral}</svg><em>${c.costCor}</em></span>`:''}
-        ${c.costInf?`<span class="pc-badge inf"><svg viewBox="0 0 24 24">${ICO.gem}</svg><em>${c.costInf}</em></span>`:''}
+        ${c.costCor?`<span class="pc-badge cor"><svg viewBox="0 0 22 22">${ICO.spiral}</svg><em>${c.costCor}</em></span>`:''}
+        ${c.costInf?`<span class="pc-badge inf"><svg viewBox="0 0 22 22">${ICO.gem}</svg><em>${c.costInf}</em></span>`:''}
       </div>
     </div>
     <div class="pc-subtitle">${esc(subtitleOf(c))}</div>

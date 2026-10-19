@@ -577,6 +577,24 @@
       "flavor": "Un tempo era la dimora di un vecchio mago, ora un cumulo di rovine. - Maestro Saro\n",
       "image": "",
       "imagePath": "img/dark-scene-crows-outdoors.jpg"
+    },
+    {
+      "id": "bj99atwa",
+      "name": "Shura, la stella rossa",
+      "type": "evento",
+      "legendary": false,
+      "fazione": "Comune",
+      "costInf": 3,
+      "costCor": 0,
+      "tipologia": "",
+      "forza": 0,
+      "resistenza": 0,
+      "ritoTipo": "immediato",
+      "prestigio": 0,
+      "effetto": "Una volta per turno, puoi aumentare di 1 il tuo livello di Corruzione, se lo fai puoi vedere una delle carte in mano del tuo avversario.",
+      "flavor": "Dall’ultimo canto nacque Shura, la fiamma che mai si spegne. - Cantico degli Astri, IV strofa",
+      "image": "",
+      "imagePath": "img/shura.jpg"
     }
   ],
   "decks": [],
