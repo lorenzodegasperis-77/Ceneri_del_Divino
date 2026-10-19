@@ -68,17 +68,18 @@ hr.sep{border:none;border-top:1px solid var(--border);margin:12px 0}
 .pc-body{flex:1;min-height:0;position:relative;padding:2mm 2.4mm;display:flex;flex-direction:column}
 .pc-watermark{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;opacity:.1;pointer-events:none}
 .pc-watermark svg{width:70%;height:70%}
-.pc-effect{position:relative;text-align:justify;flex:1 1 auto;min-height:0;overflow:hidden;line-height:1.32;white-space:pre-wrap;font-size:4mm}
+.pc-effect{position:relative;flex:1 1 auto;min-height:0;overflow:hidden;line-height:1.32;white-space:pre-wrap;font-size:4mm}
 .pc-flavor{position:relative;flex:0 0 auto;margin-top:.8mm;text-align:center;font-style:italic;font-size:2.1mm;color:#55493a;padding-top:1.2mm}
 .pc-rule{display:flex;align-items:center;gap:1mm;margin-bottom:1mm}
 .pc-rule::before,.pc-rule::after{content:"";flex:1;border-top:.2mm solid #b7943f}
 .pc-foot{background:#1c1712;color:#e9dcb8;display:flex;justify-content:space-around;align-items:center;padding:1.2mm 2.4mm;flex:0 0 auto}
 .pc-foot.center{justify-content:center}
-.pc-stat{display:flex;flex-direction:column;align-items:center;gap:.3mm}
-.pc-stat .sv{display:flex;align-items:center;gap:.8mm;font-size:3mm;font-weight:bold}
-.pc-stat .sv svg{width:3.4mm;height:3.4mm}
-.pc-stat .lbl{font-size:1.4mm;letter-spacing:.4mm;font-variant:small-caps;color:#cbb278}
-.pc-prestige-big{font-size:5.4mm;font-weight:bold}
+.pc-stat{display:flex;align-items:center;gap:1mm;font-size:3.4mm;font-weight:bold}
+.pc-stat svg{width:4mm;height:4mm;filter:drop-shadow(0 .2mm .4mm rgba(0,0,0,.6))}
+.pc-prestige-big{position:relative;width:8mm;height:8mm;display:flex;align-items:center;justify-content:center}
+.pc-prestige-big svg{position:absolute;inset:0;width:100%;height:100%;filter:drop-shadow(0 .2mm .4mm rgba(0,0,0,.6))}
+.pc-prestige-big em{position:relative;font-style:normal;font-weight:bold;font-size:2.6mm;color:#eccd7c;background:#15110d;
+  border-radius:50%;width:4.6mm;height:4.6mm;display:flex;align-items:center;justify-content:center;box-shadow:0 0 0 .3mm #8a6914;margin-top:1mm}
 
 .preview-wrap{display:flex;justify-content:center;padding:10px;background:var(--surface2);border-radius:8px}
 
@@ -130,6 +131,7 @@ const ICO = {
  spiral:`<path d="M12 4a8 8 0 1 0 8 8" fill="none" stroke="#6a3f91" stroke-width="2"/><path d="M12 7a5 5 0 1 0 5 5" fill="none" stroke="#b98ee0" stroke-width="2"/><circle cx="12" cy="12" r="1.4" fill="#6a3f91"/>`,
  sword:`<path d="M20 4l-9 9-3-3 9-9 3 3z" fill="#e9c468"/><path d="M10 14l-7 7 3 3 7-7-3-3z" fill="#8a6914"/>`,
  shield:`<path d="M12 2l7 3v6c0 5-3 8-7 9" fill="#8a6914"/><path d="M12 2L5 5v6c0 5 3 8 7 9" fill="#e9c468"/>`,
+ castle:`<path d="M4 22V11H6V8H8V11H10V5H11V8H13V5H14V11H16V8H18V11H20V22Z" fill="#8a6914"/><path d="M4 22V11H6V8H8V11H9V22Z" fill="#e9c468"/><path d="M9 22V16H15V22Z" fill="#15110d"/>`,
 };
 const ART_PLACEHOLDER = `<svg viewBox="0 0 100 100"><path d="M20 70 L40 45 L55 60 L70 35 L85 70Z" fill="#b7943f"/><circle cx="30" cy="32" r="6" fill="#b7943f"/></svg>`;
 const TYPE_LABEL = {personaggio:'Personaggio', luogo:'Luogo', rito:'Rito', evento:'Evento'};
@@ -156,9 +158,9 @@ function cardHTML(c){
   const fac = factionOf(c.fazione);
   const watermark = fac.icon ? `<div class="pc-watermark" style="color:${fac.color}"><svg viewBox="0 0 100 100">${fac.icon}</svg></div>` : '';
   let foot = '', footClass = '';
-  if(c.type==='personaggio') foot = `<div class="pc-stat"><div class="sv">${ICO.sword}${c.forza||0}</div><div class="lbl">Forza</div></div>
-    <div class="pc-stat"><div class="sv">${c.resistenza||0}${ICO.shield}</div><div class="lbl">Resistenza</div></div>`;
-  else if(c.type==='luogo'){ foot = `<span class="pc-prestige-big">${c.prestigio||0}</span>`; footClass='center'; }
+  if(c.type==='personaggio') foot = `<div class="pc-stat"><svg viewBox="0 0 24 24">${ICO.sword}</svg><span>${c.forza||0}</span></div>
+    <div class="pc-stat"><span>${c.resistenza||0}</span><svg viewBox="0 0 24 24">${ICO.shield}</svg></div>`;
+  else if(c.type==='luogo'){ foot = `<span class="pc-prestige-big"><svg viewBox="0 0 24 24">${ICO.castle}</svg><em>${c.prestigio||0}</em></span>`; footClass='center'; }
   return `<div class="pcard" style="--cw:${printDims.w}mm;--ch:${printDims.h}mm">
     <div class="pc-artwrap">
       <div class="pc-art">${(c.image||c.imagePath)?`<img src="${esc(c.image||c.imagePath)}" onerror="this.outerHTML=ART_PLACEHOLDER">`:ART_PLACEHOLDER}</div>
@@ -180,7 +182,7 @@ function cardHTML(c){
 }
 function fitCardEffects(root){
   (root||document).querySelectorAll('.pc-effect').forEach(el=>{
-    let size=3; el.style.fontSize=size+'mm';
+    let size=4.0; el.style.fontSize=size+'mm';
     let guard=0;
     while(el.scrollHeight > el.clientHeight+1 && size>1.4 && guard<30){ size-=0.15; el.style.fontSize=size.toFixed(2)+'mm'; guard++; }
   });
