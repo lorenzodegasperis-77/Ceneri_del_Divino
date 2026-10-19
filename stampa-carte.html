@@ -47,32 +47,38 @@ hr.sep{border:none;border-top:1px solid var(--border);margin:12px 0}
 /* ---- carta ---- */
 .pcard{width:var(--cw,63.5mm);height:var(--ch,88.9mm);background:#efe6d2;color:#2a2420;border:0.4mm solid #b7943f;border-radius:2.5mm;
   position:relative;overflow:hidden;display:flex;flex-direction:column;font-family:Georgia,serif;box-shadow:0 1px 4px rgba(0,0,0,.25)}
-.pc-top{background:#1c1712;color:#e9dcb8;padding:1.8mm 2.2mm 1mm;position:relative}
-.pc-legendary{font-size:1.6mm;letter-spacing:.3mm;color:#d9b24a;font-weight:bold;display:block;margin-bottom:.4mm}
-.pc-name{font-variant:small-caps;font-weight:bold;font-size:3mm;line-height:1.15;padding-right:11mm}
-.pc-badge{position:absolute;top:1.5mm;width:5.4mm;height:5.4mm;display:flex;align-items:center;justify-content:center;font-weight:bold;font-size:2.3mm}
-.pc-badge.inf{right:1.5mm;background:#d9b24a;color:#1c1712;clip-path:polygon(50% 0,100% 20%,100% 100%,0 100%,0 20%)}
-.pc-badge.cor{right:7.9mm;color:#8a5fc9}
-.pc-badge.cor svg{position:absolute;inset:0;width:100%;height:100%}
-.pc-badge.cor em{position:relative;font-style:normal;background:#efe6d2;border-radius:50%;width:3mm;height:3mm;display:flex;align-items:center;justify-content:center;font-size:2mm;color:#8a5fc9;box-shadow:0 0 0 .3mm #8a5fc9}
-.pc-badge svg{width:3mm;height:3mm}
-.pc-art{height:34%;background:repeating-linear-gradient(135deg,#d8cba0,#d8cba0 3px,#ccbd8e 3px,#ccbd8e 6px);
+.pc-artwrap{flex:0 0 auto;height:42%;position:relative;overflow:hidden}
+.pc-art{position:absolute;inset:0;background:repeating-linear-gradient(135deg,#d8cba0,#d8cba0 3px,#ccbd8e 3px,#ccbd8e 6px);
   display:flex;align-items:center;justify-content:center;overflow:hidden}
 .pc-art img{width:100%;height:100%;object-fit:cover}
 .pc-art svg{width:40%;height:40%;opacity:.35}
+.pc-top{position:absolute;top:0;left:0;right:0;color:#e9dcb8;padding:1.8mm 2.2mm 4mm;
+  background:linear-gradient(to bottom, rgba(12,9,6,.88) 0%, rgba(12,9,6,.55) 55%, rgba(12,9,6,0) 100%)}
+.pc-legendary{font-size:1.6mm;letter-spacing:.3mm;color:#d9b24a;font-weight:bold;display:block;margin-bottom:.4mm;text-shadow:0 .2mm .4mm rgba(0,0,0,.8)}
+.pc-name{font-variant:small-caps;font-weight:bold;font-size:3mm;line-height:1.15;padding-right:11mm;text-shadow:0 .2mm .5mm rgba(0,0,0,.85)}
+.pc-badge{position:absolute;top:1.5mm;width:5.6mm;height:5.6mm}
+.pc-badge.inf{right:1.5mm}
+.pc-badge.cor{right:7.9mm}
+.pc-badge svg{position:absolute;inset:0;width:100%;height:100%;filter:drop-shadow(0 .2mm .5mm rgba(0,0,0,.7))}
+.pc-badge em{position:absolute;inset:0;margin:auto;width:3.2mm;height:3.2mm;border-radius:50%;background:#15110d;
+  display:flex;align-items:center;justify-content:center;font-style:normal;font-weight:bold;font-size:2.1mm}
+.pc-badge.inf em{color:#eccd7c}
+.pc-badge.cor em{color:#c7a3e8}
 .pc-subtitle{background:#1c1712;color:#cbb278;text-align:center;font-size:2mm;letter-spacing:.3mm;padding:.8mm 1mm;font-variant:small-caps}
-.pc-body{flex:1;position:relative;padding:2mm 2.4mm;display:flex;flex-direction:column}
+.pc-body{flex:1;min-height:0;position:relative;padding:2mm 2.4mm;display:flex;flex-direction:column}
 .pc-watermark{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;opacity:.1;pointer-events:none}
 .pc-watermark svg{width:70%;height:70%}
-.pc-effect{position:relative;font-size:2.5mm;line-height:1.35;white-space:pre-wrap}
-.pc-flavor{position:relative;margin-top:auto;text-align:center;font-style:italic;font-size:2.1mm;color:#55493a;padding-top:1.2mm}
+.pc-effect{position:relative;text-align:justify;flex:1 1 auto;min-height:0;overflow:hidden;line-height:1.32;white-space:pre-wrap;font-size:4mm}
+.pc-flavor{position:relative;flex:0 0 auto;margin-top:.8mm;text-align:center;font-style:italic;font-size:2.1mm;color:#55493a;padding-top:1.2mm}
 .pc-rule{display:flex;align-items:center;gap:1mm;margin-bottom:1mm}
 .pc-rule::before,.pc-rule::after{content:"";flex:1;border-top:.2mm solid #b7943f}
-.pc-foot{background:#1c1712;color:#e9dcb8;display:flex;justify-content:space-between;align-items:center;padding:1mm 2.4mm;font-size:2.4mm;font-weight:bold}
+.pc-foot{background:#1c1712;color:#e9dcb8;display:flex;justify-content:space-around;align-items:center;padding:1.2mm 2.4mm;flex:0 0 auto}
 .pc-foot.center{justify-content:center}
-.pc-foot svg{width:3mm;height:3mm;vertical-align:-.5mm;margin:0 .6mm}
-.pc-prestige-big{display:flex;align-items:center;gap:1.2mm;font-size:4.4mm}
-.pc-prestige-big svg{width:5mm;height:5mm}
+.pc-stat{display:flex;flex-direction:column;align-items:center;gap:.3mm}
+.pc-stat .sv{display:flex;align-items:center;gap:.8mm;font-size:3mm;font-weight:bold}
+.pc-stat .sv svg{width:3.4mm;height:3.4mm}
+.pc-stat .lbl{font-size:1.4mm;letter-spacing:.4mm;font-variant:small-caps;color:#cbb278}
+.pc-prestige-big{font-size:5.4mm;font-weight:bold}
 
 .preview-wrap{display:flex;justify-content:center;padding:10px;background:var(--surface2);border-radius:8px}
 
@@ -120,10 +126,10 @@ const FACTIONS = [
 ];
 const factionOf = n => FACTIONS.find(f=>f.name===n) || FACTIONS[0];
 const ICO = {
- shield:`<path d="M12 2l7 3v6c0 5-3 8-7 9-4-1-7-4-7-9V5z" fill="currentColor"/>`,
- spiral:`<path d="M12 4a8 8 0 1 0 8 8" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M12 7a5 5 0 1 0 5 5" fill="none" stroke="currentColor" stroke-width="1.8"/><circle cx="12" cy="12" r="1.3" fill="currentColor"/>`,
- sword:`<path d="M20 4l-9 9-3-3 9-9 3 3zM10 14l-7 7 3 3 7-7-3-3z" fill="currentColor"/>`,
- star:`<path d="M12 2l2.6 6.9L22 9.5l-5.6 4.8L18 22l-6-4-6 4 1.6-7.7L2 9.5l7.4-.6z" fill="currentColor"/>`,
+ gem:`<path d="M12 2L22 9L12 22L2 9Z" fill="#8a6914"/><path d="M12 2L22 9L12 9Z" fill="#e9c468"/><path d="M2 9L12 9L12 2Z" fill="#caa23c"/>`,
+ spiral:`<path d="M12 4a8 8 0 1 0 8 8" fill="none" stroke="#6a3f91" stroke-width="2"/><path d="M12 7a5 5 0 1 0 5 5" fill="none" stroke="#b98ee0" stroke-width="2"/><circle cx="12" cy="12" r="1.4" fill="#6a3f91"/>`,
+ sword:`<path d="M20 4l-9 9-3-3 9-9 3 3z" fill="#e9c468"/><path d="M10 14l-7 7 3 3 7-7-3-3z" fill="#8a6914"/>`,
+ shield:`<path d="M12 2l7 3v6c0 5-3 8-7 9" fill="#8a6914"/><path d="M12 2L5 5v6c0 5 3 8 7 9" fill="#e9c468"/>`,
 };
 const ART_PLACEHOLDER = `<svg viewBox="0 0 100 100"><path d="M20 70 L40 45 L55 60 L70 35 L85 70Z" fill="#b7943f"/><circle cx="30" cy="32" r="6" fill="#b7943f"/></svg>`;
 const TYPE_LABEL = {personaggio:'Personaggio', luogo:'Luogo', rito:'Rito', evento:'Evento'};
@@ -133,7 +139,7 @@ const esc = s => (s||'').replace(/[&<>]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;'
 /* ====================== STATO ====================== */
 let pool = [];
 let editingId = null;
-let printDims = {w:63.5, h:88.9, margin:8, gap:3};
+let printDims = {w:63.5, h:88.9, margin:7.5, gap:2};
 let printQty = {}; // id -> copie
 let sheetsHTML = '';
 let busy = false;
@@ -150,17 +156,19 @@ function cardHTML(c){
   const fac = factionOf(c.fazione);
   const watermark = fac.icon ? `<div class="pc-watermark" style="color:${fac.color}"><svg viewBox="0 0 100 100">${fac.icon}</svg></div>` : '';
   let foot = '', footClass = '';
-  if(c.type==='personaggio') foot = `<span>${ICO.sword} ${c.forza||0} Forza</span><span>${c.resistenza||0} Resistenza ${ICO.shield}</span>`;
-  else if(c.type==='luogo'){ foot = `<span class="pc-prestige-big">${ICO.star}${c.prestigio||0}</span>`; footClass='center'; }
-  else foot = '<span></span><span></span>';
+  if(c.type==='personaggio') foot = `<div class="pc-stat"><div class="sv">${ICO.sword}${c.forza||0}</div><div class="lbl">Forza</div></div>
+    <div class="pc-stat"><div class="sv">${c.resistenza||0}${ICO.shield}</div><div class="lbl">Resistenza</div></div>`;
+  else if(c.type==='luogo'){ foot = `<span class="pc-prestige-big">${c.prestigio||0}</span>`; footClass='center'; }
   return `<div class="pcard" style="--cw:${printDims.w}mm;--ch:${printDims.h}mm">
-    <div class="pc-top">
-      ${c.legendary?'<span class="pc-legendary">Leggendaria</span>':''}
-      <div class="pc-name">${esc(c.name||'Senza nome')}</div>
-      ${c.costCor?`<span class="pc-badge cor"><svg viewBox="0 0 24 24">${ICO.spiral}</svg><em>${c.costCor}</em></span>`:''}
-      ${c.costInf?`<span class="pc-badge inf">${c.costInf}</span>`:''}
+    <div class="pc-artwrap">
+      <div class="pc-art">${(c.image||c.imagePath)?`<img src="${esc(c.image||c.imagePath)}" onerror="this.outerHTML=ART_PLACEHOLDER">`:ART_PLACEHOLDER}</div>
+      <div class="pc-top">
+        ${c.legendary?'<span class="pc-legendary">Leggendaria</span>':''}
+        <div class="pc-name">${esc(c.name||'Senza nome')}</div>
+        ${c.costCor?`<span class="pc-badge cor"><svg viewBox="0 0 24 24">${ICO.spiral}</svg><em>${c.costCor}</em></span>`:''}
+        ${c.costInf?`<span class="pc-badge inf"><svg viewBox="0 0 24 24">${ICO.gem}</svg><em>${c.costInf}</em></span>`:''}
+      </div>
     </div>
-    <div class="pc-art">${(c.image||c.imagePath)?`<img src="${esc(c.image||c.imagePath)}" onerror="this.outerHTML=ART_PLACEHOLDER">`:ART_PLACEHOLDER}</div>
     <div class="pc-subtitle">${esc(subtitleOf(c))}</div>
     <div class="pc-body">
       ${watermark}
@@ -170,17 +178,24 @@ function cardHTML(c){
     <div class="pc-foot ${footClass}">${foot}</div>
   </div>`;
 }
+function fitCardEffects(root){
+  (root||document).querySelectorAll('.pc-effect').forEach(el=>{
+    let size=3; el.style.fontSize=size+'mm';
+    let guard=0;
+    while(el.scrollHeight > el.clientHeight+1 && size>1.4 && guard<30){ size-=0.15; el.style.fontSize=size.toFixed(2)+'mm'; guard++; }
+  });
+}
 
 /* ====================== FORM CARD ====================== */
 function blankCard(){ return {id:uid(), name:'', type:'personaggio', legendary:false, fazione:'Comune',
   costInf:0, costCor:0, tipologia:'', forza:0, resistenza:0, ritoTipo:'immediato', prestigio:0,
   effetto:'', flavor:'', image:'', imagePath:''}; }
 let draft = blankCard();
-let passthrough = {decklists:null, deckFaction:null};
+let passthrough = {}; // conserva campi del simulatore (es. decks, playerDeck) non gestiti qui, per non perderli in un giro di import/export
 
 function setDraftField(k,v){ draft[k]=v; updatePreview(); }
 function setDraftFieldAndRerender(k,v){ draft[k]=v; render(); }
-function updatePreview(){ const el=document.getElementById('pc-preview'); if(el) el.innerHTML = cardHTML(draft); }
+function updatePreview(){ const el=document.getElementById('pc-preview'); if(el){ el.innerHTML = cardHTML(draft); fitCardEffects(el); } }
 function pickImage(input){
   if(!input.files || !input.files[0]) return;
   busy = true; render();
@@ -203,11 +218,23 @@ function duplicateCard(id){ const c=pool.find(x=>x.id===id); if(!c) return; cons
 function deleteCard(id){ pool=pool.filter(c=>c.id!==id); delete printQty[id]; render(); }
 function newCard(){ draft=blankCard(); editingId=null; render(); }
 
-/* ====================== IMPORT / EXPORT ====================== */
+/* ====================== IMPORT / EXPORT / SALVATAGGIO LOCALE ====================== */
+const SAVE_KEY = 'ceneri-del-divino-dati';
+function saveLocal(){ try{ localStorage.setItem(SAVE_KEY, JSON.stringify({pool, ...passthrough})); }catch(e){} }
+function loadLocal(){
+  try{
+    const raw = localStorage.getItem(SAVE_KEY); if(!raw) return;
+    const o = JSON.parse(raw);
+    if(Array.isArray(o.pool)) pool = o.pool.map(c=>({ ...blankCard(), ...c, id:c.id||uid() }));
+    Object.keys(o).forEach(k=>{ if(k!=='pool') passthrough[k]=o[k]; });
+  }catch(e){}
+}
+function clearLocal(){
+  if(!confirm('Cancellare il pool carte salvato in questo browser?')) return;
+  try{ localStorage.removeItem(SAVE_KEY); }finally{ location.reload(); }
+}
 function exportJSON(){
-  const data = {pool};
-  if(passthrough.decklists) data.decklists = passthrough.decklists;
-  if(passthrough.deckFaction) data.deckFaction = passthrough.deckFaction;
+  const data = {pool, ...passthrough};
   const blob = new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
   const a = document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='ceneri-del-divino-dati.json'; a.click();
 }
@@ -220,16 +247,15 @@ function importJSON(input){
       const o = JSON.parse(reader.result);
       const src = o.pool || o;
       if(!Array.isArray(src)) throw new Error('formato non valido');
-      if(o.decklists) passthrough.decklists = o.decklists;
-      if(o.deckFaction) passthrough.deckFaction = o.deckFaction;
-      src.forEach(c=>{ pool.push({ ...c, id:uid(), name:c.name||'', type:c.type||'personaggio', legendary:!!c.legendary,
+      Object.keys(o).forEach(k=>{ if(k!=='pool') passthrough[k]=o[k]; });
+      src.forEach(c=>{ pool.push({ ...c, id:c.id||uid(), name:c.name||'', type:c.type||'personaggio', legendary:!!c.legendary,
         fazione:c.fazione||'Comune', costInf:c.costInf||0, costCor:c.costCor||0, tipologia:c.tipologia||'',
         forza:c.forza||0, resistenza:c.resistenza||0, ritoTipo:c.ritoTipo||'immediato', prestigio:c.prestigio||0,
         effetto:c.effetto||'', flavor:c.flavor||'', image:c.image||'', imagePath:c.imagePath||'' }); });
     }catch(e){ alert('File non valido: '+e.message); }
   };
   reader.onerror = ()=>{ alert('Impossibile leggere il file.'); };
-  reader.onloadend = ()=>{ try{ } finally { busy=false; input.value=''; render(); } };
+  reader.onloadend = ()=>{ try{ } finally { busy=false; input.value=''; saveLocal(); render(); } };
   reader.readAsText(input.files[0]);
 }
 
@@ -272,6 +298,8 @@ function render(){
   document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
   document.getElementById('tab-'+activeTab).classList.add('active');
   renderEditor(); renderStampa();
+  fitCardEffects(document);
+  saveLocal();
 }
 
 function renderEditor(){
@@ -320,7 +348,8 @@ function renderEditor(){
         <label class="btn ghost" style="display:inline-block">⬆ Importa JSON<input type="file" accept=".json" style="display:none" onchange="importJSON(this)"></label>
       </div>
     </div>
-    <p class="small">Stesso formato del file esportato dal simulatore (ceneri-del-divino-dati.json): un unico import/export serve per entrambi gli strumenti. Mazzi e fazioni, se presenti nel file, vengono conservati anche se qui non sono modificabili.</p>
+    <p class="small">Il pool viene salvato automaticamente nel browser (localStorage): se apri questa pagina dallo stesso sito del simulatore, condividono gli stessi dati senza bisogno di importare un file — basta aprire entrambi via web (non funziona aprendo i file direttamente dal disco con un doppio clic). Stesso formato del file esportato dal simulatore (ceneri-del-divino-dati.json): mazzi e altri dati, se presenti nel file, vengono conservati anche se qui non sono modificabili.</p>
+    <button class="btn ghost" onclick="clearLocal()">🗑 Cancella dati salvati nel browser</button>
     <div class="poollist">${pool.map(c=>`<div class="poolrow">
       <b>${esc(c.name)}</b><span class="small">${TYPE_LABEL[c.type]}</span>
       <button class="btn ghost" onclick="editCard('${c.id}')">✎</button>
@@ -358,6 +387,7 @@ function renderStampa(){
   </div>`;
 }
 
+loadLocal();
 render();
 </script>
 </body>
