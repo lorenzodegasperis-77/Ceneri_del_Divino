@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Cormorant+Garamond:wght@400;500;700&family=MedievalSharp&display=swap" rel="stylesheet">
+<title>Le Ceneri del Divino — Stampa Carte</title>
+<style>
+:root{
+  --bg:#f5f2ec; --surface:#ffffff; --surface2:#eee9df; --border:#d8d0c0;
+  --text:#2a2420; --muted:#726a5e; --accent:#7a2e2e; --accent2:#2e4a3f;
+  --warn:#a85c1f;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#1b1815; --surface:#262220; --surface2:#2f2a26; --border:#443d36;
+    --text:#ece6dd; --muted:#a89d8d; --accent:#d98a8a; --accent2:#8fd1b8; --warn:#e0a35c;
+    --font-main: 'Garamond', serif;
+    --font-2: 'Garamond', serif;
+      color-scheme: dark;
+  }
+}
+*{box-sizing:border-box;-webkit-print-color-adjust:exact;print-color-adjust:exact;color-adjust:exact}
+body{margin:0;background:var(--bg);color:var(--text);font-family:var(--font-2);font-size:14px}
+h1,h2,h3,h4{font-family:var(--font-2),serif;margin:.2em 0}
+header{padding:12px 16px;border-bottom:2px solid var(--accent);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px}
+header h1{font-size:1.1rem;color:var(--accent)}
+nav{display:flex;gap:6px}
+nav button{background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:6px 12px;border-radius:6px;cursor:pointer;font-size:.85rem}
+nav button.active{background:var(--accent);color:#fff;border-color:var(--accent)}
+.navlink{display:inline-block;background:transparent;border:1px solid var(--border);color:var(--text);padding:6px 12px;border-radius:6px;font-size:.85rem;text-decoration:none}
+main{padding:12px 16px;max-width:1300px;margin:0 auto}
+.tab{display:none} .tab.active{display:block}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px;margin-bottom:12px}
+.row{display:flex;gap:14px;flex-wrap:wrap}
+.col{flex:1;min-width:280px}
+.formgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px}
+label{display:block;font-size:.72rem;color:var(--muted);margin-bottom:2px}
+input,select,textarea{width:100%;background:var(--surface2);border:1px solid var(--border);color:var(--text);border-radius:5px;padding:5px 7px;font-size:.82rem;font-family:inherit}
+textarea{min-height:52px}
+.btn{background:var(--accent2);color:#fff;border:none;padding:7px 12px;border-radius:6px;cursor:pointer;font-size:.8rem;margin:2px 4px 2px 0}
+.btn.alt{background:var(--accent)} .btn.ghost{background:transparent;border:1px solid var(--border);color:var(--text)}
+.small{font-size:.72rem;color:var(--muted)}
+.poollist{display:flex;flex-wrap:wrap;gap:10px}
+.poolrow{display:flex;align-items:center;gap:8px;border:1px solid var(--border);border-radius:8px;padding:6px 8px;background:var(--surface2)}
+.poolrow input[type=number]{width:52px}
+table.datatable{width:100%;border-collapse:collapse;font-size:.78rem}
+table.datatable th,table.datatable td{border:1px solid var(--border);padding:3px 5px;text-align:left;vertical-align:middle}
+table.datatable th{background:var(--surface2);white-space:nowrap}
+table.datatable th.sortable{cursor:pointer;user-select:none}
+table.datatable th.sortable:hover{color:var(--accent)}
+table.datatable tbody tr:nth-child(even){background:var(--surface2)}
+table.datatable input,table.datatable select{padding:2px 3px;font-size:.75rem}
+hr.sep{border:none;border-top:1px solid var(--border);margin:12px 0}
+
+/* ---- carta ---- */
+.pcard{width:var(--cw,63.5mm);height:var(--ch,88.9mm);background:#efe6d2;color:#2a2420;border:1.5mm solid #b7943f;border-radius:2.5mm;
+  position:relative;overflow:hidden;display:flex;flex-direction:column;font-family:var(--font-main);box-shadow:0 1px 4px rgba(0,0,0,.25)}
+.pc-artwrap{position:absolute;inset:0;overflow:hidden}
+.pc-art{position:absolute;inset:0;background:repeating-linear-gradient(135deg,#d8cba0,#d8cba0 3px,#ccbd8e 3px,#ccbd8e 6px);
+  display:flex;align-items:center;justify-content:center;overflow:hidden}
+.pc-art img{width:100%;height:100%;object-fit:cover;object-position:center}
+.pc-art svg{width:40%;height:40%;opacity:.35}
+.pc-top{position:absolute;z-index:2;top:0;left:0;right:0;color:#e9dcb8;padding:1.8mm 2.2mm 4mm;
+  background:linear-gradient(to bottom, rgba(12,9,6,.88) 0%, rgba(12,9,6,.55) 55%, rgba(12,9,6,0) 100%)}
+.pc-legendary{font-size:1.6mm;letter-spacing:.3mm;color:#d9b24a;font-weight:bold;display:block;margin-bottom:.4mm;text-shadow:0 .2mm .4mm rgba(0,0,0,.8)}
+.pc-name{font-variant:small-caps;font-weight:bold;font-size:3mm;line-height:1.15;padding-right:11mm;text-shadow:0 .2mm .5mm rgba(0,0,0,.85)}
+.pc-badge{position:absolute;top:1.5mm;width:5.6mm;height:5.6mm}
+.pc-badge.inf{right:1.5mm}
+.pc-badge.cor{right:7.9mm}
+.pc-badge svg{position:absolute;inset:0;width:100%;height:100%;filter:drop-shadow(0 .2mm .5mm rgba(0,0,0,.7))}
+.pc-badge em{position:absolute;inset:0;left: 10%; top: 10%; margin:auto;width:3.2mm;height:3.2mm;border-radius:50%;background:#15110d;
+  display:flex;align-items:center;justify-content:center;font-style:normal;font-weight:bold;font-size:2.1mm}
+.pc-badge.inf em{color:#eccd7c}
+.pc-badge.cor em{color:#c7a3e8}
+.pc-subtitle{position:absolute;z-index:2;top:52%;left:0;right:0;background:#1c1712;color:#cbb278;border-bottom:2px solid #cbb278;border-top:2px solid #cbb278;text-align:center;font-size:2mm;letter-spacing:.3mm;padding:.8mm 1mm;font-variant:small-caps}
+.pc-body{position:absolute;z-index:1;top:56%;bottom:7mm;left:0;right:0;min-height:0;padding:3mm 2.4mm;display:flex;flex-direction:column;color:#fff;
+  background:linear-gradient(to bottom,rgba(12,9,6,.5) 0%,rgba(12,9,6,.7) 20%,rgba(12,9,6,.8) 100%)}
+.pc-watermark{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;opacity:.1;pointer-events:none}
+.pc-watermark svg{width:70%;height:70%}
+.pc-effect{position:relative;flex:1 1 auto;min-height:0;overflow:hidden;line-height:1.32;white-space:pre-wrap;text-shadow:0 .2mm .5mm rgba(0,0,0,.9)}
+.pc-flavor{position:relative;flex:0 0 auto;margin-top:.8mm;text-align:center;font-style:italic;color:#eee;padding-top:1.2mm}
+.pc-rule{display:flex;align-items:center;gap:1mm;margin-bottom:1mm}
+.pc-rule::before,.pc-rule::after{content:"";flex:1;border-top:.2mm solid #b7943f}
+.pc-foot{position:absolute;z-index:2;bottom:0;left:0;right:0;height:7mm;background:linear-gradient(to bottom,rgba(12,9,6,.8) 0%,rgba(12,9,6,.95) 100%);color:#e9dcb8;display:flex;justify-content:space-around;align-items:center;padding:0 2.4mm;flex:0 0 auto}
+.pc-stat{display:flex;align-items:center;gap:1mm;font-size:3.4mm;font-weight:bold}
+.pc-stat svg{width:4mm;height:4mm;filter:drop-shadow(0 .2mm .4mm rgba(0,0,0,.6))}
+.pc-prestige-big{position:absolute;left:50%;bottom:3.25mm;transform:translateX(-50%);width:7.5mm;height:7.5mm;z-index:3}
+.pc-prestige-big svg{position:absolute;inset:0;width:100%;height:100%;filter:drop-shadow(0 .3mm .4mm rgba(0,0,0,.5))}
+.pc-prestige-big em{position:absolute;left:55%;bottom:0;transform:translateX(-50%);font-style:normal;font-weight:bold;font-size:2.3mm;color:#15110d;background:#eccd7c;
+  border-radius:50%;width:3.8mm;height:3.8mm;display:flex;align-items:center;justify-content:center;box-shadow:0 0 0 .3mm #8a6914}
+
+.preview-wrap{display:flex;justify-content:center;padding:10px;background:var(--surface2);border-radius:8px}
+
+/* ---- stampa ---- */
+.sheets{display:flex;flex-direction:column;gap:16px;align-items:flex-start}
+.sheet-scale{zoom:.42}
+.sheet{width:210mm;height:297mm;background:#fff;position:relative;box-shadow:0 1px 6px rgba(0,0,0,.3)}
+.pcell{position:absolute;border:0.2mm dashed #999}
+@media print{
+  html,body{-webkit-print-color-adjust:exact;print-color-adjust:exact;color-adjust:exact;background:#fff}
+  body *{visibility:hidden}
+  #print-area,#print-area *{visibility:visible}
+  #print-area{position:absolute;left:0;top:0;margin:0;padding:0}
+  .sheet-scale{zoom:1 !important}
+  .sheet{box-shadow:none;page-break-after:always}
+  @page{size:A4;margin:0}
+}
+</style>
+</head>
+<body>
+<header>
+  <h1>⚜ Le Ceneri del Divino — Stampa Carte</h1>
+  <nav id="tabs"></nav>
+  <a class="navlink" href="index.html">← Simulatore</a>
+</header>
+<main>
+  <div class="tab active" id="tab-editor"></div>
+  <div class="tab" id="tab-tabella"></div>
+  <div class="tab" id="tab-stampa"></div>
+</main>
+
+<script>
+/* ====================== FAZIONI / ICONE ====================== */
+const FACTIONS = [
+ {name:"Comune", color:"#8a8070", icon:""},
+ {name:"La Comunione", color:"#c9a227", icon:`<circle cx="50" cy="50" r="14" fill="currentColor"/><g stroke="currentColor" stroke-width="5" stroke-linecap="round"><line x1="50" y1="8" x2="50" y2="24"/><line x1="50" y1="76" x2="50" y2="92"/><line x1="8" y1="50" x2="24" y2="50"/><line x1="76" y1="50" x2="92" y2="50"/><line x1="19" y1="19" x2="30" y2="30"/><line x1="70" y1="70" x2="81" y2="81"/><line x1="81" y1="19" x2="70" y2="30"/><line x1="30" y1="70" x2="19" y2="81"/></g>`},
+ {name:"Creature della notte", color:"#6a3f91", icon:`<path d="M62 12a36 36 0 100 76 29 29 0 010-76z" fill="currentColor"/>`},
+ {name:"Devoti dei Primi Figli", color:"#4a7a4a", icon:`<path d="M50 8 L70 45 L30 45 Z" fill="currentColor"/><path d="M50 28 L76 68 L24 68 Z" fill="currentColor"/><rect x="44" y="68" width="12" height="22" fill="currentColor"/>`},
+ {name:"Gli Spontanei", color:"#c45a2e", icon:`<path d="M50 8C28 34 24 56 40 72 34 56 46 50 48 61 53 50 67 56 60 74 82 60 76 33 50 8Z" fill="currentColor"/>`},
+ {name:"Le Accademie del Velo", color:"#3a5a8f", icon:`<path d="M8 50C25 18 75 18 92 50 75 82 25 82 8 50Z" fill="none" stroke="currentColor" stroke-width="6"/><circle cx="50" cy="50" r="13" fill="currentColor"/>`},
+ {name:"I Ducati del Nord", color:"#6b6b6b", icon:`<path d="M6 82 L34 32 L50 55 L66 22 L94 82Z" fill="currentColor"/>`},
+ {name:"La Corona di Velaria", color:"#a8862e", icon:`<path d="M14 76 L20 32 L40 55 L50 20 L60 55 L80 32 L86 76Z" fill="currentColor"/><rect x="14" y="76" width="72" height="9" fill="currentColor"/>`},
+ {name:"Il Regno delle Luci", color:"#c9a93a", icon:`<path d="M50 4 L59 38 L92 24 L64 48 L92 76 L59 62 L50 96 L41 62 L8 76 L36 48 L8 24 L41 38Z" fill="currentColor"/>`},
+ {name:"I Domini del Ponente", color:"#2e7a7a", icon:`<path d="M4 54 Q19 34 34 54 T64 54 T94 54" fill="none" stroke="currentColor" stroke-width="7" stroke-linecap="round"/><path d="M4 73 Q19 53 34 73 T64 73 T94 73" fill="none" stroke="currentColor" stroke-width="7" stroke-linecap="round"/>`},
+ {name:"Le Terre Contese", color:"#7a2e2e", icon:`<g stroke="currentColor" stroke-width="6" stroke-linecap="round"><line x1="14" y1="14" x2="86" y2="86"/><line x1="86" y1="14" x2="14" y2="86"/></g><circle cx="50" cy="50" r="7" fill="currentColor"/>`}
+];
+const factionOf = n => FACTIONS.find(f=>f.name===n) || FACTIONS[0];
+const ICO = {
+ gem:`<path d="M12 2L22 9L12 22L2 9Z" fill="#8a6914"/><path d="M12 2L22 9L12 9Z" fill="#e9c468"/><path d="M2 9L12 9L12 2Z" fill="#caa23c"/>`,
+ spiral:`<path d="M12 4a8 8 0 1 0 8 8" fill="none" stroke="#6a3f91" stroke-width="2"/><path d="M12 7a5 5 0 1 0 5 5" fill="none" stroke="#b98ee0" stroke-width="2"/><circle cx="12" cy="12" r="1.4" fill="#6a3f91"/>`,
+ sword:`<path fill="#8a6914" d="M7.936,11.97a1,1,0,1,0-1.415,1.414l.373.372L3.3,17.35a1.024,1.024,0,0,0,0,1.448l1.9,1.9a1.024,1.024,0,0,0,1.448,0l3.593-3.593.372.372a1,1,0,0,0,1.414-1.415Z"/><polygon fill="#e9c468" points="14.3 3 9.015 10.928 13.071 14.985 21 9.7 21 3 14.3 3"/>`,
+ shield:`<path d="M12 2l7 3v6c0 5-3 8-7 9" fill="#8a6914"/><path d="M12 2L5 5v6c0 5 3 8 7 9" fill="#e9c468"/>`,
+ castle:`<path d="M5 20V8H7V5H9V8H11V4H13V8H15V5H17V8H19V20Z" fill="#b8860b"/><path d="M5 20V8H7V5H9V8H10V20Z" fill="#e9c468"/>`,
+};
+const ART_PLACEHOLDER = `<svg viewBox="0 0 100 100"><path d="M20 70 L40 45 L55 60 L70 35 L85 70Z" fill="#b7943f"/><circle cx="30" cy="32" r="6" fill="#b7943f"/></svg>`;
+const TYPE_LABEL = {personaggio:'Personaggio', luogo:'Luogo', rito:'Rito', evento:'Evento'};
+const uid = ()=>Math.random().toString(36).slice(2,10);
+const esc = s => (s||'').replace(/[&<>]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[m]));
+
+/* ====================== STATO ====================== */
+let pool = [];
+let editingId = null;
+let printDims = {w:63.5, h:88.9, margin:7.5, gap:2};
+let printQty = {}; // id -> copie
+let sheetsHTML = '';
+let busy = false;
+
+/* ====================== RENDER CARTA ====================== */
+function subtitleOf(c){
+  const parts = [TYPE_LABEL[c.type]];
+  if(c.type==='personaggio' && c.tipologia) parts.push(c.tipologia);
+  if(c.type==='rito') parts.push(c.ritoTipo==='persistente'?'Persistente':'Immediato');
+  return parts.join(' — ');
+}
+function cardHTML(c){
+  const fac = factionOf(c.fazione);
+  const watermark = fac.icon ? `<div class="pc-watermark" style="color:${fac.color}"><svg viewBox="0 0 100 100">${fac.icon}</svg></div>` : '';
+  let foot = '';
+  if(c.type==='personaggio') foot = `<div class="pc-stat"><svg viewBox="0 0 22 22">${ICO.sword}</svg><span>${c.forza||0}</span></div>
+    <div class="pc-stat"><span>${c.resistenza||0}</span><svg viewBox="0 0 22 22">${ICO.shield}</svg></div>`;
+  const prestigeEmblem = c.type==='luogo' ? `<span class="pc-prestige-big"><svg viewBox="0 0 22 22">${ICO.castle}</svg><em>${c.prestigio||0}</em></span>` : '';
+  return `<div class="pcard" style="--cw:${printDims.w}mm;--ch:${printDims.h}mm">
+    <div class="pc-artwrap">
+      <div class="pc-art">${(c.image||c.imagePath)?`<img src="${esc(c.image||c.imagePath)}" onerror="this.outerHTML=ART_PLACEHOLDER">`:ART_PLACEHOLDER}</div>
+      <div class="pc-top">
+        ${c.legendary?'<span class="pc-legendary">Leggendaria</span>':''}
+        <div class="pc-name">${esc(c.name||'Senza nome')}</div>
+        ${c.costCor?`<span class="pc-badge cor"><svg viewBox="0 0 22 22">${ICO.spiral}</svg><em>${c.costCor}</em></span>`:''}
+        ${c.costInf?`<span class="pc-badge inf"><svg viewBox="0 0 22 22">${ICO.gem}</svg><em>${c.costInf}</em></span>`:''}
+      </div>
+    </div>
+    <div class="pc-subtitle">${esc(subtitleOf(c))}</div>
+    <div class="pc-body">
+      ${watermark}
+      <div class="pc-effect">${esc(c.effetto||'')}</div>
+      ${c.flavor?`<div class="pc-flavor"><div class="pc-rule"></div>“${esc(c.flavor)}”<div class="pc-rule" style="margin-top:1mm"></div></div>`:''}
+    </div>
+    ${prestigeEmblem}
+    <div class="pc-foot">${foot}</div>
+  </div>`;
+}
+function fitCardEffects(root) {
+  (root || document).querySelectorAll('.pc-body').forEach(body => {
+    const effect = body.querySelector('.pc-effect');
+    const flavor = body.querySelector('.pc-flavor');
+    if (!effect) return;
+
+    const baseEffect = 3; // mm
+    const baseFlavor = baseEffect / 1.2; // 2,5 mm
+    let scale = 1;
+
+    const applySize = () => {
+      effect.style.fontSize = `${baseEffect * scale}mm`;
+      if (flavor) flavor.style.fontSize = `${baseFlavor * scale}mm`;
+    };
+
+    applySize();
+
+    let guard = 0;
+    while (
+      (effect.scrollHeight > effect.clientHeight + 1 ||
+        (flavor && flavor.scrollHeight > flavor.clientHeight + 1)) &&
+      scale > 0.45 &&
+      guard < 30
+    ) {
+      scale -= 0.02;
+      applySize();
+      guard++;
+    }
+  });
+}
+
+/* ====================== FORM CARD ====================== */
+function blankCard(){ return {id:uid(), name:'', type:'personaggio', legendary:false, fazione:'Comune',
+  costInf:0, costCor:0, tipologia:'', forza:0, resistenza:0, ritoTipo:'immediato', prestigio:0,
+  effetto:'', flavor:'', image:'', imagePath:''}; }
+let draft = blankCard();
+let passthrough = {}; // conserva campi del simulatore (es. decks, playerDeck) non gestiti qui, per non perderli in un giro di import/export
+let tableFilters = { search:'', fazione:'', tipo:'', legendaryOnly:false, noImageOnly:false };
+let tableSort = { key:null, dir:1 };
+
+function setDraftField(k,v){ draft[k]=v; updatePreview(); }
+function setDraftFieldAndRerender(k,v){ draft[k]=v; render(); }
+function updatePreview(){ const el=document.getElementById('pc-preview'); if(el){ el.innerHTML = cardHTML(draft); fitCardEffects(el); } }
+function pickImage(input){
+  if(!input.files || !input.files[0]) return;
+  busy = true; render();
+  const reader = new FileReader();
+  reader.onload = ()=>{ draft.image = reader.result; };
+  reader.onerror = ()=>{ alert('Impossibile leggere l\'immagine.'); };
+  reader.onloadend = ()=>{ try{ } finally { busy=false; render(); } };
+  reader.readAsDataURL(input.files[0]);
+}
+function removeImage(){ draft.image=''; render(); }
+function saveDraft(){
+  if(!draft.name.trim()){ alert('Dai un nome alla carta.'); return; }
+  const i = pool.findIndex(c=>c.id===draft.id);
+  const copy = JSON.parse(JSON.stringify(draft));
+  if(i>=0) pool[i]=copy; else pool.push(copy);
+  editingId = null; draft = blankCard(); render();
+}
+function editCard(id){ const c=pool.find(x=>x.id===id); if(!c) return; draft=JSON.parse(JSON.stringify(c)); editingId=id; render(); window.scrollTo({top:0,behavior:'smooth'}); }
+function duplicateCard(id){ const c=pool.find(x=>x.id===id); if(!c) return; const d=JSON.parse(JSON.stringify(c)); d.id=uid(); d.name=d.name+' (copia)'; pool.push(d); render(); }
+function deleteCard(id){ pool=pool.filter(c=>c.id!==id); delete printQty[id]; render(); }
+function newCard(){ draft=blankCard(); editingId=null; render(); }
+
+/* ====================== IMPORT / EXPORT / SALVATAGGIO LOCALE ====================== */
+const SAVE_KEY = 'ceneri-del-divino-dati';
+function saveLocal(){ try{ localStorage.setItem(SAVE_KEY, JSON.stringify({pool, ...passthrough})); }catch(e){} }
+function loadLocal(){
+  try{
+    const raw = localStorage.getItem(SAVE_KEY); if(!raw) return;
+    const o = JSON.parse(raw);
+    if(Array.isArray(o.pool)) pool = o.pool.map(c=>({ ...blankCard(), ...c, id:c.id||uid() }));
+    Object.keys(o).forEach(k=>{ if(k!=='pool') passthrough[k]=o[k]; });
+  }catch(e){}
+}
+function clearLocal(){
+  if(!confirm('Cancellare il pool carte salvato in questo browser?')) return;
+  try{ localStorage.removeItem(SAVE_KEY); }finally{ location.reload(); }
+}
+function exportJSON(){
+  const data = {pool, ...passthrough};
+  const blob = new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
+  const a = document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='ceneri-del-divino-dati.json'; a.click();
+}
+function importJSON(input){
+  if(!input.files || !input.files[0]) return;
+  busy=true; render();
+  const reader = new FileReader();
+  reader.onload = ()=>{
+    try{
+      const o = JSON.parse(reader.result);
+      const src = o.pool || o;
+      if(!Array.isArray(src)) throw new Error('formato non valido');
+      Object.keys(o).forEach(k=>{ if(k!=='pool') passthrough[k]=o[k]; });
+      src.forEach(c=>{ pool.push({ ...c, id:c.id||uid(), name:c.name||'', type:c.type||'personaggio', legendary:!!c.legendary,
+        fazione:c.fazione||'Comune', costInf:c.costInf||0, costCor:c.costCor||0, tipologia:c.tipologia||'',
+        forza:c.forza||0, resistenza:c.resistenza||0, ritoTipo:c.ritoTipo||'immediato', prestigio:c.prestigio||0,
+        effetto:c.effetto||'', flavor:c.flavor||'', image:c.image||'', imagePath:c.imagePath||'' }); });
+    }catch(e){ alert('File non valido: '+e.message); }
+  };
+  reader.onerror = ()=>{ alert('Impossibile leggere il file.'); };
+  reader.onloadend = ()=>{ try{ } finally { busy=false; input.value=''; saveLocal(); render(); } };
+  reader.readAsText(input.files[0]);
+}
+
+/* ====================== STAMPA ====================== */
+function setDim(k,v){ printDims[k]=parseFloat(v)||0; sheetsHTML=''; render(); }
+function setQty(id,v){ printQty[id]=Math.max(0, parseInt(v)||0); }
+function buildSheets(){
+  busy=true; render();
+  try{
+    const list=[];
+    pool.forEach(c=>{ const n=printQty[c.id]||0; for(let i=0;i<n;i++) list.push(c); });
+    if(!list.length){ sheetsHTML='<p class="small">Nessuna copia selezionata: imposta almeno una quantità nella lista qui sopra.</p>'; return; }
+    const {w,h,margin,gap} = printDims;
+    const cols = Math.max(1, Math.floor((210 - 2*margin + gap) / (w + gap)));
+    const rows = Math.max(1, Math.floor((297 - 2*margin + gap) / (h + gap)));
+    const perSheet = cols*rows;
+    const pages = Math.ceil(list.length/perSheet);
+    let html='';
+    for(let p=0;p<pages;p++){
+      let cells='';
+      for(let i=0;i<perSheet;i++){
+        const idx=p*perSheet+i; if(idx>=list.length) break;
+        const col=i%cols, row=Math.floor(i/cols);
+        const left = margin + col*(w+gap), top = margin + row*(h+gap);
+        cells += `<div class="pcell" style="left:${left}mm;top:${top}mm;width:${w}mm;height:${h}mm">${cardHTML(list[idx])}</div>`;
+      }
+      html += `<div class="sheet">${cells}</div>`;
+    }
+    sheetsHTML = `<p class="small">${list.length} carte · ${cols}×${rows} = ${perSheet} per foglio · ${pages} foglio/i A4.</p><div id="print-area" class="sheet-scale sheets">${html}</div>`;
+  } finally { busy=false; render(); }
+}
+function doPrint(){ if(!sheetsHTML){ alert('Genera prima l\'anteprima.'); return; } window.print(); }
+
+/* ====================== RENDER ====================== */
+let activeTab='editor';
+function setTab(t){ activeTab=t; render(); }
+function render(){
+  document.getElementById('tabs').innerHTML = [['editor','Editor carte'],['tabella','Tabella'],['stampa','Stampa']]
+    .map(([k,l])=>`<button class="${activeTab===k?'active':''}" onclick="setTab('${k}')">${l}</button>`).join('');
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById('tab-'+activeTab).classList.add('active');
+  renderEditor(); renderTabella(); renderStampa();
+  fitCardEffects(document);
+  saveLocal();
+}
+
+function renderEditor(){
+  const el = document.getElementById('tab-editor');
+  const facOpts = FACTIONS.map(f=>`<option value="${f.name}" ${draft.fazione===f.name?'selected':''}>${f.name}</option>`).join('');
+  el.innerHTML = `
+  <div class="card">
+    <h2>${editingId?'Modifica carta':'Nuova carta'}</h2>
+    <div class="formgrid">
+      <div><label>Nome</label><input value="${esc(draft.name)}" oninput="setDraftField('name',this.value)"></div>
+      <div><label>Tipo</label><select onchange="setDraftFieldAndRerender('type',this.value)">
+        ${Object.keys(TYPE_LABEL).map(t=>`<option value="${t}" ${draft.type===t?'selected':''}>${TYPE_LABEL[t]}</option>`).join('')}</select></div>
+      <div><label>Fazione</label><select onchange="setDraftField('fazione',this.value)">${facOpts}</select></div>
+      <div><label><input type="checkbox" style="width:auto" ${draft.legendary?'checked':''} onchange="setDraftField('legendary',this.checked)"> Leggendaria</label></div>
+      <div><label>Costo Influenza</label><input type="number" min="0" value="${draft.costInf}" oninput="setDraftField('costInf',+this.value||0)"></div>
+      <div><label>Costo Corruzione</label><input type="number" min="0" value="${draft.costCor}" oninput="setDraftField('costCor',+this.value||0)"></div>
+      ${draft.type==='personaggio'?`
+        <div><label>Tipologia</label><input value="${esc(draft.tipologia)}" placeholder="Umano, Non morto…" oninput="setDraftField('tipologia',this.value)"></div>
+        <div><label>Forza</label><input type="number" min="0" value="${draft.forza}" oninput="setDraftField('forza',+this.value||0)"></div>
+        <div><label>Resistenza</label><input type="number" min="0" value="${draft.resistenza}" oninput="setDraftField('resistenza',+this.value||0)"></div>`:''}
+      ${draft.type==='rito'?`
+        <div><label>Tipo di rito</label><select onchange="setDraftField('ritoTipo',this.value)">
+          <option value="immediato" ${draft.ritoTipo==='immediato'?'selected':''}>Immediato</option>
+          <option value="persistente" ${draft.ritoTipo==='persistente'?'selected':''}>Persistente</option></select></div>`:''}
+      ${draft.type==='luogo'?`<div><label>Prestigio prodotto</label><input type="number" min="0" value="${draft.prestigio}" oninput="setDraftField('prestigio',+this.value||0)"></div>`:''}
+      <div style="grid-column:1/-1"><label>Effetto</label><textarea oninput="setDraftField('effetto',this.value)">${esc(draft.effetto)}</textarea></div>
+      <div style="grid-column:1/-1"><label>Testo flavor (opzionale)</label><textarea oninput="setDraftField('flavor',this.value)">${esc(draft.flavor)}</textarea></div>
+      <div style="grid-column:1/-1"><label>Percorso immagine (es. img/nome.png — usato anche dal simulatore)</label>
+        <input value="${esc(draft.imagePath)}" oninput="setDraftField('imagePath',this.value)"></div>
+      <div style="grid-column:1/-1"><label>Oppure carica un'immagine da incorporare nel PDF (opzionale, ha priorità sul percorso)</label>
+        <input type="file" accept="image/*" onchange="pickImage(this)">
+        ${draft.image?`<button class="btn ghost" onclick="removeImage()">Rimuovi immagine caricata</button>`:''}
+      </div>
+    </div>
+    <div style="margin-top:8px">
+      <button class="btn" onclick="saveDraft()" ${busy?'disabled':''}>${editingId?'Salva modifiche':'Aggiungi al pool'}</button>
+      <button class="btn ghost" onclick="newCard()">Nuova carta vuota</button>
+    </div>
+  </div>
+  <div class="card"><h3>Anteprima</h3><div class="preview-wrap" id="pc-preview">${cardHTML(draft)}</div></div>
+  <div class="card">
+    <div class="row" style="justify-content:space-between;align-items:center">
+      <h2>Pool carte (${pool.length})</h2>
+      <div>
+        <button class="btn ghost" onclick="exportJSON()">⬇ Esporta JSON</button>
+        <label class="btn ghost" style="display:inline-block">⬆ Importa JSON<input type="file" accept=".json" style="display:none" onchange="importJSON(this)"></label>
+      </div>
+    </div>
+    <p class="small">Il pool viene salvato automaticamente nel browser (localStorage): se apri questa pagina dallo stesso sito del simulatore, condividono gli stessi dati senza bisogno di importare un file — basta aprire entrambi via web (non funziona aprendo i file direttamente dal disco con un doppio clic). Stesso formato del file esportato dal simulatore (ceneri-del-divino-dati.json): mazzi e altri dati, se presenti nel file, vengono conservati anche se qui non sono modificabili.</p>
+    <button class="btn ghost" onclick="clearLocal()">🗑 Cancella dati salvati nel browser</button>
+    <div class="poollist">${pool.map(c=>`<div class="poolrow">
+      <b>${esc(c.name)}</b><span class="small">${TYPE_LABEL[c.type]}</span>
+      <button class="btn ghost" onclick="editCard('${c.id}')">✎</button>
+      <button class="btn ghost" onclick="duplicateCard('${c.id}')">⧉</button>
+      <button class="btn ghost" onclick="deleteCard('${c.id}')">🗑</button>
+    </div>`).join('')||'<span class="small">Nessuna carta ancora: compila il modulo sopra oppure importa un JSON.</span>'}</div>
+  </div>`;
+}
+
+/* ====================== TABELLA ====================== */
+function openInEditor(id){ editCard(id); setTab('editor'); }
+function setCardField(id,k,v){ const c=pool.find(x=>x.id===id); if(c) c[k]=v; saveLocal(); }
+function setCardFieldRerender(id,k,v){ const c=pool.find(x=>x.id===id); if(c) c[k]=v; render(); }
+function setTableSearch(v){ tableFilters.search=v; updateTableRows(); }
+function setTableFilter(k,v){ tableFilters[k]=v; render(); }
+function setTableSort(key){
+  if(tableSort.key===key) tableSort.dir*=-1; else { tableSort.key=key; tableSort.dir=1; }
+  render();
+}
+function filteredSortedPool(){
+  let list = pool.filter(c=>{
+    if(tableFilters.search && !(c.name||'').toLowerCase().includes(tableFilters.search.toLowerCase())) return false;
+    if(tableFilters.fazione && (c.fazione||'Comune')!==tableFilters.fazione) return false;
+    if(tableFilters.tipo && c.type!==tableFilters.tipo) return false;
+    if(tableFilters.legendaryOnly && !c.legendary) return false;
+    if(tableFilters.noImageOnly && (c.image||c.imagePath)) return false;
+    return true;
+  });
+  if(tableSort.key){
+    const k=tableSort.key, d=tableSort.dir;
+    list = list.slice().sort((a,b)=>{
+      let av=a[k], bv=b[k];
+      if(k==='name'||k==='fazione'){ av=(av||'').toLowerCase(); bv=(bv||'').toLowerCase(); return av<bv? -d : av>bv? d : 0; }
+      return ((av||0)-(bv||0))*d;
+    });
+  }
+  return list;
+}
+function sortArrow(key){ return tableSort.key===key ? (tableSort.dir>0?' ▲':' ▼') : ''; }
+function imgFlagSVG(has){
+  return has
+    ? `<svg width="13" height="13" viewBox="0 0 24 24"><path d="M9 16.2 4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4z" fill="#3a8f5c"/></svg>`
+    : `<svg width="13" height="13" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8" fill="none" stroke="var(--muted)" stroke-width="2"/></svg>`;
+}
+function tableRowsHTML(){
+  const list = filteredSortedPool();
+  if(!list.length) return `<tr><td colspan="12" class="small">Nessuna carta corrisponde ai filtri.</td></tr>`;
+  return list.map(c=>`<tr>
+    <td><input value="${esc(c.name)}" oninput="setCardField('${c.id}','name',this.value)" style="min-width:110px"></td>
+    <td><select onchange="setCardFieldRerender('${c.id}','type',this.value)">${Object.keys(TYPE_LABEL).map(t=>`<option value="${t}" ${c.type===t?'selected':''}>${TYPE_LABEL[t]}</option>`).join('')}</select></td>
+    <td><select onchange="setCardFieldRerender('${c.id}','fazione',this.value)">${FACTIONS.map(f=>`<option value="${f.name}" ${c.fazione===f.name?'selected':''}>${f.name}</option>`).join('')}</select></td>
+    <td style="text-align:center"><input type="checkbox" style="width:auto" ${c.legendary?'checked':''} onchange="setCardFieldRerender('${c.id}','legendary',this.checked)"></td>
+    <td><input type="number" min="0" value="${c.costInf||0}" oninput="setCardField('${c.id}','costInf',+this.value||0)" style="width:3.2em"></td>
+    <td><input type="number" min="0" value="${c.costCor||0}" oninput="setCardField('${c.id}','costCor',+this.value||0)" style="width:3.2em"></td>
+    <td>${c.type==='personaggio'?`<input value="${esc(c.tipologia)}" oninput="setCardField('${c.id}','tipologia',this.value)" style="min-width:90px">`
+        :c.type==='rito'?`<select onchange="setCardFieldRerender('${c.id}','ritoTipo',this.value)"><option value="immediato" ${c.ritoTipo==='immediato'?'selected':''}>Immediato</option><option value="persistente" ${c.ritoTipo==='persistente'?'selected':''}>Persistente</option></select>`
+        :'<span class="small">—</span>'}</td>
+    <td>${c.type==='personaggio'?`<input type="number" min="0" value="${c.forza||0}" oninput="setCardField('${c.id}','forza',+this.value||0)" style="width:3em">`:'<span class="small">—</span>'}</td>
+    <td>${c.type==='personaggio'?`<input type="number" min="0" value="${c.resistenza||0}" oninput="setCardField('${c.id}','resistenza',+this.value||0)" style="width:3em">`:'<span class="small">—</span>'}</td>
+    <td>${c.type==='luogo'?`<input type="number" min="0" value="${c.prestigio||0}" oninput="setCardField('${c.id}','prestigio',+this.value||0)" style="width:3em">`:'<span class="small">—</span>'}</td>
+    <td style="text-align:center">${imgFlagSVG(!!(c.image||c.imagePath))}</td>
+    <td style="white-space:nowrap">
+      <button class="btn ghost" onclick="openInEditor('${c.id}')">✎</button>
+      <button class="btn ghost" onclick="duplicateCard('${c.id}')">⧉</button>
+      <button class="btn ghost" onclick="deleteCard('${c.id}')">🗑</button>
+    </td>
+  </tr>`).join('');
+}
+function updateTableRows(){ const el=document.getElementById('tabella-rows'); if(el) el.innerHTML = tableRowsHTML(); }
+function renderTabella(){
+  const el = document.getElementById('tab-tabella');
+  const list = filteredSortedPool();
+  const sortHeader = (key,label)=>`<th class="sortable" onclick="setTableSort('${key}')">${label}${sortArrow(key)}</th>`;
+  el.innerHTML = `<div class="card">
+    <h2>Tabella carte (${list.length}/${pool.length})</h2>
+    <div class="formgrid" style="margin-bottom:8px">
+      <div><label>Cerca nome</label><input value="${esc(tableFilters.search)}" oninput="setTableSearch(this.value)"></div>
+      <div><label>Fazione</label><select onchange="setTableFilter('fazione',this.value)">
+        <option value="">Tutte</option>${FACTIONS.map(f=>`<option value="${f.name}" ${tableFilters.fazione===f.name?'selected':''}>${f.name}</option>`).join('')}</select></div>
+      <div><label>Categoria</label><select onchange="setTableFilter('tipo',this.value)">
+        <option value="">Tutte</option>${Object.keys(TYPE_LABEL).map(t=>`<option value="${t}" ${tableFilters.tipo===t?'selected':''}>${TYPE_LABEL[t]}</option>`).join('')}</select></div>
+      <div><label><input type="checkbox" style="width:auto" ${tableFilters.legendaryOnly?'checked':''} onchange="setTableFilter('legendaryOnly',this.checked)"> Solo leggendarie</label></div>
+      <div><label><input type="checkbox" style="width:auto" ${tableFilters.noImageOnly?'checked':''} onchange="setTableFilter('noImageOnly',this.checked)"> Solo senza immagine</label></div>
+    </div>
+    <div style="overflow-x:auto"><table class="datatable">
+      <thead><tr>
+        ${sortHeader('name','Nome')}
+        <th>Tipo</th>
+        ${sortHeader('fazione','Fazione')}
+        <th>Legg.</th>
+        ${sortHeader('costInf','Inf.')}
+        ${sortHeader('costCor','Cor.')}
+        <th>Tipologia / Rito</th>
+        ${sortHeader('forza','Forza')}
+        ${sortHeader('resistenza','Res.')}
+        ${sortHeader('prestigio','Prest.')}
+        <th>Img</th>
+        <th>Azioni</th>
+      </tr></thead>
+      <tbody id="tabella-rows">${tableRowsHTML()}</tbody>
+    </table></div>
+    <p class="small">Le modifiche qui si salvano subito. Per effetto, testo flavor e immagine usa "✎" per aprire la carta nell'Editor.</p>
+  </div>`;
+}
+
+function renderStampa(){
+  const el = document.getElementById('tab-stampa');
+  el.innerHTML = `
+  <div class="card">
+    <h2>Impostazioni foglio</h2>
+    <div class="formgrid">
+      <div><label>Larghezza carta (mm)</label><input type="number" step="0.1" value="${printDims.w}" oninput="setDim('w',this.value)"></div>
+      <div><label>Altezza carta (mm)</label><input type="number" step="0.1" value="${printDims.h}" oninput="setDim('h',this.value)"></div>
+      <div><label>Margine foglio (mm)</label><input type="number" step="0.5" value="${printDims.margin}" oninput="setDim('margin',this.value)"></div>
+      <div><label>Spazio tra carte (mm)</label><input type="number" step="0.5" value="${printDims.gap}" oninput="setDim('gap',this.value)"></div>
+    </div>
+    <p class="small">Default: formato Magic/Poker 63,5×88,9&nbsp;mm. Le dimensioni sono completamente modificabili. Vengono mostrate solo linee guida leggere per il taglio, nessun crocino di registro. Il dorso della carta non è incluso (solo fronte).</p>
+  </div>
+  <div class="card">
+    <h2>Quante copie di ogni carta</h2>
+    <div class="poollist">${pool.map(c=>`<div class="poolrow">
+      <span>${esc(c.name)}</span>
+      <input type="number" min="0" value="${printQty[c.id]||0}" oninput="setQty('${c.id}',this.value)">
+    </div>`).join('')||'<span class="small">Il pool è vuoto: aggiungi carte dalla scheda Editor.</span>'}</div>
+    <div style="margin-top:8px"><button class="btn" onclick="buildSheets()" ${busy?'disabled':''}>Genera anteprima di stampa</button>
+    <button class="btn alt" onclick="doPrint()">🖨 Stampa / Salva come PDF</button></div>
+    <p class="small">Il pulsante di stampa apre la finestra di stampa del browser, impaginata a grandezza reale su fogli A4: scegliendo come destinazione "Salva come PDF" si ottiene direttamente il file PDF pronto per la stampante.</p>
+  </div>
+  <div class="card"><h2>Anteprima</h2>
+    <div class="sheets">${sheetsHTML||'<p class="small">Nessuna anteprima generata.</p>'}</div>
+  </div>`;
+}
+
+loadLocal();
+render();
+</script>
+</body>
+</html>

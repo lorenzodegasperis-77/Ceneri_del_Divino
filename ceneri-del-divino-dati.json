@@ -53,8 +53,8 @@
       "resistenza": 2,
       "ritoTipo": "immediato",
       "prestigio": 0,
-      "effetto": "Quando entra in gioco, guarda la prima carta del tuo mazzo. Puoi lasciarla in cima oppure metterla in fondo.",
-      "flavor": "",
+      "effetto": "Quando viene schierato, guarda la prima carta del tuo mazzo. Puoi lasciarla in cima oppure metterla in fondo.",
+      "flavor": "A volte l'unica cosa che ci manca nella vita, è il tempo di vivere tutte le esperienze che essa può offrire.",
       "image": "",
       "imagePath": "IMG/EXPLORER.JPG",
       "costPre": 0,
@@ -288,7 +288,7 @@
       "fazione": "Comune",
       "costInf": 2,
       "costCor": 2,
-      "tipologia": "",
+      "tipologia": "Umano",
       "forza": 0,
       "resistenza": 3,
       "ritoTipo": "immediato",
@@ -328,7 +328,7 @@
       "fazione": "Le Terre Contese",
       "costInf": 2,
       "costCor": 0,
-      "tipologia": "",
+      "tipologia": "Umano",
       "forza": 1,
       "resistenza": 3,
       "ritoTipo": "immediato",
@@ -348,7 +348,7 @@
       "fazione": "Le Terre Contese",
       "costInf": 3,
       "costCor": 0,
-      "tipologia": "",
+      "tipologia": "Umano",
       "forza": 3,
       "resistenza": 3,
       "ritoTipo": "immediato",
@@ -448,7 +448,7 @@
       "fazione": "Le Accademie del Velo",
       "costInf": 2,
       "costCor": 0,
-      "tipologia": "",
+      "tipologia": "Umano",
       "forza": 3,
       "resistenza": 1,
       "ritoTipo": "immediato",
@@ -468,7 +468,7 @@
       "fazione": "Le Accademie del Velo",
       "costInf": 3,
       "costCor": 0,
-      "tipologia": "",
+      "tipologia": "Umano",
       "forza": 2,
       "resistenza": 3,
       "ritoTipo": "immediato",
@@ -595,11 +595,204 @@
       "flavor": "",
       "image": "",
       "imagePath": ""
+    },
+    {
+      "id": "v9pbqhoh",
+      "name": "Maestra Irina, tessitrice di sangue",
+      "type": "personaggio",
+      "legendary": true,
+      "fazione": "Gli Spontanei",
+      "costInf": 4,
+      "costCor": 2,
+      "tipologia": "Umano",
+      "forza": 1,
+      "resistenza": 2,
+      "ritoTipo": "immediato",
+      "prestigio": 0,
+      "effetto": "Quando viene schierata, infliggi 4 danni a un Personaggio. Se questo effetto lo sconfigge, scarta una carta dalla Mano dell'avversario.",
+      "flavor": "",
+      "image": "",
+      "imagePath": "img/irina.png"
+    },
+    {
+      "id": "vso8ndct",
+      "name": "Cristiano Dirimetti, Conte di Midesta",
+      "type": "personaggio",
+      "legendary": true,
+      "fazione": "Le Terre Contese",
+      "costInf": 5,
+      "costCor": 0,
+      "tipologia": "Umano",
+      "forza": 3,
+      "resistenza": 5,
+      "ritoTipo": "immediato",
+      "prestigio": 0,
+      "effetto": "Quando viene schierato, tu e il tuo avversario ottenete 1 Influenza. Poi peschi 2 carte. Se una almeno delle due è un Luogo puoi costruirlo senza pagarne il costo. Poi puoi spostare su di esso un personaggio schierato.",
+      "flavor": "Il governo è fatto di promesse, e di decisioni che gli altri non hanno il coraggio di prendere.",
+      "image": "",
+      "imagePath": "img/cristiano_dirimetti.png"
+    },
+    {
+      "id": "ll03qsw7",
+      "name": "L'Imboccatura",
+      "type": "luogo",
+      "legendary": false,
+      "fazione": "Le Terre Contese",
+      "costInf": 4,
+      "costCor": 0,
+      "tipologia": "",
+      "forza": 0,
+      "resistenza": 0,
+      "ritoTipo": "immediato",
+      "prestigio": 1,
+      "effetto": "Il Prestigio prodotto quando è costruita nello spazio 2 o 5 è incrementato di 2.",
+      "flavor": "",
+      "image": "",
+      "imagePath": ""
     }
   ],
-  "decks": [],
+  "decks": [
+    {
+      "id": "9nih77yk",
+      "name": "Terre Contese",
+      "factions": [
+        "Le Terre Contese"
+      ],
+      "list": [
+        {
+          "cardId": "zlr5bsbo",
+          "qty": 2
+        },
+        {
+          "cardId": "dq52b24k",
+          "qty": 3
+        },
+        {
+          "cardId": "4bbayoz2",
+          "qty": 3
+        },
+        {
+          "cardId": "xm5ukn9l",
+          "qty": 3
+        },
+        {
+          "cardId": "zw3fknnx",
+          "qty": 2
+        },
+        {
+          "cardId": "uizlazwa",
+          "qty": 2
+        },
+        {
+          "cardId": "9a59ghl1",
+          "qty": 2
+        },
+        {
+          "cardId": "vso8ndct",
+          "qty": 1
+        },
+        {
+          "cardId": "ll03qsw7",
+          "qty": 2
+        },
+        {
+          "cardId": "ec4zqrzo",
+          "qty": 2
+        },
+        {
+          "cardId": "xuyrybkw",
+          "qty": 2
+        },
+        {
+          "cardId": "33wjt2rl",
+          "qty": 2
+        },
+        {
+          "cardId": "knbaf4ci",
+          "qty": 2
+        },
+        {
+          "cardId": "ye034uzj",
+          "qty": 1
+        },
+        {
+          "cardId": "7bip5ko6",
+          "qty": 1
+        }
+      ]
+    },
+    {
+      "id": "f34jjemq",
+      "name": "Accademie del Velo",
+      "factions": [
+        "Le Accademie del Velo"
+      ],
+      "list": [
+        {
+          "cardId": "zc0t0nez",
+          "qty": 3
+        },
+        {
+          "cardId": "mg232vog",
+          "qty": 3
+        },
+        {
+          "cardId": "231aqlkw",
+          "qty": 2
+        },
+        {
+          "cardId": "s0lsg86n",
+          "qty": 3
+        },
+        {
+          "cardId": "xokamtf9",
+          "qty": 3
+        },
+        {
+          "cardId": "k9zjzq38",
+          "qty": 2
+        },
+        {
+          "cardId": "n0vv637v",
+          "qty": 1
+        },
+        {
+          "cardId": "ec4zqrzo",
+          "qty": 2
+        },
+        {
+          "cardId": "xuyrybkw",
+          "qty": 2
+        },
+        {
+          "cardId": "33wjt2rl",
+          "qty": 2
+        },
+        {
+          "cardId": "knbaf4ci",
+          "qty": 2
+        },
+        {
+          "cardId": "bhbhj6ej",
+          "qty": 2
+        },
+        {
+          "cardId": "zv8qowxx",
+          "qty": 1
+        },
+        {
+          "cardId": "7bip5ko6",
+          "qty": 1
+        },
+        {
+          "cardId": "q6sdldl0",
+          "qty": 1
+        }
+      ]
+    }
+  ],
   "playerDeck": [
-    null,
-    null
+    "9nih77yk",
+    "f34jjemq"
   ]
 }
