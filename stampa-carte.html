@@ -38,12 +38,12 @@ main{padding:12px 16px;max-width:1300px;margin:0 auto}
 .row{display:flex;gap:14px;flex-wrap:wrap}
 .col{flex:1;min-width:280px}
 .formgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px}
-label{display:block;font-size:.72rem;color:var(--muted);margin-bottom:2px}
+label{display:block;color:var(--muted);margin-bottom:2px}
 input,select,textarea{width:100%;background:var(--surface2);border:1px solid var(--border);color:var(--text);border-radius:5px;padding:5px 7px;font-size:.82rem;font-family:inherit}
 textarea{min-height:52px}
 .btn{background:var(--accent2);color:#fff;border:none;padding:7px 12px;border-radius:6px;cursor:pointer;font-size:.8rem;margin:2px 4px 2px 0}
 .btn.alt{background:var(--accent)} .btn.ghost{background:transparent;border:1px solid var(--border);color:var(--text)}
-.small{font-size:.72rem;color:var(--muted)}
+.small{color:var(--muted)}
 .poollist{display:flex;flex-wrap:wrap;gap:10px}
 .poolrow{display:flex;align-items:center;gap:8px;border:1px solid var(--border);border-radius:8px;padding:6px 8px;background:var(--surface2)}
 .poolrow input[type=number]{width:52px}
@@ -55,6 +55,8 @@ table.datatable th.sortable:hover{color:var(--accent)}
 table.datatable tbody tr:nth-child(even){background:var(--surface2)}
 table.datatable input,table.datatable select{padding:2px 3px;font-size:.75rem}
 hr.sep{border:none;border-top:1px solid var(--border);margin:12px 0}
+dialog{max-width:min(420px,calc(100% - 32px));border:1px solid var(--border);border-radius:10px;padding:18px;background:var(--surface);color:var(--text)}
+dialog::backdrop{background:rgba(0,0,0,.55)}
 
 /* ---- carta ---- */
 .pcard{width:var(--cw,63.5mm);height:var(--ch,88.9mm);background:#efe6d2;color:#2a2420;border:1.55mm solid #b7943f;border-radius:2.5mm;
@@ -121,9 +123,16 @@ hr.sep{border:none;border-top:1px solid var(--border);margin:12px 0}
 </header>
 <main>
   <div class="tab active" id="tab-editor"></div>
-  <div class="tab" id="tab-tabella"></div>
   <div class="tab" id="tab-stampa"></div>
 </main>
+<dialog id="clear-confirm-dialog" aria-labelledby="clear-confirm-title">
+  <h2 id="clear-confirm-title">Cancellare i dati salvati?</h2>
+  <p>Questa azione rimuoverà dal browser il pool carte e gli altri dati salvati per il simulatore.</p>
+  <div style="text-align:right">
+    <button class="btn ghost" onclick="document.getElementById('clear-confirm-dialog').close()">Annulla</button>
+    <button class="btn alt" onclick="confirmClearLocal()">Cancella dati</button>
+  </div>
+</dialog>
 
 <script>
 /* ====================== FAZIONI / ICONE ====================== */
@@ -236,8 +245,9 @@ function blankCard(){ return {id:uid(), name:'', type:'personaggio', legendary:f
   effetto:'', flavor:'', image:'', imagePath:''}; }
 let draft = blankCard();
 let passthrough = {}; // conserva campi del simulatore (es. decks, playerDeck) non gestiti qui, per non perderli in un giro di import/export
-let tableFilters = { search:'', fazione:'', tipo:'', legendaryOnly:false, noImageOnly:false };
-let tableSort = { key:null, dir:1 };
+let tableFilters = { search:'', fazione:'', tipo:'', legendaryOnly:false, image:'all' };
+let tableSort = [{key:'fazione',dir:1},{key:'name',dir:1}];
+let showMultiSort = false;
 
 function setDraftField(k,v){ draft[k]=v; updatePreview(); }
 function setDraftFieldAndRerender(k,v){ draft[k]=v; render(); }
@@ -276,7 +286,9 @@ function loadLocal(){
   }catch(e){}
 }
 function clearLocal(){
-  if(!confirm('Cancellare il pool carte salvato in questo browser?')) return;
+  document.getElementById('clear-confirm-dialog').showModal();
+}
+function confirmClearLocal(){
   try{ localStorage.removeItem(SAVE_KEY); }finally{ location.reload(); }
 }
 function exportJSON(){
@@ -339,11 +351,11 @@ function doPrint(){ if(!sheetsHTML){ alert('Genera prima l\'anteprima.'); return
 let activeTab='editor';
 function setTab(t){ activeTab=t; render(); }
 function render(){
-  document.getElementById('tabs').innerHTML = [['editor','Editor carte'],['tabella','Tabella'],['stampa','Stampa']]
+  document.getElementById('tabs').innerHTML = [['editor','Editor carte'],['stampa','Stampa']]
     .map(([k,l])=>`<button class="${activeTab===k?'active':''}" onclick="setTab('${k}')">${l}</button>`).join('');
   document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
   document.getElementById('tab-'+activeTab).classList.add('active');
-  renderEditor(); renderTabella(); renderStampa();
+  renderEditor(); renderStampa();
   fitCardEffects(document);
   saveLocal();
 }
@@ -388,7 +400,7 @@ function renderEditor(){
   <div class="card"><h3>Anteprima</h3><div class="preview-wrap" id="pc-preview">${cardHTML(draft)}</div></div>
   <div class="card">
     <div class="row" style="justify-content:space-between;align-items:center">
-      <h2>Pool carte (${pool.length})</h2>
+      <h2>Pool carte</h2>
       <div>
         <button class="btn ghost" onclick="exportJSON()">⬇ Esporta JSON</button>
         <label class="btn ghost" style="display:inline-block">⬆ Importa JSON<input type="file" accept=".json" style="display:none" onchange="importJSON(this)"></label>
@@ -396,13 +408,9 @@ function renderEditor(){
     </div>
     <p class="small">Il pool viene salvato automaticamente nel browser (localStorage): se apri questa pagina dallo stesso sito del simulatore, condividono gli stessi dati senza bisogno di importare un file — basta aprire entrambi via web (non funziona aprendo i file direttamente dal disco con un doppio clic). Stesso formato del file esportato dal simulatore (ceneri-del-divino-dati.json): mazzi e altri dati, se presenti nel file, vengono conservati anche se qui non sono modificabili.</p>
     <button class="btn ghost" onclick="clearLocal()">🗑 Cancella dati salvati nel browser</button>
-    <div class="poollist">${pool.map(c=>`<div class="poolrow">
-      <b>${esc(c.name)}</b><span class="small">${TYPE_LABEL[c.type]}</span>
-      <button class="btn ghost" onclick="editCard('${c.id}')">✎</button>
-      <button class="btn ghost" onclick="duplicateCard('${c.id}')">⧉</button>
-      <button class="btn ghost" onclick="deleteCard('${c.id}')">🗑</button>
-    </div>`).join('')||'<span class="small">Nessuna carta ancora: compila il modulo sopra oppure importa un JSON.</span>'}</div>
+    <div id="pool-table"></div>
   </div>`;
+  renderPoolTable();
 }
 
 /* ====================== TABELLA ====================== */
@@ -412,7 +420,26 @@ function setCardFieldRerender(id,k,v){ const c=pool.find(x=>x.id===id); if(c) c[
 function setTableSearch(v){ tableFilters.search=v; updateTableRows(); }
 function setTableFilter(k,v){ tableFilters[k]=v; render(); }
 function setTableSort(key){
-  if(tableSort.key===key) tableSort.dir*=-1; else { tableSort.key=key; tableSort.dir=1; }
+  if(tableSort[0]&&tableSort[0].key===key) tableSort[0].dir*=-1;
+  else tableSort=[{key,dir:1}];
+  render();
+}
+function toggleMultiSort(){ showMultiSort=!showMultiSort; render(); }
+function setMultiSortKey(index,key){
+  const next=tableSort.slice();
+  const previous=next[index];
+  if(key){
+    const duplicate=next.findIndex((item,i)=>i!==index&&item.key===key);
+    if(duplicate>=0) next[duplicate]=previous||null;
+    next[index]={key,dir:previous?previous.dir:1};
+  }else next[index]=null;
+  tableSort=next.filter(Boolean);
+  render();
+}
+function setMultiSortDir(index,dir){
+  const next=tableSort.slice();
+  next[index].dir=Number(dir);
+  tableSort=next;
   render();
 }
 function filteredSortedPool(){
@@ -421,20 +448,42 @@ function filteredSortedPool(){
     if(tableFilters.fazione && (c.fazione||'Comune')!==tableFilters.fazione) return false;
     if(tableFilters.tipo && c.type!==tableFilters.tipo) return false;
     if(tableFilters.legendaryOnly && !c.legendary) return false;
-    if(tableFilters.noImageOnly && (c.image||c.imagePath)) return false;
+    if(tableFilters.image==='with' && !(c.image||c.imagePath)) return false;
+    if(tableFilters.image==='without' && (c.image||c.imagePath)) return false;
     return true;
   });
-  if(tableSort.key){
-    const k=tableSort.key, d=tableSort.dir;
-    list = list.slice().sort((a,b)=>{
-      let av=a[k], bv=b[k];
-      if(k==='name'||k==='fazione'){ av=(av||'').toLowerCase(); bv=(bv||'').toLowerCase(); return av<bv? -d : av>bv? d : 0; }
-      return ((av||0)-(bv||0))*d;
-    });
-  }
-  return list;
+  const compare = (a,b,key)=>{
+    let av=a[key], bv=b[key];
+    if(key==='name'||key==='fazione'){
+      av=key==='fazione'?(av||'Comune'):av||'';
+      bv=key==='fazione'?(bv||'Comune'):bv||'';
+      return av.localeCompare(bv,'it',{sensitivity:'base'});
+    }
+    if(key==='type'){
+      av=TYPE_LABEL[av]||av||'';
+      bv=TYPE_LABEL[bv]||bv||'';
+      return av.localeCompare(bv,'it',{sensitivity:'base'});
+    }
+    if(key==='legendary'||key==='image'){
+      av=key==='legendary'?!!av:!!(a.image||a.imagePath);
+      bv=key==='legendary'?!!bv:!!(b.image||b.imagePath);
+      return Number(av)-Number(bv);
+    }
+    return ((av||0)-(bv||0));
+  };
+  return list.slice().sort((a,b)=>{
+    for(const sort of tableSort){
+      const result=compare(a,b,sort.key)*sort.dir;
+      if(result) return result;
+    }
+    return 0;
+  });
 }
-function sortArrow(key){ return tableSort.key===key ? (tableSort.dir>0?' ▲':' ▼') : ''; }
+function sortArrow(key){
+  const index=tableSort.findIndex(sort=>sort.key===key);
+  if(index<0) return '';
+  return `${index+1}${tableSort[index].dir>0?' ▲':' ▼'}`;
+}
 function imgFlagSVG(has){
   return has
     ? `<svg width="13" height="13" viewBox="0 0 24 24"><path d="M9 16.2 4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4z" fill="#3a8f5c"/></svg>`
@@ -442,7 +491,7 @@ function imgFlagSVG(has){
 }
 function tableRowsHTML(){
   const list = filteredSortedPool();
-  if(!list.length) return `<tr><td colspan="12" class="small">Nessuna carta corrisponde ai filtri.</td></tr>`;
+  if(!list.length) return `<tr><td colspan="12" class="small">${pool.length?'Nessuna carta corrisponde ai filtri.':'Pool vuoto: aggiungi una carta dal modulo sopra o importa un JSON.'}</td></tr>`;
   return list.map(c=>`<tr>
     <td><input value="${esc(c.name)}" oninput="setCardField('${c.id}','name',this.value)" style="min-width:110px"></td>
     <td><select onchange="setCardFieldRerender('${c.id}','type',this.value)">${Object.keys(TYPE_LABEL).map(t=>`<option value="${t}" ${c.type===t?'selected':''}>${TYPE_LABEL[t]}</option>`).join('')}</select></td>
@@ -464,13 +513,40 @@ function tableRowsHTML(){
     </td>
   </tr>`).join('');
 }
-function updateTableRows(){ const el=document.getElementById('tabella-rows'); if(el) el.innerHTML = tableRowsHTML(); }
-function renderTabella(){
-  const el = document.getElementById('tab-tabella');
+function updateTableRows(){
+  const rows=document.getElementById('pool-table-rows');
+  if(rows) rows.innerHTML=tableRowsHTML();
+  const count=document.getElementById('pool-table-count');
+  if(count) count.textContent=`Tabella carte (${filteredSortedPool().length}/${pool.length})`;
+}
+function renderPoolTable(){
+  const el = document.getElementById('pool-table');
   const list = filteredSortedPool();
   const sortHeader = (key,label)=>`<th class="sortable" onclick="setTableSort('${key}')">${label}${sortArrow(key)}</th>`;
-  el.innerHTML = `<div class="card">
-    <h2>Tabella carte (${list.length}/${pool.length})</h2>
+  const sortOptions=[
+    ['name','Nome'],['fazione','Fazione'],['type','Categoria'],['legendary','Leggendaria'],
+    ['costInf','Influenza'],['costCor','Corruzione'],['forza','Forza'],
+    ['resistenza','Resistenza'],['prestigio','Prestigio'],['image','Immagine']
+  ];
+  const multiSortControls=showMultiSort?`<div class="formgrid" style="margin:8px 0">
+      ${Array.from({length:4},(_,index)=>{
+        const sort=tableSort[index];
+        const used=tableSort.map((item,i)=>i!==index?item.key:null);
+        return `<div><label>Indice ${index+1}</label><select onchange="setMultiSortKey(${index},this.value)">
+          <option value="">${index<2?'Nessuno':'Non impostato'}</option>
+          ${sortOptions.map(([key,label])=>`<option value="${key}" ${sort?.key===key?'selected':''} ${used.includes(key)?'disabled':''}>${label}</option>`).join('')}
+        </select>${sort?`<select aria-label="Direzione indice ${index+1}" onchange="setMultiSortDir(${index},this.value)">
+          <option value="1" ${sort.dir===1?'selected':''}>Crescente</option>
+          <option value="-1" ${sort.dir===-1?'selected':''}>Decrescente</option>
+        </select>`:''}</div>`;
+      }).join('')}
+    </div>`:'';
+  el.innerHTML = `<h3 id="pool-table-count">Tabella carte (${list.length}/${pool.length})</h3>
+    <div style="margin-bottom:8px">
+      <button class="btn ghost" onclick="clearTableFilters()">Rimuovi tutti i filtri</button>
+      <button class="btn ghost" onclick="toggleMultiSort()">${showMultiSort?'Nascondi ordinamento':'Ordina per più indici'}</button>
+    </div>
+    ${multiSortControls}
     <div class="formgrid" style="margin-bottom:8px">
       <div><label>Cerca nome</label><input value="${esc(tableFilters.search)}" oninput="setTableSearch(this.value)"></div>
       <div><label>Fazione</label><select onchange="setTableFilter('fazione',this.value)">
@@ -478,27 +554,35 @@ function renderTabella(){
       <div><label>Categoria</label><select onchange="setTableFilter('tipo',this.value)">
         <option value="">Tutte</option>${Object.keys(TYPE_LABEL).map(t=>`<option value="${t}" ${tableFilters.tipo===t?'selected':''}>${TYPE_LABEL[t]}</option>`).join('')}</select></div>
       <div><label><input type="checkbox" style="width:auto" ${tableFilters.legendaryOnly?'checked':''} onchange="setTableFilter('legendaryOnly',this.checked)"> Solo leggendarie</label></div>
-      <div><label><input type="checkbox" style="width:auto" ${tableFilters.noImageOnly?'checked':''} onchange="setTableFilter('noImageOnly',this.checked)"> Solo senza immagine</label></div>
+      <div><label>Immagine</label><select onchange="setTableFilter('image',this.value)">
+        <option value="all" ${tableFilters.image==='all'?'selected':''}>Tutte</option>
+        <option value="with" ${tableFilters.image==='with'?'selected':''}>Con immagine</option>
+        <option value="without" ${tableFilters.image==='without'?'selected':''}>Senza immagine</option>
+      </select></div>
     </div>
     <div style="overflow-x:auto"><table class="datatable">
       <thead><tr>
         ${sortHeader('name','Nome')}
-        <th>Tipo</th>
+        ${sortHeader('type','Tipo')}
         ${sortHeader('fazione','Fazione')}
-        <th>Legg.</th>
+        ${sortHeader('legendary','Legg.')}
         ${sortHeader('costInf','Inf.')}
         ${sortHeader('costCor','Cor.')}
         <th>Tipologia / Rito</th>
         ${sortHeader('forza','Forza')}
         ${sortHeader('resistenza','Res.')}
         ${sortHeader('prestigio','Prest.')}
-        <th>Img</th>
+        ${sortHeader('image','Img')}
         <th>Azioni</th>
       </tr></thead>
-      <tbody id="tabella-rows">${tableRowsHTML()}</tbody>
+      <tbody id="pool-table-rows">${tableRowsHTML()}</tbody>
     </table></div>
     <p class="small">Le modifiche qui si salvano subito. Per effetto, testo flavor e immagine usa "✎" per aprire la carta nell'Editor.</p>
-  </div>`;
+  `;
+}
+function clearTableFilters(){
+  tableFilters={search:'',fazione:'',tipo:'',legendaryOnly:false,image:'all'};
+  render();
 }
 
 function renderStampa(){
