@@ -72,7 +72,7 @@ dialog::backdrop{background:rgba(0,0,0,.55)}
 .pc-top{position:absolute;z-index:3;top:0;left:0;right:0;color:#e9dcb8;padding:1.8mm 2.2mm 4mm;
   background:linear-gradient(to bottom,rgba(12,9,6,.88) 0%,rgba(12,9,6,.55) 55%,rgba(12,9,6,0) 100%)}
 .pc-legendary{font-size:1.6mm;letter-spacing:.3mm;color:#d9b24a;font-weight:bold;display:block;margin-bottom:.4mm;text-shadow:0 .2mm .4mm rgba(0,0,0,.8)}
-.pc-name{font-variant:small-caps;font-weight:bold;padding-top: 1mm;padding-left: 1mm;font-size:3mm;line-height:.85;padding-right:11mm;text-shadow:0 .2mm .5mm rgba(0,0,0,.85)}
+.pc-name{font-variant:small-caps;font-weight:bold;padding-top: 1mm;padding-left: 1mm;font-size:3.7mm;line-height:.85;padding-right:11mm;text-shadow:0 .2mm .5mm rgba(0,0,0,.85)}
 .pc-badge{position:absolute;top:1.5mm;width:5.6mm;height:5.6mm}
 .pc-badge.inf{right:1.5mm}
 .pc-badge.cor{right:7.9mm}
@@ -81,22 +81,22 @@ dialog::backdrop{background:rgba(0,0,0,.55)}
   display:flex;align-items:center;justify-content:center;font-style:normal;font-weight:bold;font-size:2.1mm}
 .pc-badge.inf em{color:#eccd7c}
 .pc-badge.cor em{color:#c7a3e8}
-.pc-subtitle{flex:0 0 auto;background:rgba(28,23,18,.65);color:#cbb278;border-bottom:.2mm solid #cbb278;border-top:.2mm solid #cbb278;text-align:center;font-size:2mm;letter-spacing:.3mm;padding:.8mm 1mm;font-variant:small-caps}
+.pc-subtitle{flex:0 0 auto;background:rgba(28,23,18,.65);color:#cbb278;border-bottom:.2mm solid #cbb278;border-top:.2mm solid #cbb278;text-align:center;font-size:2.6mm;letter-spacing:.3mm;padding:.8mm 1mm;font-variant:small-caps}
 .pc-body{position:relative;flex:1 1 auto;min-height:0;padding:0;display:flex;flex-direction:column;color:#fff;overflow:hidden}
 .pc-watermark{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;opacity:.25;pointer-events:none}
 .pc-watermark svg{width:25mm;height:25mm}
 .pc-effect{position:relative;flex:1 1 auto;min-height:0;overflow:hidden;line-height:1.32;white-space:pre-wrap;text-shadow:0 .2mm .5mm rgba(0,0,0,.9)}
-.pc-flavor{position:relative;flex:0 0 auto;margin-top:.8mm;text-align:center;font-style:italic;color:#eee;padding-top:1.2mm}
+.pc-flavor{position:relative;flex:0 0 auto;text-align:center;font-style:italic;color:#eee;}
 .pc-rule{display:flex;align-items:center;gap:1mm;margin-bottom:1mm}
 .pc-rule::before,.pc-rule::after{content:"";flex:1;border-top:.2mm solid #b7943f}
 .pc-info-bottom{flex:0 0 auto;display:flex;justify-content:center;align-items:center;min-height:4.7mm}
 .pc-foot{color:#e9dcb8;display:flex;justify-content:space-around;align-items:center;gap:4mm;padding:0 2mm}
 .pc-stat{display:flex;align-items:center;gap:1mm;font-size:3.4mm;font-weight:bold}
-.pc-stat svg{width:4mm;height:4mm;filter:drop-shadow(0 .2mm .4mm rgba(0,0,0,.6))}
+.pc-stat svg{width:8mm;height:8mm;filter:drop-shadow(0 .2mm .4mm rgba(0,0,0,.6))}
 .pc-prestige-big{position:relative;flex:0 0 auto;width:7.5mm;height:7.5mm}
-.pc-prestige-big svg{position:absolute;inset:0;width:140%;height:100%;filter:drop-shadow(0 .3mm .4mm rgba(0,0,0,.5))}
-.pc-prestige-big em{position:absolute;left:74%;bottom:0;transform:translateX(-50%);font-style:normal;font-weight:bold;font-size:2.3mm;color:#15110d;background:#eccd7c;
-  border-radius:50%;width:3.8mm;height:3.8mm;display:flex;align-items:center;justify-content:center;box-shadow:0 0 0 .3mm #8a6914}
+.pc-prestige-big svg{position:absolute;inset:0;width:155%;height:130%;filter:drop-shadow(0 .3mm .4mm rgba(0,0,0,.5))}
+.pc-prestige-big em{position:absolute;left:74%;bottom:12%;transform:translateX(-50%);font-style:normal;font-weight:bold;font-size:2.8mm;color:#15110d;background:#eccd7c;
+  border-radius:50%;width:4.5mm;height:4.5mm;display:flex;align-items:center;justify-content:center;box-shadow:0 0 0 .3mm #8a6914}
 
 .preview-wrap{display:flex;justify-content:center;padding:10px;background:var(--surface2);border-radius:8px}
 
@@ -184,13 +184,13 @@ function cardHTML(c){
   let foot = '';
   if(c.type==='personaggio') foot = `<div class="pc-stat"><svg viewBox="0 0 22 22">${ICO.sword}</svg><span>${c.forza||0}</span></div>
     <div class="pc-stat"><span>${c.resistenza||0}</span><svg viewBox="0 0 22 22">${ICO.shield}</svg></div>`;
-  const prestigeEmblem = c.type==='luogo' ? `<span class="pc-prestige-big"><svg viewBox="0 0 22 22">${ICO.castle}</svg><em>${c.prestigio||0}</em></span>` : '';
+  const prestigeEmblem = c.type==='luogo' ? `<span class="pc-prestige-big"><svg viewBox="-2 2 29 25">${ICO.castle}</svg><em>${c.prestigio||0}</em></span>` : '';
   return `<div class="pcard" style="--cw:${printDims.w}mm;--ch:${printDims.h}mm">
     <div class="pc-artwrap">
       <div class="pc-art">${(c.image||c.imagePath)?`<img src="${esc(c.image||c.imagePath)}" onerror="this.outerHTML=ART_PLACEHOLDER">`:ART_PLACEHOLDER}</div>
     </div>
     <div class="pc-top">
-      ${c.legendary ? `<div class="pc-name" style="-webkit-text-stroke: 0.15px #d9b24a; text-shadow: 0 2px 4px rgba(0,0,0,0.8);">${esc(c.name||'Senza nome')}</div>` : `<div class="pc-name">${esc(c.name||'Senza nome')}</div>`}
+      ${c.legendary ? `<div class="pc-name" style="-webkit-text-stroke: 0.4px #d9b24a;">${esc(c.name||'Senza nome')}</div>` : `<div class="pc-name">${esc(c.name||'Senza nome')}</div>`}
       ${c.costCor?`<span class="pc-badge cor"><svg viewBox="0 0 22 22">${ICO.spiral}</svg><em>${c.costCor}</em></span>`:''}
       ${c.costInf?`<span class="pc-badge inf"><svg viewBox="0 0 22 22">${ICO.gem}</svg><em>${c.costInf}</em></span>`:''}
     </div>
