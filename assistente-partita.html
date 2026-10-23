@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Le Ceneri del Divino — Assistente di Partita</title>
+<style>
+:root{
+  --bg:#f5f2ec; --surface:#ffffff; --surface2:#eee9df; --border:#d8d0c0;
+  --text:#2a2420; --muted:#726a5e; --accent:#7a2e2e; --accent2:#2e4a3f;
+  --warn:#a85c1f; --p1:#2e4a3f; --p2:#5a2e6b;
+  color-scheme: light;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#1b1815; --surface:#262220; --surface2:#2f2a26; --border:#443d36;
+    --text:#ece6dd; --muted:#a89d8d; --accent:#d98a8a; --accent2:#8fd1b8;
+    --warn:#e0a35c; --p1:#8fd1b8; --p2:#d6a8e8;
+    color-scheme: dark;
+  }
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{margin:0;background:var(--bg);color:var(--text);font-family:Georgia,'Iowan Old Style',serif;font-size:14px}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);background:var(--bg);z-index:10}
+h1,h2,h3,h4{font-family:Georgia,serif;margin:.2em 0}
+header{padding:12px 16px;border-bottom:2px solid var(--accent);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px}
+header h1{font-size:1.1rem;color:var(--accent)}
+.navlinks{display:flex;gap:6px;flex-wrap:wrap}
+.navlink{display:inline-block;background:transparent;border:1px solid var(--border);color:var(--text);padding:6px 12px;border-radius:6px;font-size:.85rem;text-decoration:none}
+main{padding:12px 16px;max-width:1100px;margin:0 auto}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:10px;margin-bottom:10px}
+.row{display:flex;gap:10px;flex-wrap:wrap}
+.col{flex:1;min-width:270px}
+button{font-family:inherit}
+.btn{background:var(--accent2);color:#fff;border:none;padding:6px 10px;border-radius:6px;cursor:pointer;font-size:.8rem;margin:2px}
+.btn.alt{background:var(--accent)}
+.btn.ghost{background:transparent;border:1px solid var(--border);color:var(--text)}
+.btn:disabled{opacity:.4;cursor:not-allowed}
+input,select{background:var(--surface2);border:1px solid var(--border);color:var(--text);border-radius:5px;padding:4px 6px;font-size:.8rem;font-family:inherit}
+.pill{display:inline-flex;align-items:center;gap:6px;background:var(--surface2);border-radius:20px;padding:4px 12px;font-weight:bold;font-size:.95rem}
+.pill .lbl{font-size:.68rem;font-weight:normal;color:var(--muted);font-variant:small-caps}
+.resline{display:flex;gap:8px;flex-wrap:wrap;margin:8px 0;align-items:center}
+.playerpanel{border-radius:10px;padding:10px;border:2px solid var(--border)}
+.playerpanel.p1{border-color:var(--p1)}
+.playerpanel.p2{border-color:var(--p2)}
+.playerpanel.active{box-shadow:0 0 0 2px var(--warn)}
+.small{font-size:.72rem;color:var(--muted)}
+.ritelist{display:flex;flex-wrap:wrap;gap:5px;margin:6px 0}
+.ritetag{display:inline-flex;align-items:center;gap:4px;background:var(--surface2);border:1px solid var(--border);border-radius:14px;padding:2px 4px 2px 10px;font-size:.74rem}
+.ritetag button{background:none;border:none;color:var(--muted);cursor:pointer;font-size:.8rem;padding:0 4px}
+.locrow{display:grid;grid-template-columns:repeat(6,1fr);gap:6px}
+.loc{border:2px solid var(--border);border-radius:8px;padding:6px;text-align:center;cursor:pointer;font-size:.72rem;background:var(--surface2)}
+.loc.p1{border-color:var(--p1);background:color-mix(in srgb, var(--p1) 12%, var(--surface2))}
+.loc.p2{border-color:var(--p2);background:color-mix(in srgb, var(--p2) 12%, var(--surface2))}
+.loc.conteso{border-color:var(--warn);border-width:3px}
+.loc input{width:48px;text-align:center;margin-top:4px}
+.banner{background:var(--warn);color:#1b1815;border-radius:8px;padding:10px;margin-bottom:10px;font-weight:bold}
+.scorepip{display:inline-block;width:10px;height:10px;border-radius:50%;background:var(--border);margin-right:2px}
+.scorepip.won{background:var(--accent)}
+#log{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:8px;height:160px;overflow-y:auto;font-size:.74rem}
+.flex-between{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap}
+@media (max-width:600px){
+  body{font-size:13px}
+  header{padding:10px 12px}
+  header h1{font-size:1rem}
+  main{padding:8px 10px}
+  .card{padding:8px}
+  .col{min-width:100%}
+  .pill{font-size:.84rem;padding:3px 9px}
+  .pill .lbl{font-size:.62rem}
+  .locrow{grid-template-columns:repeat(3,1fr);gap:5px}
+  .loc{padding:5px 3px;font-size:.68rem}
+  .loc input{width:100%;max-width:100%;padding:3px 2px}
+  .btn{padding:7px 9px;font-size:.78rem}
+}
+@media (max-width:380px){
+  .locrow{grid-template-columns:repeat(2,1fr)}
+}
+</style>
+</head>
+<body>
+<header>
+  <h1>⚜ Le Ceneri del Divino — Assistente di Partita</h1>
+  <div class="navlinks">
+    <a class="navlink" href="index.html">Simulatore</a>
+    <a class="navlink" href="stampa-carte.html">Stampa carte</a>
+  </div>
+</header>
+<main id="app"></main>
+
+<script>
+const uid = ()=>Math.random().toString(36).slice(2,10);
+function esc(s){ return (s||'').replace(/[&<>]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[m])); }
+function clamp0(v){ return Math.max(0, v); }
+function newPlayer(name){ return {name, influence:5, corruption:0, prestige:0, removed:0, rites:[]}; }
+function freshLocations(){ return Array.from({length:6},()=>({status:'neutro', prestige:0})); }
+
+let S = {
+  players: [newPlayer('Giocatore 1'), newPlayer('Giocatore 2')],
+  round: 1, matchScore:[0,0], matchOver:null, roundEnded:false,
+  locations: freshLocations(),
+  active: 0, passStreak: 0,
+  log: [],
+};
+
+const SAVE_KEY = 'ceneri-del-divino-match';
+function saveLocal(){ try{ localStorage.setItem(SAVE_KEY, JSON.stringify(S)); }catch(e){} }
+function loadLocal(){
+  try{
+    const raw = localStorage.getItem(SAVE_KEY); if(!raw) return;
+    const o = JSON.parse(raw);
+    if(o && o.players) S = o;
+  }catch(e){}
+}
+function clearMatch(){
+  if(!confirm('Azzerare punteggio, round e tutte le risorse della partita attuale? Non è reversibile.')) return;
+  const names=[S.players[0].name, S.players[1].name];
+  S = { players:[newPlayer(names[0]), newPlayer(names[1])], round:1, matchScore:[0,0], matchOver:null, roundEnded:false,
+        locations: freshLocations(), active:0, passStreak:0, log:[] };
+  render();
+}
+
+function logMsg(t){ S.log.unshift(`[Round ${S.round}] ${t}`); if(S.log.length>200) S.log.length=200; }
+
+/* ---- azioni risorse ---- */
+function changeInfluence(pi,d){ const p=S.players[pi]; p.influence=clamp0(p.influence+d); logMsg(`${p.name}: Influenza ${d>0?'+':''}${d} → ${p.influence}.`); render(); }
+function changeCorruption(pi,d){
+  const p=S.players[pi]; const before=p.corruption; p.corruption=clamp0(p.corruption+d);
+  if(d>0){
+    const crossed = Math.floor(p.corruption/5) - Math.floor(before/5);
+    if(crossed>0){ p.removed+=crossed; logMsg(`⚠ ${p.name} raggiunge una soglia di Corruzione: rimuovi ${crossed} carta/e dalla cima del Mazzo dalla partita (Corruzione ${p.corruption}).`); }
+    else logMsg(`${p.name}: Corruzione +${d} → ${p.corruption}.`);
+  } else logMsg(`${p.name}: Corruzione ${d} → ${p.corruption}.`);
+  render();
+}
+function changePrestige(pi,d){ const p=S.players[pi]; p.prestige=clamp0(p.prestige+d); logMsg(`${p.name}: Prestigio ${d>0?'+':''}${d} → ${p.prestige}.`); render(); }
+function changeRemoved(pi,d){ S.players[pi].removed=clamp0(S.players[pi].removed+d); render(); }
+function setPlayerName(pi,v){ S.players[pi].name=v||`Giocatore ${pi+1}`; render(); }
+
+let riteDraft=['',''];
+function setRiteDraft(pi,v){ riteDraft[pi]=v; }
+function addRite(pi){
+  const name=(riteDraft[pi]||'').trim(); if(!name) return;
+  const p=S.players[pi]; p.rites.push(name); riteDraft[pi]='';
+  logMsg(`${p.name} attiva il rito persistente "${name}".`);
+  if(p.rites.length>3) logMsg(`⚠ ${p.name} ha più di 3 riti persistenti attivi: scartane uno a scelta.`);
+  render();
+}
+function removeRite(pi,idx){ const p=S.players[pi]; const n=p.rites.splice(idx,1)[0]; logMsg(`${p.name} rimuove il rito persistente "${n}".`); render(); }
+
+/* ---- turno ---- */
+function endTurn(pi){
+  const p=S.players[pi]; p.influence+=2;
+  logMsg(`${p.name} termina il turno (+2 Influenza → ${p.influence}).`);
+  S.passStreak=0; S.active=1-pi; render();
+}
+function passTurn(pi){
+  logMsg(`${S.players[pi].name} passa senza giocare.`);
+  S.passStreak++; S.active=1-pi; render();
+}
+function setActive(pi){ S.active=pi; render(); }
+
+/* ---- luoghi ---- */
+function cycleLocation(slot){
+  const order=['neutro','p1','p2','conteso']; const l=S.locations[slot];
+  l.status=order[(order.indexOf(l.status)+1)%order.length]; render();
+}
+function setLocationPrestige(slot,v){ S.locations[slot].prestige=Math.max(0,+v||0); render(); }
+
+/* ---- round / partita ---- */
+function endRound(){
+  S.locations.forEach((l,i)=>{
+    if(l.status==='p1'){ S.players[0].prestige+=l.prestige; logMsg(`Luogo ${i+1} (Prestigio ${l.prestige}) controllato da ${S.players[0].name}.`); }
+    else if(l.status==='p2'){ S.players[1].prestige+=l.prestige; logMsg(`Luogo ${i+1} (Prestigio ${l.prestige}) controllato da ${S.players[1].name}.`); }
+    else if(l.status==='conteso') logMsg(`Luogo ${i+1} conteso: nessun Prestigio prodotto.`);
+  });
+  const [a,b]=S.players; let winner=null;
+  if(a.prestige>b.prestige) winner=0; else if(b.prestige>a.prestige) winner=1;
+  if(winner!==null){ S.matchScore[winner]++; logMsg(`🏅 ${S.players[winner].name} vince il Round ${S.round} (${a.prestige}-${b.prestige}).`); }
+  else logMsg(`Round ${S.round} in parità (${a.prestige}-${b.prestige}): nessun punto Round.`);
+  if(S.matchScore[0]>=2||S.matchScore[1]>=2) S.matchOver = S.matchScore[0]>S.matchScore[1]? S.players[0].name : S.players[1].name;
+  else if(S.round>=3) S.matchOver='Pareggio';
+  S.roundEnded=true; render();
+}
+function newRound(){
+  if(S.matchOver) return;
+  S.round++;
+  S.players.forEach(p=>{ p.influence=5; p.prestige=0; p.rites=[]; });
+  S.locations=freshLocations(); S.active=0; S.passStreak=0; S.roundEnded=false;
+  logMsg(`— Preparazione del Round ${S.round}: Influenza a 5, plancia e riti persistenti azzerati. La Corruzione resta invariata. —`);
+  render();
+}
+
+/* ---- render ---- */
+function resLine(label, val, onPlus, onMinus, extraClass){
+  return `<span class="pill ${extraClass||''}"><span class="lbl">${label}</span> ${val}
+    <button class="btn ghost" onclick="${onPlus}">+</button><button class="btn ghost" onclick="${onMinus}">−</button></span>`;
+}
+function playerPanel(pi){
+  const p=S.players[pi];
+  return `<div class="col playerpanel p${pi+1} ${S.active===pi&&!S.matchOver?'active':''}">
+    <div class="flex-between">
+      <input value="${esc(p.name)}" oninput="setPlayerName(${pi},this.value)" style="font-weight:bold;max-width:160px">
+      ${!S.matchOver?`<button class="btn ghost" onclick="setActive(${pi})">${S.active===pi?'Attivo':'Rendi attivo'}</button>`:''}
+    </div>
+    <div class="resline">
+      ${resLine('Influenza', p.influence, `changeInfluence(${pi},1)`, `changeInfluence(${pi},-1)`)}
+      ${resLine('Corruzione', p.corruption, `changeCorruption(${pi},1)`, `changeCorruption(${pi},-1)`)}
+      ${resLine('Prestigio', p.prestige, `changePrestige(${pi},1)`, `changePrestige(${pi},-1)`)}
+    </div>
+    <div class="small">Carte rimosse dalla partita (per soglie di Corruzione): <b>${p.removed}</b>
+      <button class="btn ghost" onclick="changeRemoved(${pi},1)">+</button><button class="btn ghost" onclick="changeRemoved(${pi},-1)">−</button></div>
+    <div class="flex-between" style="margin-top:6px"><h4 style="margin:0">Riti persistenti (${p.rites.length}/3)</h4></div>
+    <div class="ritelist">${p.rites.map((n,i)=>`<span class="ritetag">${esc(n)}<button onclick="removeRite(${pi},${i})" title="Rimuovi">✕</button></span>`).join('')||'<span class="small">—</span>'}</div>
+    <div class="row" style="gap:4px">
+      <input placeholder="Nome rito…" value="${esc(riteDraft[pi]||'')}" oninput="setRiteDraft(${pi},this.value)" style="flex:1;min-width:100px" onkeydown="if(event.key==='Enter')addRite(${pi})">
+      <button class="btn ghost" onclick="addRite(${pi})">Aggiungi</button>
+    </div>
+    ${!S.matchOver?`<div style="margin-top:8px">
+      <button class="btn" ${S.active===pi?'':'disabled'} onclick="endTurn(${pi})">Fine turno (+2 Influenza)</button>
+      <button class="btn ghost" ${S.active===pi?'':'disabled'} onclick="passTurn(${pi})">Passa senza giocare</button>
+    </div>`:''}
+  </div>`;
+}
+function render(){
+  const el = document.getElementById('app');
+  let html = '';
+  html += `<div class="card flex-between">
+    <div><b>Round ${S.round}/3</b> — Punteggio:
+      ${S.players.map((p,i)=>`${esc(p.name)} ${Array.from({length:2},(_,k)=>`<span class="scorepip ${k<S.matchScore[i]?'won':''}"></span>`).join('')}`).join(' &nbsp;·&nbsp; ')}
+    </div>
+    <button class="btn ghost" onclick="clearMatch()">↺ Nuova partita</button>
+  </div>`;
+
+  if(S.matchOver){
+    html += `<div class="banner">🏆 ${S.matchOver==='Pareggio'?'Partita in parità':'Vince la partita: '+esc(S.matchOver)}</div>`;
+  } else if(S.roundEnded){
+    html += `<div class="banner">Round ${S.round} concluso. <button class="btn" onclick="newRound()">Round successivo →</button></div>`;
+  } else if(S.passStreak>=2){
+    html += `<div class="banner">Entrambi i giocatori hanno passato di seguito: il Round può terminare.
+      <button class="btn" onclick="endRound()">Termina Round ora</button></div>`;
+  }
+
+  html += `<div class="row">${playerPanel(0)}${playerPanel(1)}</div>`;
+
+  html += `<div class="card"><h3>Fila dei luoghi</h3>
+    <p class="small">Clic su uno spazio per cambiarne lo stato (Neutro → ${esc(S.players[0].name)} → ${esc(S.players[1].name)} → Conteso). Inserisci il Prestigio stampato sulla carta per calcolare automaticamente il punteggio a fine Round.</p>
+    <div class="locrow">${S.locations.map((l,i)=>`<div class="loc ${l.status}" onclick="cycleLocation(${i})">
+      <div>${i+1}</div>
+      <div class="small">${l.status==='neutro'?'Neutro':l.status==='p1'?esc(S.players[0].name):l.status==='p2'?esc(S.players[1].name):'Conteso'}</div>
+      <input type="number" min="0" value="${l.prestige}" onclick="event.stopPropagation()" oninput="setLocationPrestige(${i},this.value)" title="Prestigio prodotto">
+    </div>`).join('')}</div>
+    ${!S.matchOver && !S.roundEnded?`<button class="btn" style="margin-top:8px" onclick="endRound()">Termina Round e calcola il Prestigio</button>`:''}
+  </div>`;
+
+  html += `<div class="card"><h3>Registro</h3><div id="log">${S.log.map(esc).join('<br>')}</div></div>`;
+  el.innerHTML = html;
+  saveLocal();
+}
+
+loadLocal();
+render();
+</script>
+</body>
+</html>
