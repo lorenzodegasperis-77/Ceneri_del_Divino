@@ -154,8 +154,8 @@ function removeRite(pi,idx){ const p=S.players[pi]; const n=p.rites.splice(idx,1
 
 /* ---- turno ---- */
 function endTurn(pi){
-  const p=S.players[pi]; p.influence+=2;
-  logMsg(`${p.name} termina il turno (+2 Influenza → ${p.influence}).`);
+  const p=S.players[pi]; p.influence+=1;
+  logMsg(`${p.name} termina il turno (+1 Influenza → ${p.influence}).`);
   S.passStreak=0; S.active=1-pi; render();
 }
 function passTurn(pi){
