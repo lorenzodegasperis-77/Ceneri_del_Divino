@@ -221,7 +221,7 @@ function playerPanel(pi){
       <button class="btn ghost" onclick="addRite(${pi})">Aggiungi</button>
     </div>
     ${!S.matchOver?`<div style="margin-top:8px">
-      <button class="btn" ${S.active===pi?'':'disabled'} onclick="endTurn(${pi})">Fine turno (+2 Influenza)</button>
+      <button class="btn" ${S.active===pi?'':'disabled'} onclick="endTurn(${pi})">Fine turno (+1 Influenza)</button>
       <button class="btn ghost" ${S.active===pi?'':'disabled'} onclick="passTurn(${pi})">Passa senza giocare</button>
     </div>`:''}
   </div>`;
