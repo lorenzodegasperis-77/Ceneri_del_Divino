@@ -148,7 +148,7 @@ function shuffle(arr){ const a=arr.slice(); for(let i=a.length-1;i>0;i--){ const
 function esc(s){ return (s||'').replace(/[&<>]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[m])); }
 
 let S = {
-  pool: [], decklists: [[],[]], deckFaction:[null,null],
+  pool: [], decks: [], playerDeck:[null,null],
   players: [newPlayer("Giocatore 1"), newPlayer("Giocatore 2")],
   locations: freshLocations(),
   round:1, started:false, matchOver:null,
@@ -194,44 +194,63 @@ function shuffleDeck(pi){ S.players[pi].deck=shuffle(S.players[pi].deck); logMsg
 function shuffleDiscardIntoDeck(pi){ const p=S.players[pi]; if(!p.discard.length) return; p.deck=shuffle([...p.deck,...p.discard]); p.discard=[]; logMsg(`${p.name} mischia gli scarti nel mazzo.`); render(); }
 function peekTop(pi){ const p=S.players[pi]; if(!p.deck.length){ showToast('Mazzo vuoto.'); return; } showToast(`Prima carta del mazzo di ${p.name}: ${cardById(p.deck[0]).name}`); }
 
-function deckCount(pi){ return S.decklists[pi].reduce((s,e)=>s+e.qty,0); }
-function deckValid(pi){
-  const list=S.decklists[pi]; const fac=S.deckFaction[pi];
-  if(!fac || deckCount(pi)!==20) return false;
-  for(const e of list){ const c=cardById(e.cardId); if(!c) return false;
-    if(c.type==='evento' || c.fazione==='Mercenario' || c.fazione!==fac) return false;
+/* ====================== LIBRERIA MAZZI (più mazzi di Fazione salvabili, riutilizzabili su entrambi i giocatori) ====================== */
+function deckById(id){ return S.decks.find(d=>d.id===id); }
+function deckCountOf(deck){ return deck? deck.list.reduce((s,e)=>s+e.qty,0) : 0; }
+function deckValidOf(deck){
+  if(!deck || !deck.faction || deckCountOf(deck)!==20) return false;
+  for(const e of deck.list){ const c=cardById(e.cardId); if(!c) return false;
+    if(c.type==='evento' || c.fazione==='Mercenario' || c.fazione!==deck.faction) return false;
     if(c.legendary && e.qty>1) return false; if(!c.legendary && e.qty>2) return false; }
   return true;
 }
-function addToDeck(pi,cardId){
-  const c=cardById(cardId); const fac=S.deckFaction[pi];
+function createDeck(){
+  const d={id:uid(), name:`Nuovo mazzo ${S.decks.length+1}`, faction:null, list:[]};
+  S.decks.push(d); deckEditor={mode:'edit', id:d.id}; render();
+}
+function duplicateDeck(id){
+  const src=deckById(id); if(!src) return;
+  const copy={id:uid(), name:src.name+' (copia)', faction:src.faction, list:src.list.map(e=>({...e}))};
+  S.decks.push(copy); render();
+}
+function renameDeck(id,name){ const d=deckById(id); if(!d) return; d.name=name||d.name; render(); }
+function deleteDeck(id){
+  S.decks=S.decks.filter(d=>d.id!==id);
+  S.playerDeck=S.playerDeck.map(x=>x===id?null:x);
+  if(deckEditor.id===id) deckEditor={mode:'list'};
+  render();
+}
+function setDeckFactionOf(id, fac){ const d=deckById(id); if(!d) return; d.faction=fac||null; d.list=[]; render(); }
+function addCardToDeck(deckId,cardId){
+  const d=deckById(deckId); const c=cardById(cardId); if(!d||!c) return;
   if(c.type==='evento'){ showToast('Le carte Evento non fanno parte del Mazzo di Fazione.'); return; }
   if(c.fazione==='Mercenario'){ showToast('Le carte Mercenario alimentano il Mercato, non il Mazzo di Fazione.'); return; }
-  if(fac && c.fazione!==fac){ showToast(`Questa carta appartiene a "${c.fazione}", diversa dalla fazione scelta.`); return; }
-  const list=S.decklists[pi]; let e=list.find(x=>x.cardId===cardId); const max=c.legendary?1:2;
-  if(e){ if(e.qty<max) e.qty++; } else list.push({cardId,qty:1});
+  if(d.faction && c.fazione!==d.faction){ showToast(`Questa carta appartiene a "${c.fazione}", diversa dalla fazione del mazzo.`); return; }
+  let e=d.list.find(x=>x.cardId===cardId); const max=c.legendary?1:2;
+  if(e){ if(e.qty<max) e.qty++; } else d.list.push({cardId,qty:1});
   render();
 }
-function removeFromDeck(pi,cardId){
-  const list=S.decklists[pi]; const e=list.find(x=>x.cardId===cardId);
-  if(!e) return; e.qty--; if(e.qty<=0) S.decklists[pi]=list.filter(x=>x!==e);
+function removeCardFromDeck(deckId,cardId){
+  const d=deckById(deckId); if(!d) return;
+  const e=d.list.find(x=>x.cardId===cardId);
+  if(!e) return; e.qty--; if(e.qty<=0) d.list=d.list.filter(x=>x!==e);
   render();
 }
-function setDeckFaction(pi, fac){ S.deckFaction[pi]=fac||null; render(); }
+function setPlayerDeck(pi,deckId){ S.playerDeck[pi]=deckId||null; render(); }
 
 function startMatch(){
   for(let pi=0;pi<2;pi++){
-    const list=S.decklists[pi]; let ids=[];
-    list.forEach(e=>{ for(let i=0;i<e.qty;i++) ids.push(e.cardId); });
+    const deck=deckById(S.playerDeck[pi]); let ids=[];
+    if(deck) deck.list.forEach(e=>{ for(let i=0;i<e.qty;i++) ids.push(e.cardId); });
     const p=S.players[pi];
     p.deck=shuffle(ids); p.hand=[]; p.discard=[]; p.removed=[]; p.persistentRiti=[];
-    p.influence=0; p.corruption=0; p.prestige=0; p.faction=S.deckFaction[pi];
+    p.influence=0; p.corruption=0; p.prestige=0; p.faction=deck?deck.faction:null;
   }
   S.locations=freshLocations();
   S.eventDeck=shuffle(S.pool.filter(c=>c.type==='evento').map(c=>c.id)); S.eventDiscard=[]; S.activeEvent=null;
   S.mercenarioDeck=shuffle(S.pool.filter(c=>c.fazione==='Mercenario').map(c=>c.id)); S.mercenarioDiscard=[]; S.market=[null,null,null];
   S.round=1; S.matchOver=null; S.log=[]; S.started=true; S.active=0;
-  logMsg(`Sandbox avviata — ${S.players[0].name} (${S.deckFaction[0]||'—'}) contro ${S.players[1].name} (${S.deckFaction[1]||'—'}). Nulla è automatico: pesche, costi, Preparazione, Mercato e fine Round li gestisci tu con i pulsanti.`);
+  logMsg(`Sandbox avviata — ${S.players[0].name} (${S.players[0].faction||'—'}) contro ${S.players[1].name} (${S.players[1].faction||'—'}). Nulla è automatico: pesche, costi, Preparazione, Mercato e fine Round li gestisci tu con i pulsanti.`);
   render();
 }
 function stopMatch(){
@@ -338,10 +357,10 @@ let editingCard=null;
 function upsertCard(data){ if(editingCard){ Object.assign(cardById(editingCard),data); editingCard=null; } else S.pool.push({id:uid(),...data}); render(); }
 function askDeleteCard(id){ confirmingDelete[id]=true; render(); }
 function cancelDeleteCard(id){ confirmingDelete[id]=false; render(); }
-function deleteCard(id){ S.pool=S.pool.filter(c=>c.id!==id); S.decklists.forEach(l=>{ const i=l.findIndex(e=>e.cardId===id); if(i>=0) l.splice(i,1); }); delete confirmingDelete[id]; render(); }
+function deleteCard(id){ S.pool=S.pool.filter(c=>c.id!==id); S.decks.forEach(d=>{ const i=d.list.findIndex(e=>e.cardId===id); if(i>=0) d.list.splice(i,1); }); delete confirmingDelete[id]; render(); }
 
 async function exportData(){
-  const data=JSON.stringify({pool:S.pool, decklists:S.decklists, deckFaction:S.deckFaction},null,2);
+  const data=JSON.stringify({pool:S.pool, decks:S.decks, playerDeck:S.playerDeck},null,2);
   try{ const d=await claude.use("downloads"); if(d){ await d.save({filename:"ceneri-del-divino-dati.json", data}); return; } }catch(e){}
   const blob=new Blob([data],{type:"application/json"}); const a=document.createElement('a');
   a.href=URL.createObjectURL(blob); a.download="ceneri-del-divino-dati.json"; a.click();
@@ -350,8 +369,12 @@ function importData(file){
   const r=new FileReader();
   r.onload=()=>{ try{ const o=JSON.parse(r.result);
       if(o.pool) S.pool=o.pool.map(c=>({fazione:'',tipologia:'',...c}));
-      if(o.decklists) S.decklists=o.decklists;
-      if(o.deckFaction) S.deckFaction=o.deckFaction;
+      if(o.decks) S.decks=o.decks;
+      else if(o.decklists && o.deckFaction){
+        // compatibilità con l'export a mazzo singolo delle versioni precedenti
+        S.decks = o.decklists.map((list,i)=> list.length? {id:uid(), name:`Mazzo importato ${i+1}`, faction:o.deckFaction[i]||null, list} : null).filter(Boolean);
+      }
+      if(o.playerDeck) S.playerDeck=o.playerDeck;
       render();
     }catch(e){ showToast('File non valido.'); } };
   r.readAsText(file);
@@ -388,6 +411,7 @@ function cardFace(c, inst, forceOpen){
 }
 
 let activeTab='partita';
+let deckEditor = {mode:'list', id:null};
 function setTab(t){ activeTab=t; render(); }
 function render(){
   const tabsEl=document.getElementById('tabs');
@@ -428,17 +452,18 @@ function renderPartita(){
   if(!S.started){
     el.innerHTML = toastHtml() + `<div class="card"><h2>Imposta la sandbox</h2>
       <p class="small">Regolamento v0.6.0 — 4 Luoghi, Mazzo di Fazione da 20 carte, Mazzo Eventi e Mercato Mercenario separati. Nessun turno, pesca, costo o controllo viene risolto in automatico: lo decidi tu con i pulsanti.</p>
-      <div class="row">${[0,1].map(pi=>`
+      ${!S.decks.length?'<p class="small">Non hai ancora creato nessun mazzo: vai nella scheda "Mazzi" per crearne uno o più per fazione.</p>':''}
+      <div class="row">${[0,1].map(pi=>{ const d=deckById(S.playerDeck[pi]); return `
         <div class="col">
           <h3>${esc(S.players[pi].name)}</h3>
           <input value="${esc(S.players[pi].name)}" onchange="S.players[${pi}].name=this.value;render()" style="margin-bottom:6px;width:100%">
-          <label class="small">Fazione mazzo —
-            <select onchange="setDeckFaction(${pi}, this.value)">
-              <option value="">— scegli —</option>
-              ${FACTIONS.map(f=>`<option value="${f}" ${S.deckFaction[pi]===f?'selected':''}>${f}</option>`).join('')}
+          <label class="small">Mazzo —
+            <select onchange="setPlayerDeck(${pi}, this.value)">
+              <option value="">— scegli un mazzo —</option>
+              ${S.decks.map(d2=>`<option value="${d2.id}" ${S.playerDeck[pi]===d2.id?'selected':''}>${esc(d2.name)} (${d2.faction||'nessuna fazione'})</option>`).join('')}
             </select></label>
-          <p>Mazzo: <b>${deckCount(pi)}/20</b> ${deckValid(pi)?'✅':'❌'} <span class="small">(configuralo nella scheda "Mazzi"; puoi avviare anche con un mazzo incompleto)</span></p>
-        </div>`).join('')}</div>
+          <p>${d?`<b>${esc(d.name)}</b> — ${deckCountOf(d)}/20 ${deckValidOf(d)?'✅':'❌'}`:'<span class="small">Nessun mazzo selezionato</span>'} <span class="small">(crea/modifica i mazzi nella scheda "Mazzi"; puoi avviare anche con un mazzo incompleto)</span></p>
+        </div>`;}).join('')}</div>
       <button class="btn" onclick="startMatch()">Avvia sandbox</button>
       </div>`;
     return;
@@ -623,16 +648,45 @@ function submitCardForm(){
 function renderMazzi(){
   const el=document.getElementById('tab-mazzi');
   let html=toastHtml();
-  for(let pi=0;pi<2;pi++){
-    const fac=S.deckFaction[pi];
-    const avail=S.pool.filter(c=>c.type!=='evento' && c.fazione!=='Mercenario' && (!fac || c.fazione===fac));
-    html += `<div class="card"><h2>Mazzo — ${esc(S.players[pi].name)} (${deckCount(pi)}/20) ${deckValid(pi)?'✅':''}</h2>
-    <label class="small">Fazione: <select onchange="setDeckFaction(${pi}, this.value)"><option value="">— scegli —</option>${FACTIONS.map(f=>`<option value="${f}" ${fac===f?'selected':''}>${f}</option>`).join('')}</select></label>
-    <div class="row">
-      <div class="col"><h4>Pool disponibile (${fac||'scegli fazione'})</h4>${avail.map(c=>`<div class="minicard" onclick="addToDeck(${pi},'${c.id}')">${cardFace(c)}</div>`).join('')||'<span class="small">Nessuna carta.</span>'}</div>
-      <div class="col"><h4>Nel mazzo</h4>${S.decklists[pi].map(e=>{const c=cardById(e.cardId); if(!c) return ''; return `<div class="minicard"><div class="small">×${e.qty}</div>${cardFace(c)}<button class="btn ghost" onclick="removeFromDeck(${pi},'${e.cardId}')">− Rimuovi</button></div>`}).join('')||'<span class="small">Vuoto</span>'}</div>
-    </div></div>`;
+  if(deckEditor.mode==='edit'){
+    const d=deckById(deckEditor.id);
+    if(!d){ deckEditor={mode:'list'}; renderMazzi(); return; }
+    const avail=S.pool.filter(c=>c.type!=='evento' && c.fazione!=='Mercenario' && (!d.faction || c.fazione===d.faction));
+    html += `<div class="card flex-between">
+      <div><button class="btn ghost" onclick="deckEditor={mode:'list'};render()">← Tutti i mazzi</button>
+        <input value="${esc(d.name)}" onchange="renameDeck('${d.id}',this.value)" style="margin-left:6px"></div>
+      <div><b>${deckCountOf(d)}/20</b> ${deckValidOf(d)?'✅':'❌'}</div>
+    </div>
+    <div class="card">
+      <label class="small">Fazione del mazzo — <select onchange="setDeckFactionOf('${d.id}', this.value)">
+        <option value="">— scegli —</option>
+        ${FACTIONS.map(f=>`<option value="${f}" ${d.faction===f?'selected':''}>${f}</option>`).join('')}
+      </select></label>
+      ${d.list.length?'<p class="small">Cambiare fazione svuota il mazzo.</p>':''}
+      <div class="row">
+        <div class="col"><h4>Pool disponibile (${d.faction||'scegli una fazione'})</h4>${avail.map(c=>`<div class="minicard" onclick="addCardToDeck('${d.id}','${c.id}')">${cardFace(c)}</div>`).join('')||'<span class="small">Nessuna carta.</span>'}</div>
+        <div class="col"><h4>Nel mazzo</h4>${d.list.map(e=>{const c=cardById(e.cardId); if(!c) return ''; return `<div class="minicard"><div class="small">×${e.qty}</div>${cardFace(c)}<button class="btn ghost" onclick="removeCardFromDeck('${d.id}','${e.cardId}')">− Rimuovi</button></div>`}).join('')||'<span class="small">Vuoto</span>'}</div>
+      </div>
+    </div>`;
+    el.innerHTML=html;
+    return;
   }
+  html += `<div class="card flex-between"><h2>I tuoi mazzi (${S.decks.length})</h2><button class="btn" onclick="createDeck()">+ Nuovo mazzo</button></div>`;
+  html += `<div class="row">${S.decks.map(d=>`
+    <div class="col card">
+      <h3>${esc(d.name)}</h3>
+      <p class="small">${d.faction||'nessuna fazione scelta'} — ${deckCountOf(d)}/20 ${deckValidOf(d)?'✅':'❌'}</p>
+      <div class="manual-controls">
+        <button class="btn ghost" onclick="deckEditor={mode:'edit',id:'${d.id}'};render()">✎ Apri/Modifica</button>
+        <button class="btn ghost" onclick="duplicateDeck('${d.id}')">⧉ Duplica</button>
+        <button class="btn ghost" onclick="if(confirm('Eliminare il mazzo \\'${esc(d.name).replace(/'/g,"\\'")}\\'
+?')) deleteDeck('${d.id}')">🗑 Elimina</button>
+      </div>
+      <div class="manual-controls">
+        <button class="btn ghost" onclick="setPlayerDeck(0,'${d.id}')">Usa per ${esc(S.players[0].name)}</button>
+        <button class="btn ghost" onclick="setPlayerDeck(1,'${d.id}')">Usa per ${esc(S.players[1].name)}</button>
+      </div>
+    </div>`).join('')||'<p class="small">Nessun mazzo creato — premi "+ Nuovo mazzo" per iniziare.</p>'}</div>`;
   el.innerHTML=html;
 }
 function renderDati(){
