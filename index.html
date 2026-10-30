@@ -3,10 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Le Ceneri del Divino — Simulatore</title>
+<title>Le Ceneri del Divino — Sandbox (v0.6.0)</title>
 <style>
 :root{
-    zoom: 1.35; /* Imposta lo zoom */
   --bg:#f5f2ec; --surface:#ffffff; --surface2:#eee9df; --border:#d8d0c0;
   --text:#2a2420; --muted:#726a5e; --accent:#7a2e2e; --accent2:#2e4a3f;
   --warn:#a85c1f; --p1:#2e4a3f; --p2:#5a2e6b;
@@ -56,14 +55,14 @@ button{font-family:inherit}
 input,select,textarea{background:var(--surface2);border:1px solid var(--border);color:var(--text);border-radius:5px;padding:4px 6px;font-size:.8rem;font-family:inherit}
 textarea{width:100%;min-height:40px}
 .pill{display:inline-flex;align-items:center;gap:4px;background:var(--surface2);border-radius:20px;padding:3px 10px;font-weight:bold;font-size:.85rem}
+.pill input{width:48px}
 .icon{width:14px;height:14px;display:inline-block;vertical-align:-2px}
 .playerpanel{border-radius:10px;padding:8px;border:2px solid var(--border)}
 .playerpanel.p1{border-color:var(--p1)}
 .playerpanel.p2{border-color:var(--p2)}
-.playerpanel.active{box-shadow:0 0 0 2px var(--warn)}
 .resline{display:flex;gap:8px;flex-wrap:wrap;margin:6px 0}
-.handlist,.areaist{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0}
-.minicard{border:none;padding:0;background:transparent;max-width:185px;cursor:default;margin-bottom:6px;display:inline-block;vertical-align:top}
+.handlist,.areaist,.zone-cards{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0}
+.minicard{border:none;padding:0;background:transparent;max-width:190px;cursor:default;margin-bottom:6px;display:inline-block;vertical-align:top}
 .gamecard{position:relative;border:1px solid var(--border);border-left:5px solid var(--type-color);border-radius:8px;
   padding:7px 8px 8px;background:var(--surface2);font-size:.72rem;min-height:38px;cursor:pointer}
 .gamecard.type-personaggio{--type-color:var(--t-pers)}
@@ -76,54 +75,42 @@ textarea{width:100%;min-height:40px}
 .gc-badge.inf{background:#000;color:#ffd21a;border-color:#ffd21a}
 .gc-badge.cor{background:#000;color:#ff6a6a;border-color:#ff6a6a}
 .gc-icon{width:13px;height:13px;flex:none;color:var(--type-color);vertical-align:-2px}
-.gc-name{font-variant:small-caps;font-weight:bold;font-size:.82rem;letter-spacing:.3px;
+.gc-name{font-variant:small-caps;font-weight:bold;font-size:.88rem;letter-spacing:.3px;
   margin-right:50px;line-height:1.3}
-.gc-firstline{display:inline-flex;align-items:baseline;gap:3px;white-space:nowrap;vertical-align:baseline}
 .gc-toggle{background:none;border:none;color:var(--muted);font-size:.78rem;cursor:pointer;padding:0 0 0 4px;line-height:1;vertical-align:middle}
 .gc-full{display:none;margin-top:5px;padding-top:4px;border-top:1px dashed var(--border)}
 .gamecard:hover .gc-full,.gamecard.open .gc-full{display:block}
 .gc-sub{font-size:.66rem;color:var(--muted);margin-bottom:3px}
 .gc-effect{font-size:.7rem;line-height:1.3;white-space:normal}
-.gc-dmg{font-size:.68rem;color:var(--accent);margin-top:3px;font-weight:bold}
 .gc-stat{border:1px solid var(--border);border-radius:5px;
   padding:1px 7px;font-size:.68rem;background:var(--surface);font-weight:bold;text-align:center;line-height:1.4}
-.gc-art{width:100%;max-height:110px;object-fit:cover;border-radius:5px;margin-bottom:4px;display:block;background:var(--surface)}
 .loc{border:1px solid var(--border);border-radius:8px;padding:6px;min-height:90px;background:var(--surface2);font-size:.72rem}
-.loc.neutrale{border-color:var(--border)}
 .loc.occ1{border-color:var(--p1)}
 .loc.occ2{border-color:var(--p2)}
 .loc.conteso{border-color:var(--warn);border-width:2px}
-.locrow{display:flex;gap:8px;overflow-x:auto;align-items:stretch;padding-bottom:4px}
-.locrow .loc{flex:0 0 230px;min-width:230px}
-.loc-heading{display:flex;justify-content:space-between;align-items:center;gap:6px;margin-bottom:5px}
-.loc-card{margin-bottom:8px}
-.loc-card .gamecard{cursor:default}
-.player-tag{display:inline-block;margin:2px 0 5px;padding:2px 7px;border:1px solid;border-radius:999px;font-size:.68rem;font-weight:bold}
-.player-tag.p1{color:var(--p1);border-color:var(--p1);background:var(--surface)}
-.player-tag.p2{color:var(--p2);border-color:var(--p2);background:var(--surface)}
-.manual-controls{display:flex;flex-wrap:wrap;gap:3px;margin-top:3px}
-.manual-controls .btn{margin:1px;padding:4px 7px}
-.manual-board{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
-.manual-board .pill{margin:2px 0}
-.manual-value{width:54px!important;padding:2px 4px!important}
-.zone-cards{display:flex;flex-wrap:wrap;gap:6px;margin:5px 0}
+.locrow{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;overflow-x:auto}
+.locrow .loc{min-width:160px}
+.loc-heading{display:flex;justify-content:space-between;align-items:center}
 #log{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:8px;height:150px;overflow-y:auto;font-size:.74rem;overflow-x:auto}
 .formgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:6px}
 .small{font-size:.72rem;color:var(--muted)}
 .tag{display:inline-block;background:var(--surface2);border-radius:4px;padding:1px 5px;font-size:.68rem;margin-right:3px}
+.player-tag{display:inline-block;font-size:.66rem;border-radius:4px;padding:0 4px}
+.player-tag.p1{background:var(--p1);color:#fff}
+.player-tag.p2{background:var(--p2);color:#fff}
 .flex-between{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap}
 .banner{background:var(--warn);color:#1b1815;border-radius:8px;padding:10px;margin-bottom:10px;font-weight:bold}
-.scorepip{display:inline-block;width:10px;height:10px;border-radius:50%;background:var(--border);margin-right:2px}
-.scorepip.won{background:var(--accent)}
+.manual-controls{display:flex;flex-wrap:wrap;gap:3px;margin-top:4px}
+.marketslot{border:1px dashed var(--border);border-radius:8px;padding:4px;min-width:170px}
 .navlink{display:inline-block;background:transparent;border:1px solid var(--border);color:var(--text);padding:6px 12px;border-radius:6px;font-size:.85rem;text-decoration:none}
 </style>
 </head>
 <body>
 <header>
-  <h1>⚜ Le Ceneri del Divino</h1>
+  <h1>⚜ Le Ceneri del Divino — Sandbox</h1>
   <nav id="tabs"></nav>
-    <a class="navlink" href="stampa-carte.html">Stampa carte</a>
-    <a class="navlink" href="assistente-partita.html">Assistente di partita</a>
+  <a class="navlink" href="stampa-carte.html">Stampa carte</a>
+  <a class="navlink" href="assistente-partita.html">Assistente di partita</a>
 </header>
 <main>
   <div class="tab active" id="tab-partita"></div>
@@ -133,7 +120,14 @@ textarea{width:100%;min-height:40px}
 </main>
 
 <script>
-/* ====================== ICONE / COSTANTI ====================== */
+/* ======================================================================
+   SANDBOX MANUALE — nessuna fase, turno o azione è imposta dal motore.
+   Lo strumento tiene il conto (mazzi, mani, Luoghi, risorse, Mercato,
+   Eventi) e offre un pulsante per ogni spostamento possibile; sei tu
+   l'arbitro e decidi quando applicare costi, effetti e controllo.
+   Dati conformi al regolamento v0.6.0 (mazzo da 20, 4 Luoghi, Mazzo
+   Mercenario → Mercato, Mazzo Eventi separato, nessuno scontro).
+   ====================================================================== */
 const ICO = {
  inf:`<svg class="icon" viewBox="0 0 24 24"><path d="M12 2l3 7h7l-5.5 4.5L18.5 21 12 16.5 5.5 21l2-7.5L2 9h7z" fill="var(--warn)"/></svg>`,
  cor:`<svg class="icon" viewBox="0 0 24 24"><path d="M12 2C9 7 5 10 5 14.5A7 7 0 0019 14.5C19 10 15 7 12 2z" fill="var(--accent)"/></svg>`,
@@ -145,32 +139,28 @@ const ICO = {
    evento:`<svg class="gc-icon" viewBox="0 0 24 24"><path d="M13 2L4 14h6l-1 8 9-12h-6z" fill="currentColor"/></svg>`,
  },
 };
-const FACTIONS = ["La Comunione","Creature della notte","Devoti dei Primi Figli","Gli Spontanei","Le Accademie del Velo","I Ducati del Nord","La Corona di Velaria","Il Regno delle Luci","I Domini del Ponente","Le Terre Contese"];
+const FACTIONS = ["La Comunione","Creature della notte","Devoti dei Primi Figli","Gli Spontanei","Le Accademie del Velo","Le Terre Contese"];
+const CARD_FACTIONS = [...FACTIONS, "Mercenario"];
+const LOCATION_COUNT = 4;
 const uid = ()=>Math.random().toString(36).slice(2,10);
 function typeLabel(t){ return {personaggio:'Personaggio',luogo:'Luogo',rito:'Rito',evento:'Evento'}[t]||t; }
 function shuffle(arr){ const a=arr.slice(); for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; }
 function esc(s){ return (s||'').replace(/[&<>]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[m])); }
 
-/* ====================== STATO ====================== */
 let S = {
-  pool: [], decks: [], playerDeck:[null,null],
+  pool: [], decklists: [[],[]], deckFaction:[null,null],
   players: [newPlayer("Giocatore 1"), newPlayer("Giocatore 2")],
   locations: freshLocations(),
-  ai:[null,null],
-  matchScore:[0,0], round:1, started:false, matchOver:null,
-  stage:'idle', // manual sandbox; legacy phases remain for older helpers
-  prepPlacer:0, prepFirstPlacer:0, luoghiPlaced:0, prepPassStreak:0,
-  mulliganDone:[false,false], mulliganSel:[[],[]],
-  active:0, cardPlayedThisTurn:false, passStreak:0,
-  activeEvent:null, activeEventOwner:null,
-  pendingAIEffect:null,
+  round:1, started:false, matchOver:null,
+  active:0,
+  activeEvent:null, eventDeck:[], eventDiscard:[],
+  mercenarioDeck:[], mercenarioDiscard:[], market:[null,null,null],
   showDeck:[false,false], showDiscard:[false,false], showRemoved:[false,false],
+  showMercDeck:false,
   log:[],
 };
 function newPlayer(name){ return {name, influence:0, corruption:0, prestige:0, deck:[], hand:[], discard:[], removed:[], persistentRiti:[], faction:null}; }
-function freshLocations(){ return Array.from({length:6},()=>({cardId:null, builder:null, chars:[]})); }
-let sel = { skirmishOffer:null, choosingDefender:null };
-let mazziView = { mode:'list' };
+function freshLocations(){ return Array.from({length:LOCATION_COUNT},()=>({cardId:null, builder:null, chars:[], controller:null})); }
 let cardOpen = {};
 function toggleCardOpen(key){ cardOpen[key]=!cardOpen[key]; render(); }
 let toast = null;
@@ -182,34 +172,8 @@ function toastHtml(){
 let confirmingDelete = {};
 
 function cardById(id){ return S.pool.find(c=>c.id===id); }
-function logMsg(t){ S.log.unshift(`[Round ${S.round}${S.stage==='play'?' · '+S.players[S.active].name:''}] ${t}`); }
+function logMsg(t){ S.log.unshift(`[Round ${S.round}] ${t}`); }
 
-/* ====================== RISORSE ====================== */
-function changeCorruption(pi, delta){
-  const p=S.players[pi]; const before=p.corruption;
-  p.corruption=Math.max(0,p.corruption+delta);
-  if(delta>0 && S.stage!=='manual'){
-    const thBefore=Math.floor(before/5), thAfter=Math.floor(p.corruption/5);
-    for(let t=thBefore+1;t<=thAfter;t++){ removeTopFromDeck(pi); logMsg(`${p.name}: soglia di Corruzione ${t*5} raggiunta → una carta viene rimossa dalla partita.`); }
-  }
-  if(delta>0 && S.stage==='manual' && Math.floor(before/5)<Math.floor(p.corruption/5)){
-    logMsg(`${p.name} supera una soglia di Corruzione: gestisci manualmente l'eventuale rimozione di carte.`);
-  }
-  render();
-}
-function removeTopFromDeck(pi){
-  const p=S.players[pi];
-  if(!p.deck.length){ logMsg(`${p.name}: mazzo vuoto, nessuna carta da rimuovere.`); return; }
-  const id=p.deck.shift(); p.removed.push(id);
-  logMsg(`${p.name} rimuove dalla partita "${cardById(id)?.name||'?'}".`);
-}
-function changePrestige(pi, delta){ S.players[pi].prestige=Math.max(0,S.players[pi].prestige+delta); render(); }
-function changeInfluence(pi, delta){
-  const p=S.players[pi];
-  p.influence=Math.max(0,p.influence+delta);
-  if(S.stage!=='manual') p.influence=Math.min(10,p.influence);
-  render();
-}
 function setManualResource(pi,resource,value){
   if(!['influence','corruption','prestige'].includes(resource)) return;
   const amount=Number.parseInt(value,10);
@@ -217,593 +181,167 @@ function setManualResource(pi,resource,value){
   S.players[pi][resource]=Math.max(0,amount);
   render();
 }
+function bumpResource(pi,resource,delta){ setManualResource(pi,resource, (S.players[pi][resource]||0)+delta); }
 
 function drawCard(pi){
   const p=S.players[pi];
-  if(!p.deck.length){
-    if(S.stage==='manual'){
-      showToast(p.discard.length
-        ? `Mazzo di ${p.name} vuoto: mischia manualmente gli scarti nel mazzo.`
-        : `Mazzo e scarti di ${p.name} vuoti.`);
-      return;
-    }
-    if(!p.discard.length){ logMsg(`${p.name}: mazzo e scarti vuoti, nessuna pescata possibile.`); return; }
-    p.deck=shuffle(p.discard); p.discard=[];
-    logMsg(`${p.name} rimescola gli Scarti nel Mazzo (mazzo esaurito).`);
-  }
+  if(!p.deck.length){ showToast(p.discard.length? `Mazzo di ${p.name} vuoto: mischia manualmente gli scarti nel mazzo.` : `Mazzo e scarti di ${p.name} vuoti.`); return; }
   const id=p.deck.shift(); p.hand.push(id);
-  logMsg(`${p.name} pesca una carta (mano: ${p.hand.length}).`);
+  logMsg(`${p.name} pesca "${cardById(id)?.name||'?'}" (mano: ${p.hand.length}).`);
+  render();
 }
+function shuffleDeck(pi){ S.players[pi].deck=shuffle(S.players[pi].deck); logMsg(`${S.players[pi].name} mischia il mazzo.`); render(); }
+function shuffleDiscardIntoDeck(pi){ const p=S.players[pi]; if(!p.discard.length) return; p.deck=shuffle([...p.deck,...p.discard]); p.discard=[]; logMsg(`${p.name} mischia gli scarti nel mazzo.`); render(); }
+function peekTop(pi){ const p=S.players[pi]; if(!p.deck.length){ showToast('Mazzo vuoto.'); return; } showToast(`Prima carta del mazzo di ${p.name}: ${cardById(p.deck[0]).name}`); }
 
-/* ====================== AVVIO PARTITA / ROUND ====================== */
-function deckCountOf(deck){ return deck? deck.list.reduce((s,e)=>s+e.qty,0) : 0; }
-function deckValidFull(deck){
-  if(!deck || deckCountOf(deck)!==30) return false;
-  for(const e of deck.list){ const c=cardById(e.cardId); if(!c) return false;
-    if(c.fazione!=='Comune' && !deck.factions.includes(c.fazione)) return false;
-    if(c.legendary && e.qty>1) return false; if(!c.legendary && e.qty>3) return false; }
+function deckCount(pi){ return S.decklists[pi].reduce((s,e)=>s+e.qty,0); }
+function deckValid(pi){
+  const list=S.decklists[pi]; const fac=S.deckFaction[pi];
+  if(!fac || deckCount(pi)!==20) return false;
+  for(const e of list){ const c=cardById(e.cardId); if(!c) return false;
+    if(c.type==='evento' || c.fazione==='Mercenario' || c.fazione!==fac) return false;
+    if(c.legendary && e.qty>1) return false; if(!c.legendary && e.qty>2) return false; }
   return true;
 }
-function addCardToDeck(deckId,cardId){
-  const deck=S.decks.find(d=>d.id===deckId); if(!deck) return;
-  const c=cardById(cardId);
-  if(c.fazione!=='Comune' && !deck.factions.includes(c.fazione)){ showToast(`Questa carta appartiene a "${c.fazione}", non selezionata per questo mazzo.`); return; }
-  let e=deck.list.find(x=>x.cardId===cardId); const max=c.legendary?1:3;
-  if(e){ if(e.qty<max) e.qty++; } else deck.list.push({cardId,qty:1});
+function addToDeck(pi,cardId){
+  const c=cardById(cardId); const fac=S.deckFaction[pi];
+  if(c.type==='evento'){ showToast('Le carte Evento non fanno parte del Mazzo di Fazione.'); return; }
+  if(c.fazione==='Mercenario'){ showToast('Le carte Mercenario alimentano il Mercato, non il Mazzo di Fazione.'); return; }
+  if(fac && c.fazione!==fac){ showToast(`Questa carta appartiene a "${c.fazione}", diversa dalla fazione scelta.`); return; }
+  const list=S.decklists[pi]; let e=list.find(x=>x.cardId===cardId); const max=c.legendary?1:2;
+  if(e){ if(e.qty<max) e.qty++; } else list.push({cardId,qty:1});
   render();
 }
-function removeCardFromDeck(deckId,cardId){
-  const deck=S.decks.find(d=>d.id===deckId); if(!deck) return;
-  const e=deck.list.find(x=>x.cardId===cardId);
-  if(!e) return; e.qty--; if(e.qty<=0) deck.list=deck.list.filter(x=>x!==e);
+function removeFromDeck(pi,cardId){
+  const list=S.decklists[pi]; const e=list.find(x=>x.cardId===cardId);
+  if(!e) return; e.qty--; if(e.qty<=0) S.decklists[pi]=list.filter(x=>x!==e);
   render();
 }
-function toggleDeckFaction(deckId, fac){
-  const deck=S.decks.find(d=>d.id===deckId); if(!deck) return;
-  const i=deck.factions.indexOf(fac);
-  if(i>=0) deck.factions.splice(i,1);
-  else { if(deck.factions.length>=2){ showToast('Un mazzo può avere al massimo due fazioni (oltre alle carte Comuni).'); return; } deck.factions.push(fac); }
-  render();
-}
-function renameDeck(deckId,name){ const deck=S.decks.find(d=>d.id===deckId); if(!deck) return; deck.name=name; saveLocal(); }
-function createDeck(){ const d={id:uid(), name:'Nuovo mazzo', factions:[], list:[]}; S.decks.push(d); mazziView={mode:'edit',deckId:d.id}; render(); }
-function duplicateDeck(deckId){ const deck=S.decks.find(d=>d.id===deckId); if(!deck) return;
-  const copy=JSON.parse(JSON.stringify(deck)); copy.id=uid(); copy.name=deck.name+' (copia)'; S.decks.push(copy); render(); }
-function deleteDeck(deckId){
-  S.decks=S.decks.filter(d=>d.id!==deckId);
-  S.playerDeck=S.playerDeck.map(id=>id===deckId?null:id);
-  if(mazziView.deckId===deckId) mazziView={mode:'list'};
-  render();
-}
-function openDeckEditor(deckId){ mazziView={mode:'edit',deckId}; render(); }
-function backToDeckList(){ mazziView={mode:'list'}; render(); }
-function setPlayerDeck(pi, deckId){ S.playerDeck[pi]=deckId||null; render(); }
-function setAI(pi, level){ S.ai[pi]= level||null; render(); }
+function setDeckFaction(pi, fac){ S.deckFaction[pi]=fac||null; render(); }
 
 function startMatch(){
   for(let pi=0;pi<2;pi++){
-    const deck=S.decks.find(d=>d.id===S.playerDeck[pi]); let ids=[];
-    if(!deck){ showToast(`Seleziona un mazzo per ${S.players[pi].name}.`); return; }
-    deck.list.forEach(e=>{ for(let i=0;i<e.qty;i++) ids.push(e.cardId); });
+    const list=S.decklists[pi]; let ids=[];
+    list.forEach(e=>{ for(let i=0;i<e.qty;i++) ids.push(e.cardId); });
     const p=S.players[pi];
-    p.deck=ids; p.hand=[]; p.discard=[]; p.removed=[]; p.persistentRiti=[];
-    p.influence=0; p.corruption=0; p.prestige=0; p.deckName=deck.name; p.factions=deck.factions.slice();
+    p.deck=shuffle(ids); p.hand=[]; p.discard=[]; p.removed=[]; p.persistentRiti=[];
+    p.influence=0; p.corruption=0; p.prestige=0; p.faction=S.deckFaction[pi];
   }
-  S.matchScore=[0,0]; S.round=1; S.matchOver=null; S.log=[]; S.started=true;
-  S.locations=freshLocations(); S.activeEvent=null; S.activeEventOwner=null;
-  S.active=0; S.stage='manual'; S.ai=[null,null]; S.pendingAIEffect=null;
-  sel={skirmishOffer:null,choosingDefender:null};
-  logMsg(`Sandbox manuale avviata — ${S.players[0].name} (${S.players[0].deckName}) contro ${S.players[1].name} (${S.players[1].deckName}).`);
+  S.locations=freshLocations();
+  S.eventDeck=shuffle(S.pool.filter(c=>c.type==='evento').map(c=>c.id)); S.eventDiscard=[]; S.activeEvent=null;
+  S.mercenarioDeck=shuffle(S.pool.filter(c=>c.fazione==='Mercenario').map(c=>c.id)); S.mercenarioDiscard=[]; S.market=[null,null,null];
+  S.round=1; S.matchOver=null; S.log=[]; S.started=true; S.active=0;
+  logMsg(`Sandbox avviata — ${S.players[0].name} (${S.deckFaction[0]||'—'}) contro ${S.players[1].name} (${S.deckFaction[1]||'—'}). Nulla è automatico: pesche, costi, Preparazione, Mercato e fine Round li gestisci tu con i pulsanti.`);
   render();
 }
-function startRound(){
-  for(let pi=0;pi<2;pi++){
-    const p=S.players[pi];
-    let ret=[...p.hand, ...p.discard, ...p.persistentRiti];
-    S.locations.forEach(l=>{ l.chars.filter(c=>c.owner===pi).forEach(c=>ret.push(c.cardId)); if(l.cardId && l.builder===pi) ret.push(l.cardId); });
-    p.deck=shuffle([...p.deck, ...ret]);
-    p.hand=[]; p.discard=[]; p.persistentRiti=[]; p.prestige=0; p.influence=0;
-  }
-  S.locations=freshLocations(); S.activeEvent=null; S.activeEventOwner=null;
-  S.prepFirstPlacer=Math.random()<0.5?0:1; S.prepPlacer=S.prepFirstPlacer;
-  S.luoghiPlaced=0; S.prepPassStreak=0; S.mulliganDone=[false,false]; S.mulliganSel=[[],[]];
-  S.pendingAIEffect=null; sel={skirmishOffer:null,choosingDefender:null};
-  S.stage='prep-place';
-  logMsg(`— Preparazione del Round ${S.round} — inizia a posizionare ${S.players[S.prepFirstPlacer].name}.`);
-  for(let pi=0;pi<2;pi++) for(let i=0;i<3;i++) drawCard(pi);
+function stopMatch(){
+  if(!confirm('Terminare la sandbox? La disposizione attuale delle carte non verrà conservata.')) return;
+  S.started=false; S.matchOver=null; S.locations=freshLocations();
+  S.players.forEach(p=>{ p.deck=[]; p.hand=[]; p.discard=[]; p.removed=[]; p.persistentRiti=[]; });
+  S.activeEvent=null; S.eventDeck=[]; S.eventDiscard=[]; S.mercenarioDeck=[]; S.mercenarioDiscard=[]; S.market=[null,null,null]; S.log=[];
   render();
-  driveAIPrep();
-}
-
-/* ====================== PREPARAZIONE: PIAZZAMENTO LUOGHI ====================== */
-function placeLuogoPrep(pi, handIdx, slot){
-  if(S.stage!=='prep-place' || S.prepPlacer!==pi) return;
-  const p=S.players[pi]; const id=p.hand[handIdx]; const c=cardById(id);
-  if(!c||c.type!=='luogo'||S.locations[slot].cardId||S.luoghiPlaced>=3) return;
-  p.hand.splice(handIdx,1);
-  S.locations[slot]={cardId:id, builder:pi, chars:[]};
-  S.luoghiPlaced++; S.prepPassStreak=0;
-  logMsg(`${p.name} posiziona gratuitamente "${c.name}" nello spazio ${slot+1}.`);
-  if(S.luoghiPlaced>=3){ beginMulliganStage(); return; }
-  S.prepPlacer=1-pi; render(); driveAIPrep();
-}
-function passPrepPlacement(pi){
-  if(S.stage!=='prep-place' || S.prepPlacer!==pi) return;
-  S.prepPassStreak++; logMsg(`${S.players[pi].name} non posiziona alcun Luogo.`);
-  if(S.prepPassStreak>=2){
-    if(S.luoghiPlaced===0){
-      logMsg('Nessun Luogo in campo: le mani vengono rimescolate e la Preparazione ricomincia.');
-      for(let i=0;i<2;i++){ const pl=S.players[i]; pl.deck=shuffle([...pl.deck,...pl.hand]); pl.hand=[]; }
-      S.prepFirstPlacer=1-S.prepFirstPlacer; S.prepPlacer=S.prepFirstPlacer; S.prepPassStreak=0;
-      for(let i=0;i<2;i++) for(let k=0;k<3;k++) drawCard(i);
-      render(); driveAIPrep(); return;
-    }
-    beginMulliganStage(); return;
-  }
-  S.prepPlacer=1-pi; render(); driveAIPrep();
-}
-function beginMulliganStage(){
-  S.stage='prep-mulligan';
-  for(let pi=0;pi<2;pi++){
-    const p=S.players[pi]; p.discard.push(...p.hand); p.hand=[]; p.influence=5;
-    for(let i=0;i<6;i++) drawCard(pi);
-  }
-  logMsg('Fine piazzamento: Influenza a 5, mano scartata e ripescate 6 carte. Ora si può fare mulligan (max 2 carte).');
-  render(); driveAIMulligan();
-}
-function toggleMulliganPick(pi, idx){
-  if(S.mulliganDone[pi]) return;
-  const arr=S.mulliganSel[pi]; const at=arr.indexOf(idx);
-  if(at>=0) arr.splice(at,1); else if(arr.length<2) arr.push(idx);
-  render();
-}
-function confirmMulligan(pi){
-  if(S.mulliganDone[pi]) return;
-  const p=S.players[pi]; const idxs=[...S.mulliganSel[pi]].sort((a,b)=>b-a);
-  idxs.forEach(i=>{ const id=p.hand.splice(i,1)[0]; p.deck.push(id); });
-  p.deck=shuffle(p.deck);
-  for(let k=0;k<idxs.length;k++) drawCard(pi);
-  S.mulliganDone[pi]=true; S.mulliganSel[pi]=[];
-  logMsg(`${p.name} sostituisce ${idxs.length} carta/e e mischia il mazzo.`);
-  render();
-  if(S.mulliganDone[0]&&S.mulliganDone[1]) beginPlayStage();
-}
-function beginPlayStage(){
-  S.stage='play'; S.active=S.prepFirstPlacer; S.cardPlayedThisTurn=false; S.passStreak=0;
-  logMsg(`— Inizia il turno di gioco del Round ${S.round}. Comincia ${S.players[S.active].name}. —`);
-  turnStart();
-}
-
-/* ====================== FASE DI GIOCO ====================== */
-function turnStart(){
-  if(S.matchOver || S.stage!=='play') return;
-  drawCard(S.active); render();
-  if(S.ai[S.active] && !S.pendingAIEffect) aiTakeTurn(S.active);
-}
-function finishCardAction(pi, card){
-  if(S.stage==='manual') return;
-  if(card && card.effetto && S.ai[pi]){ S.pendingAIEffect={pi,name:card.name,effetto:card.effetto}; render(); return; }
-  endPlayTurn();
-}
-function ackAIEffect(){ S.pendingAIEffect=null; endPlayTurn(); }
-function endPlayTurn(){
-  const p=S.players[S.active];
-  p.influence=Math.min(10,p.influence+2);
-  logMsg(`${p.name} termina il turno (+2 Influenza).`);
-  S.passStreak = S.cardPlayedThisTurn? 0 : S.passStreak+1;
-  if(S.passStreak>=2){ enterRoundEnd(); return; }
-  S.active=1-S.active; S.cardPlayedThisTurn=false; sel={skirmishOffer:null,choosingDefender:null};
-  render();
-  turnStart();
-}
-function passTurn(pi){
-  if(S.stage!=='play'||S.active!==pi||S.cardPlayedThisTurn) return;
-  logMsg(`${S.players[pi].name} passa.`);
-  endPlayTurn();
 }
 function setManualActivePlayer(pi){ S.active=Number(pi); render(); }
 function changeManualRound(delta){ S.round=Math.max(1,S.round+delta); render(); }
-function changeManualScore(pi,delta){ S.matchScore[pi]=Math.max(0,S.matchScore[pi]+delta); render(); }
-function setManualWinner(pi){
-  S.matchOver=pi===null?'Pareggio':S.players[pi].name;
-  logMsg(S.matchOver==='Pareggio'?'Partita segnata come pareggio.':`Vittoria assegnata manualmente a ${S.matchOver}.`);
+function setMatchWinner(pi){ S.matchOver = pi===null?'Pareggio':S.players[pi].name; logMsg(S.matchOver==='Pareggio'?'Partita segnata come pareggio.':`Vittoria assegnata a ${S.matchOver}.`); render(); }
+function clearMatchWinner(){ S.matchOver=null; render(); }
+
+const ZONE_LABEL = {hand:'mano',discard:'scarti',removed:'rimosse',top:'cima mazzo',bottom:'fondo mazzo'};
+function putInZone(p,id,dest){
+  if(dest==='hand') p.hand.push(id);
+  else if(dest==='discard') p.discard.push(id);
+  else if(dest==='removed') p.removed.push(id);
+  else if(dest==='top') p.deck.unshift(id);
+  else if(dest==='bottom') p.deck.push(id);
+}
+function moveHandCard(pi,idx,dest){ const p=S.players[pi]; const id=p.hand.splice(idx,1)[0]; if(id===undefined) return; putInZone(p,id,dest); logMsg(`${p.name} sposta "${cardById(id)?.name||'?'}" dalla mano a ${ZONE_LABEL[dest]}.`); render(); }
+function moveDeckCard(pi,idx,dest){ const p=S.players[pi]; const id=p.deck.splice(idx,1)[0]; if(id===undefined) return; putInZone(p,id,dest); logMsg(`${p.name} sposta "${cardById(id)?.name||'?'}" dal mazzo a ${ZONE_LABEL[dest]}.`); render(); }
+function moveDiscardCard(pi,idx,dest){ const p=S.players[pi]; const id=p.discard.splice(idx,1)[0]; if(id===undefined) return; putInZone(p,id,dest); logMsg(`${p.name} sposta "${cardById(id)?.name||'?'}" dagli scarti a ${ZONE_LABEL[dest]}.`); render(); }
+function moveRemovedCard(pi,idx,dest){ const p=S.players[pi]; const id=p.removed.splice(idx,1)[0]; if(id===undefined) return; putInZone(p,id,dest); logMsg(`${p.name} sposta "${cardById(id)?.name||'?'}" dalle rimosse a ${ZONE_LABEL[dest]}.`); render(); }
+function movePersistentRito(pi,idx,dest){ const p=S.players[pi]; const id=p.persistentRiti.splice(idx,1)[0]; if(id===undefined) return; putInZone(p,id,dest); logMsg(`${p.name} sposta "${cardById(id)?.name||'?'}" dai riti persistenti a ${ZONE_LABEL[dest]}.`); render(); }
+function handRitoToPersistent(pi,idx){ const p=S.players[pi]; const id=p.hand.splice(idx,1)[0]; if(id===undefined) return; p.persistentRiti.push(id); logMsg(`${p.name} sposta "${cardById(id)?.name||'?'}" dalla mano ai riti persistenti.`); render(); }
+
+function placeLuogoInSlot(pi,handIdx,slot){
+  const p=S.players[pi]; const id=p.hand[handIdx]; const c=cardById(id);
+  if(!c||c.type!=='luogo'||S.locations[slot].cardId) return;
+  p.hand.splice(handIdx,1); S.locations[slot]={cardId:id, builder:pi, chars:[], controller:null};
+  logMsg(`${p.name} posiziona "${c.name}" nello spazio ${slot+1}.`);
   render();
 }
-function stopManualMatch(){
-  if(!confirm('Terminare la sandbox? La disposizione attuale delle carte non verrà conservata.')) return;
-  S.started=false; S.stage='idle'; S.matchOver=null; S.locations=freshLocations();
-  S.players.forEach(p=>{ p.deck=[]; p.hand=[]; p.discard=[]; p.removed=[]; p.persistentRiti=[]; });
-  S.activeEvent=null; S.activeEventOwner=null; S.log=[]; render();
-}
-function drawManualCard(pi){ drawCard(pi); render(); }
-function shuffleDiscardIntoDeck(pi){
-  const p=S.players[pi];
-  if(!p.discard.length) return;
-  p.deck=shuffle([...p.deck,...p.discard]); p.discard=[];
-  logMsg(`${p.name} mischia manualmente gli scarti nel mazzo.`);
+function deployCharacterToLocation(pi,handIdx,slot){
+  const p=S.players[pi]; const id=p.hand[handIdx]; const c=cardById(id);
+  if(!c||c.type!=='personaggio'||!S.locations[slot].cardId) return;
+  p.hand.splice(handIdx,1); S.locations[slot].chars.push({instId:uid(), cardId:id, owner:pi});
+  logMsg(`${p.name} schiera "${c.name}" nel luogo ${slot+1}.`);
   render();
 }
-function moveDeckCard(pi,idx,destination){
-  if(!['hand','discard','removed','top','bottom'].includes(destination)) return;
-  const p=S.players[pi]; const [id]=p.deck.splice(idx,1);
-  if(id===undefined) return;
-  if(destination==='hand') p.hand.push(id);
-  else if(destination==='discard') p.discard.push(id);
-  else if(destination==='removed') p.removed.push(id);
-  else if(destination==='top') p.deck.unshift(id);
-  else if(destination==='bottom') p.deck.push(id);
-  logMsg(`${S.players[pi].name} sposta "${cardById(id)?.name||'?'}" dal mazzo a ${destination==='top'?'cima al mazzo':destination==='bottom'?'fondo al mazzo':destination==='hand'?'mano':destination==='discard'?'scarti':'rimosse'}.`);
-  render();
-}
-function adjustCharacterDamage(slot,instId,delta){
-  const inst=S.locations[slot].chars.find(c=>c.instId===instId);
-  if(!inst) return;
-  inst.dmg=Math.max(0,inst.dmg+delta);
-  logMsg(`Danni di "${cardById(inst.cardId)?.name||'?'}" aggiornati manualmente: ${inst.dmg}.`);
-  render();
-}
-function moveCharacterFromLocation(slot,instId,destination){
-  if(!['hand','discard','removed','top','bottom'].includes(destination)) return;
-  const loc=S.locations[slot]; const idx=loc.chars.findIndex(c=>c.instId===instId);
-  if(idx<0) return;
-  const [inst]=loc.chars.splice(idx,1); const p=S.players[inst.owner];
-  if(destination==='hand') p.hand.push(inst.cardId);
-  else if(destination==='discard') p.discard.push(inst.cardId);
-  else if(destination==='removed') p.removed.push(inst.cardId);
-  else if(destination==='top') p.deck.unshift(inst.cardId);
-  else if(destination==='bottom') p.deck.push(inst.cardId);
-  const zone=destination==='hand'?'mano':destination==='discard'?'scarti':destination==='removed'?'rimosse':destination==='top'?'cima al mazzo':'fondo al mazzo';
-  logMsg(`"${cardById(inst.cardId)?.name||'?'}" spostato manualmente dal luogo ${slot+1} a ${zone} di ${p.name}.`);
-  render();
-}
-function changeCharacterOwner(slot,instId,pi){
-  const inst=S.locations[slot].chars.find(c=>c.instId===instId);
-  if(!inst || (pi!==0 && pi!==1)) return;
-  inst.owner=pi;
-  logMsg(`Controllo di "${cardById(inst.cardId)?.name||'?'}" assegnato a ${S.players[pi].name}.`);
-  render();
-}
-function changeLocationOwner(slot,pi){
-  const loc=S.locations[slot];
-  if(!loc.cardId || (pi!==0 && pi!==1)) return;
-  loc.builder=pi;
-  logMsg(`Controllo del Luogo ${slot+1} assegnato a ${S.players[pi].name}.`);
-  render();
-}
-function moveCharacterToLocation(fromSlot,instId,toSlot){
-  if(fromSlot===toSlot) return;
-  const source=S.locations[fromSlot]; const idx=source.chars.findIndex(c=>c.instId===instId);
-  if(idx<0) return;
-  const [inst]=source.chars.splice(idx,1); S.locations[toSlot].chars.push(inst);
-  logMsg(`"${cardById(inst.cardId)?.name||'?'}" spostato manualmente al luogo ${toSlot+1}.`);
-  render();
-}
-function moveLocationCard(slot,destination){
-  const loc=S.locations[slot]; if(!loc.cardId) return;
-  const pi=loc.builder??S.active; const p=S.players[pi]; const id=loc.cardId;
-  if(destination==='hand') p.hand.push(id);
-  else if(destination==='discard') p.discard.push(id);
-  else if(destination==='removed') p.removed.push(id);
-  else if(destination==='top') p.deck.unshift(id);
-  else if(destination==='bottom') p.deck.push(id);
-  else return;
-  S.locations[slot]={cardId:null,builder:null,chars:loc.chars};
-  logMsg(`"${cardById(id)?.name||'?'}" rimosso dal luogo ${slot+1} e spostato a ${destination==='hand'?'mano':destination==='discard'?'scarti':destination==='removed'?'rimosse':destination==='top'?'cima al mazzo':'fondo al mazzo'} di ${p.name}.`);
+function moveLocationCard(slot,dest){
+  const l=S.locations[slot]; if(!l.cardId) return;
+  const pi = l.builder!=null? l.builder : S.active; const p=S.players[pi]; const id=l.cardId;
+  putInZone(p,id,dest);
+  S.locations[slot]={cardId:null,builder:null,chars:l.chars,controller:null};
+  logMsg(`"${cardById(id)?.name||'?'}" tolto dal luogo ${slot+1} e spostato a ${ZONE_LABEL[dest]} di ${p.name}.`);
   render();
 }
 function moveLocationToSlot(fromSlot,toSlot){
   if(fromSlot===toSlot || S.locations[toSlot].cardId || S.locations[toSlot].chars.length || !S.locations[fromSlot].cardId) return;
-  S.locations[toSlot]=S.locations[fromSlot];
-  S.locations[fromSlot]={cardId:null,builder:null,chars:[]};
-  logMsg(`Luogo spostato manualmente dallo spazio ${fromSlot+1} allo spazio ${toSlot+1}.`);
+  S.locations[toSlot]=S.locations[fromSlot]; S.locations[fromSlot]={cardId:null,builder:null,chars:[],controller:null};
+  logMsg(`Luogo spostato dallo spazio ${fromSlot+1} allo spazio ${toSlot+1}.`);
   render();
 }
-function movePersistentRito(pi,idx,destination){
-  if(!['hand','discard','removed','top','bottom'].includes(destination)) return;
-  const p=S.players[pi]; const [id]=p.persistentRiti.splice(idx,1);
-  if(id===undefined) return;
-  if(destination==='hand') p.hand.push(id);
-  else if(destination==='discard') p.discard.push(id);
-  else if(destination==='removed') p.removed.push(id);
-  else if(destination==='top') p.deck.unshift(id);
-  else if(destination==='bottom') p.deck.push(id);
-  logMsg(`"${cardById(id)?.name||'?'}" spostato dai riti persistenti a ${destination==='hand'?'mano':destination==='discard'?'scarti':destination==='removed'?'rimosse':destination==='top'?'cima al mazzo':'fondo al mazzo'} di ${p.name}.`);
+function setLocationController(slot,pi){ S.locations[slot].controller = pi; logMsg(`Controllo del luogo ${slot+1} impostato su ${pi==null?'nessuno':S.players[pi].name}.`); render(); }
+function moveCharacterFromLocation(slot,instId,dest){
+  const loc=S.locations[slot]; const idx=loc.chars.findIndex(c=>c.instId===instId); if(idx<0) return;
+  const [inst]=loc.chars.splice(idx,1); const p=S.players[inst.owner]; putInZone(p,inst.cardId,dest);
+  logMsg(`"${cardById(inst.cardId)?.name||'?'}" tolto dal luogo ${slot+1} e spostato a ${ZONE_LABEL[dest]} di ${p.name}.`);
   render();
 }
-function moveActiveEvent(destination){
-  if(!S.activeEvent) return;
-  const id=S.activeEvent; const pi=S.activeEventOwner??S.active;
-  const p=S.players[pi];
-  if(destination==='hand') p.hand.push(id);
-  else if(destination==='discard') p.discard.push(id);
-  else if(destination==='removed') p.removed.push(id);
-  else if(destination==='top') p.deck.unshift(id);
-  else if(destination==='bottom') p.deck.push(id);
-  else return;
-  S.activeEvent=null; S.activeEventOwner=null;
-  logMsg(`Evento spostato manualmente a ${destination==='hand'?'mano':destination==='discard'?'scarti':destination==='removed'?'rimosse':destination==='top'?'cima al mazzo':'fondo al mazzo'} di ${p.name}.`);
+function moveCharacterToLocation(fromSlot,instId,toSlot){
+  if(fromSlot===toSlot) return;
+  const src=S.locations[fromSlot]; const idx=src.chars.findIndex(c=>c.instId===instId); if(idx<0) return;
+  const [inst]=src.chars.splice(idx,1); S.locations[toSlot].chars.push(inst);
+  logMsg(`"${cardById(inst.cardId)?.name||'?'}" spostato al luogo ${toSlot+1}.`);
   render();
 }
+function changeCharacterOwner(slot,instId,pi){
+  const inst=S.locations[slot].chars.find(c=>c.instId===instId); if(!inst||(pi!==0&&pi!==1)) return;
+  inst.owner=pi; logMsg(`Controllo di "${cardById(inst.cardId)?.name||'?'}" assegnato a ${S.players[pi].name}.`); render();
+}
+function removePersistentRito(pi, idx){ movePersistentRito(pi, idx, 'discard'); }
 
-function tradeScore(atk,def){
-  let s=0;
-  if((atk.forza||0)>=(def.resistenza||0)) s+=3;
-  if((def.forza||0)>=(atk.resistenza||0)) s-=3;
-  s += ((atk.forza||0)-(def.forza||0))*0.3 + ((atk.resistenza||0)-(def.resistenza||0))*0.2;
-  return s;
-}
-function resolveSingleSkirmish(slot, attackerInstId, defenderInstId){
-  const l=S.locations[slot]; const atk=l.chars.find(c=>c.instId===attackerInstId);
-  if(!atk) return;
-  if(!defenderInstId){ logMsg('Nessun difensore scelto: nessuno scontro.'); return; }
-  const def=l.chars.find(c=>c.instId===defenderInstId); if(!def) return;
-  const ac=cardById(atk.cardId), dc=cardById(def.cardId);
-  atk.dmg+=(dc.forza||0); def.dmg+=(ac.forza||0);
-  logMsg(`Scontro di presidio: "${ac.name}" vs "${dc.name}" — danni scambiati.`);
-  l.chars=l.chars.filter(c=>{
-    const cc=cardById(c.cardId); const dead=c.dmg>=(cc.resistenza||0);
-    if(dead){ S.players[c.owner].discard.push(c.cardId); logMsg(`"${cc.name}" sconfitto e messo negli scarti.`); }
-    return !dead;
-  });
-}
-function deployCharacter(pi, handIdx, slot, aiLevel){
-  if(S.stage!=='manual' && !aiLevel && (S.stage!=='play'||S.active!==pi||S.cardPlayedThisTurn)) return;
-  const p=S.players[pi]; const id=p.hand[handIdx]; const c=cardById(id);
-  if(!c||c.type!=='personaggio'||!S.locations[slot].cardId) return;
-  if(S.stage!=='manual'){
-    if(p.influence<(c.costInf||0)){ if(!aiLevel) showToast('Influenza insufficiente.'); return; }
-    p.influence-=(c.costInf||0);
-  }
-  p.hand.splice(handIdx,1);
-  const inst={instId:uid(), cardId:id, owner:pi, dmg:0};
-  S.locations[slot].chars.push(inst);
-  if(S.stage==='manual'){
-    logMsg(`${p.name} schiera manualmente "${c.name}" nel luogo ${slot+1}.`);
-    render();
-    return;
-  }
-  S.cardPlayedThisTurn=true;
-  logMsg(`${p.name} schiera "${c.name}" nel luogo ${slot+1}.`);
-  const oppHere=S.locations[slot].chars.some(ch=>ch.owner!==pi);
-  if(!oppHere){ finishCardAction(pi,c); render(); return; }
-  if(aiLevel){
-    const defenders=S.locations[slot].chars.filter(ch=>ch.owner!==pi).map(ch=>cardById(ch.cardId));
-    const willAttack = aiLevel==='facile'? Math.random()<0.6 : defenders.some(dc=>tradeScore(c,dc)>-2);
-    if(willAttack){
-      const defSeat=1-pi;
-      if(S.ai[defSeat]){ const defId=aiChooseDefender(slot,id,defSeat,S.ai[defSeat]); resolveSingleSkirmish(slot,inst.instId,defId); finishCardAction(pi,c); }
-      else { sel.choosingDefender={slot, attackerInstId:inst.instId}; }
-    } else finishCardAction(pi,c);
-  } else {
-    sel.skirmishOffer={slot, attackerInstId:inst.instId};
-  }
+function revealNextEvent(){
+  if(!S.eventDeck.length){ if(S.eventDiscard.length){ S.eventDeck=shuffle(S.eventDiscard); S.eventDiscard=[]; logMsg('Mazzo Eventi esaurito: si rimescolano gli Scarti Eventi.'); } else { showToast('Mazzo Eventi e Scarti Eventi vuoti.'); return; } }
+  if(S.activeEvent) S.eventDiscard.push(S.activeEvent);
+  S.activeEvent=S.eventDeck.shift();
+  logMsg(`Rivelato l'Evento "${cardById(S.activeEvent).name}".`);
   render();
 }
-function humanStartSkirmish(yes){
-  const {slot,attackerInstId}=sel.skirmishOffer; sel.skirmishOffer=null;
-  const atkInst=S.locations[slot].chars.find(c=>c.instId===attackerInstId); const pi=atkInst.owner; const defSeat=1-pi;
-  if(!yes){ finishCardAction(pi, cardById(atkInst.cardId)); render(); return; }
-  if(S.ai[defSeat]){
-    const defId=aiChooseDefender(slot, atkInst.cardId, defSeat, S.ai[defSeat]);
-    resolveSingleSkirmish(slot, attackerInstId, defId);
-    finishCardAction(pi, cardById(atkInst.cardId));
-  } else { sel.choosingDefender={slot, attackerInstId}; }
-  render();
-}
-function humanPickDefender(defInstId){
-  const {slot,attackerInstId}=sel.choosingDefender; sel.choosingDefender=null;
-  const atkInst=S.locations[slot].chars.find(c=>c.instId===attackerInstId); const pi=atkInst.owner;
-  resolveSingleSkirmish(slot, attackerInstId, defInstId);
-  finishCardAction(pi, cardById(atkInst.cardId));
-  render();
-}
-function aiChooseDefender(slot, attackerCardId, pi, level){
-  const atkCard=cardById(attackerCardId);
-  const opts=S.locations[slot].chars.filter(c=>c.owner===pi);
-  if(!opts.length) return null;
-  if(level==='facile') return Math.random()<0.5? opts[Math.floor(Math.random()*opts.length)].instId : null;
-  let best=null,bestScore=-Infinity;
-  opts.forEach(o=>{ const dc=cardById(o.cardId); const sc=-tradeScore(atkCard,dc); if(sc>bestScore){bestScore=sc;best=o;} });
-  if(level==='medio' && Math.random()<0.25) return opts[Math.floor(Math.random()*opts.length)].instId;
-  return bestScore>-2.5? best.instId : null;
-}
+function discardActiveEvent(){ if(!S.activeEvent) return; S.eventDiscard.push(S.activeEvent); logMsg(`Evento "${cardById(S.activeEvent).name}" scartato.`); S.activeEvent=null; render(); }
 
-function playLocationFromHand(pi,handIdx,slot){
-  if(S.stage!=='manual' && (S.stage!=='play'||S.active!==pi||S.cardPlayedThisTurn)) return;
-  const p=S.players[pi]; const id=p.hand[handIdx]; const c=cardById(id);
-  if(!c||c.type!=='luogo'||S.locations[slot].cardId) return;
-  if(S.stage!=='manual'){
-    if(p.influence<(c.costInf||0)){ showToast('Influenza insufficiente.'); return; }
-    p.influence-=(c.costInf||0); if(c.costCor) changeCorruption(pi, c.costCor);
-  }
-  p.hand.splice(handIdx,1); S.locations[slot]={cardId:id, builder:pi, chars:[]};
-  S.cardPlayedThisTurn=true;
-  logMsg(S.stage==='manual'
-    ? `${p.name} posiziona manualmente "${c.name}" nello spazio ${slot+1}.`
-    : `${p.name} costruisce "${c.name}" nello spazio ${slot+1} (a pagamento).`);
-  finishCardAction(pi,c); render();
-}
-function playRitoFromHand(pi,handIdx){
-  if(S.stage!=='manual' && (S.stage!=='play'||S.active!==pi||S.cardPlayedThisTurn)) return;
-  const p=S.players[pi]; const id=p.hand[handIdx]; const c=cardById(id);
-  if(!c||c.type!=='rito') return;
-  if(S.stage!=='manual'){
-    if(p.influence<(c.costInf||0)){ showToast('Influenza insufficiente.'); return; }
-    p.influence-=(c.costInf||0); if(c.costCor) changeCorruption(pi,c.costCor);
-  }
-  p.hand.splice(handIdx,1); S.cardPlayedThisTurn=true;
-  if(c.ritoTipo==='persistente'){
-    p.persistentRiti.push(id);
-    logMsg(S.stage==='manual'
-      ? `${p.name} sposta manualmente "${c.name}" nei riti persistenti; applica l'effetto separatamente se necessario.`
-      : `${p.name} attiva il rito persistente "${c.name}" (applica l'effetto d'ingresso, poi resta in gioco).`);
-    if(p.persistentRiti.length>3) logMsg(`⚠ ${p.name} ha più di 3 riti persistenti: rimuovine uno dal pannello "Riti persistenti".`);
-  } else {
-    p.discard.push(id);
-    logMsg(S.stage==='manual'
-      ? `${p.name} sposta manualmente "${c.name}" negli scarti; applica l'effetto separatamente se necessario.`
-      : `${p.name} risolve il rito immediato "${c.name}" → applica l'effetto, poi va negli scarti.`);
-  }
-  finishCardAction(pi,c); render();
-}
-function playRitoAsResponse(pi,handIdx){
-  if(S.stage!=='manual' && (S.stage!=='play'||S.active===pi)) return;
-  const p=S.players[pi]; const id=p.hand[handIdx]; const c=cardById(id);
-  if(!c||c.type!=='rito'||c.ritoTipo==='persistente') return;
-  if(S.stage!=='manual'){
-    if(p.influence<(c.costInf||0)){ showToast('Influenza insufficiente.'); return; }
-    p.influence-=(c.costInf||0); if(c.costCor) changeCorruption(pi,c.costCor);
-  }
-  p.hand.splice(handIdx,1); p.discard.push(id);
-  logMsg(`${p.name} risponde con il rito istantaneo "${c.name}" → applica l'effetto, poi va negli scarti.`);
+function refillMarketSlot(slot){
+  if(S.market[slot]) return;
+  if(!S.mercenarioDeck.length){ if(S.mercenarioDiscard.length){ S.mercenarioDeck=shuffle(S.mercenarioDiscard); S.mercenarioDiscard=[]; logMsg('Mazzo Mercenario esaurito: si rimescolano gli Scarti Mercenari.'); } else { showToast('Mazzo Mercenario e Scarti Mercenari vuoti.'); return; } }
+  S.market[slot]=S.mercenarioDeck.shift();
   render();
 }
-function playEventFromHand(pi,handIdx){
-  if(S.stage!=='manual' && (S.stage!=='play'||S.active!==pi||S.cardPlayedThisTurn)) return;
-  const p=S.players[pi]; const id=p.hand[handIdx]; const c=cardById(id);
-  if(!c||c.type!=='evento') return;
-  if(S.stage!=='manual'){
-    if(p.influence<(c.costInf||0)){ showToast('Influenza insufficiente.'); return; }
-    p.influence-=(c.costInf||0);
-  }
-  if(S.stage==='manual' && S.activeEvent){ showToast('Sposta prima l’Evento attivo in un’altra zona.'); return; }
-  p.hand.splice(handIdx,1); S.cardPlayedThisTurn=true;
-  if(S.activeEvent){ S.players[S.activeEventOwner].discard.push(S.activeEvent); logMsg(`Evento precedente scartato.`); }
-  S.activeEvent=id; S.activeEventOwner=pi;
-  logMsg(`${p.name} richiama l'Evento "${c.name}". Applica l'effetto manualmente.`);
-  finishCardAction(pi,c); render();
+function moveMarketCard(slot,dest){
+  const id=S.market[slot]; if(!id) return;
+  if(dest==='mercDiscard'){ S.mercenarioDiscard.push(id); }
+  else { const pi=Number(dest.slice(1,2)); const zone=dest.slice(2); const p=S.players[pi]; putInZone(p,id,zone);
+    logMsg(`"${cardById(id)?.name||'?'}" preso dal Mercato e messo in ${ZONE_LABEL[zone]} di ${p.name}.`); }
+  S.market[slot]=null; render();
 }
-function removePersistentRito(pi, idx){
-  const p=S.players[pi]; const id=p.persistentRiti.splice(idx,1)[0];
-  if(id){ p.discard.push(id); logMsg(`${p.name} rimuove dal campo il rito persistente "${cardById(id)?.name}".`); }
-  render();
-}
+function shuffleMercDiscardIntoDeck(){ if(!S.mercenarioDiscard.length) return; S.mercenarioDeck=shuffle([...S.mercenarioDeck,...S.mercenarioDiscard]); S.mercenarioDiscard=[]; logMsg('Scarti Mercenari rimescolati nel Mazzo Mercenario.'); render(); }
+function moveMercDeckCard(i,pi){ const id=S.mercenarioDeck.splice(i,1)[0]; if(id===undefined) return; S.players[pi].hand.push(id); logMsg(`"${cardById(id)?.name||'?'}" preso dal Mazzo Mercenario e messo in mano a ${S.players[pi].name}.`); render(); }
 
-/* ====================== FINE ROUND ====================== */
-function locStatus(l){
-  const has1=l.chars.some(c=>c.owner===0), has2=l.chars.some(c=>c.owner===1);
-  if(has1&&has2) return "conteso"; if(has1) return "occ1"; if(has2) return "occ2"; return "neutrale";
-}
-function enterRoundEnd(){
-  S.stage='round-end';
-  S.locations.forEach((l,i)=>{
-    const st=locStatus(l);
-    if(l.cardId && (st==='occ1'||st==='occ2')){
-      const pi=st==='occ1'?0:1; const c=cardById(l.cardId);
-      if(c.prestigio){ S.players[pi].prestige+=c.prestigio; logMsg(`${S.players[pi].name} ottiene ${c.prestigio} Prestigio da "${c.name}" (luogo ${i+1}).`); }
-    }
-  });
-  const [a,b]=S.players; let roundWinner=null;
-  if(a.prestige>b.prestige) roundWinner=0; else if(b.prestige>a.prestige) roundWinner=1;
-  if(roundWinner!==null){ S.matchScore[roundWinner]++; logMsg(`🏅 ${S.players[roundWinner].name} vince il Round ${S.round} (${a.prestige}-${b.prestige}).`); }
-  else logMsg(`Round ${S.round} in parità (${a.prestige}-${b.prestige}): nessun punto.`);
-  if(S.matchScore[0]>=2||S.matchScore[1]>=2) S.matchOver = S.matchScore[0]>S.matchScore[1]? S.players[0].name : S.players[1].name;
-  else if(S.round>=3) S.matchOver='Pareggio';
-  render();
-}
-function nextRound(){
-  if(S.stage==='manual'){ S.round++; render(); return; }
-  if(S.matchOver) return;
-  S.round++; startRound();
-}
-
-/* ====================== IA ====================== */
-function aiTakeTurn(pi){
-  const level=S.ai[pi]; const p=S.players[pi];
-  const playable=p.hand.map((id,idx)=>({id,idx,c:cardById(id)})).filter(h=>h.c);
-  const options=[];
-  playable.forEach(h=>{
-    const c=h.c;
-    if(c.type==='personaggio' && p.influence>=(c.costInf||0)) S.locations.forEach((l,slot)=>{ if(l.cardId) options.push({type:'char',h,slot}); });
-    if(c.type==='luogo' && p.influence>=(c.costInf||0) && p.corruption>=0) S.locations.forEach((l,slot)=>{ if(!l.cardId) options.push({type:'loc',h,slot}); });
-    if(c.type==='rito' && p.influence>=(c.costInf||0)) options.push({type:'rito',h});
-    if(c.type==='evento' && p.influence>=(c.costInf||0)) options.push({type:'evento',h});
-  });
-  if(!options.length){ passTurn(pi); return; }
-  function scoreOpt(o){
-    const c=o.h.c; let s=(c.effetto?1:0)*1.2;
-    if(o.type==='loc') s += (c.prestigio||0)*2 - (c.costInf||0)*0.3;
-    if(o.type==='char'){
-      const occ=S.locations[o.slot].chars; const oppHere=occ.filter(ch=>ch.owner!==pi);
-      s += 1 - (c.costInf||0)*0.25 + (c.forza||0)*0.3 + (c.resistenza||0)*0.2;
-      if(oppHere.length){ let best=-Infinity; oppHere.forEach(d=>{ const sc=tradeScore(c,cardById(d.cardId)); if(sc>best) best=sc; }); s+=best; }
-      else if(!occ.length) s+=0.5;
-    }
-    if(o.type==='rito'||o.type==='evento') s += 0.8 - (c.costInf||0)*0.2;
-    return s;
-  }
-  let chosen;
-  if(level==='facile'){ chosen=options[Math.floor(Math.random()*options.length)]; }
-  else {
-    options.forEach(o=>o.score=scoreOpt(o)); options.sort((a,b)=>b.score-a.score);
-    chosen = (level==='medio' && options.length>1 && Math.random()<0.3) ? options[1] : options[0];
-    if(chosen.score<-1 && Math.random()<0.6){ passTurn(pi); return; }
-  }
-  if(chosen.type==='char') deployCharacter(pi, chosen.h.idx, chosen.slot, level);
-  else if(chosen.type==='loc') playLocationFromHand(pi, chosen.h.idx, chosen.slot);
-  else if(chosen.type==='rito') playRitoFromHand(pi, chosen.h.idx);
-  else if(chosen.type==='evento') playEventFromHand(pi, chosen.h.idx);
-}
-function driveAIPrep(){
-  if(S.stage!=='prep-place') return;
-  const pi=S.prepPlacer; const level=S.ai[pi]; if(!level) return;
-  const p=S.players[pi]; const luoghi=p.hand.map((id,idx)=>({id,idx,c:cardById(id)})).filter(h=>h.c.type==='luogo');
-  if(!luoghi.length || S.luoghiPlaced>=3){ passPrepPlacement(pi); return; }
-  let pick = level==='facile'? luoghi[Math.floor(Math.random()*luoghi.length)] : luoghi.sort((a,b)=>(b.c.prestigio||0)-(a.c.prestigio||0))[0];
-  const empty=S.locations.map((l,i)=>l.cardId?null:i).filter(i=>i!==null);
-  const slot = empty[Math.floor(Math.random()*empty.length)];
-  placeLuogoPrep(pi, pick.idx, slot);
-}
-function driveAIMulligan(){
-  for(let pi=0;pi<2;pi++){
-    const level=S.ai[pi]; if(!level||S.mulliganDone[pi]) continue;
-    const p=S.players[pi];
-    if(level!=='facile'){
-      const costly=p.hand.map((id,idx)=>({idx,c:cardById(id)})).filter(h=>h.c&&(h.c.costInf||0)>=5).sort((a,b)=>(b.c.costInf)-(a.c.costInf)).slice(0,2);
-      S.mulliganSel[pi]=costly.map(h=>h.idx);
-    }
-    confirmMulligan(pi);
-  }
-}
-
-/* ====================== GESTIONE MANO / SCARTI / MAZZO / RIMOSSE ====================== */
-function discardFromHand(pi,idx){ const p=S.players[pi]; const id=p.hand.splice(idx,1)[0]; if(id===undefined) return; p.discard.push(id); logMsg(`${p.name} scarta "${cardById(id)?.name}" dalla mano.`); render(); }
-function discardFromHandToRemoved(pi,idx){ const p=S.players[pi]; const id=p.hand.splice(idx,1)[0]; if(id===undefined) return; p.removed.push(id); logMsg(`${p.name} rimuove manualmente "${cardById(id)?.name}" dalla mano.`); render(); }
-function handCardToDeck(pi,idx,pos){ const p=S.players[pi]; const id=p.hand.splice(idx,1)[0]; if(id===undefined) return; if(pos==='top') p.deck.unshift(id); else p.deck.push(id); logMsg(`${p.name} rimette "${cardById(id)?.name}" ${pos==='top'?'in cima':'in fondo'} al mazzo.`); render(); }
-function discardToHand(pi,idx){ const p=S.players[pi]; const id=p.discard.splice(idx,1)[0]; if(id===undefined) return; p.hand.push(id); logMsg(`${p.name} riprende in mano "${cardById(id)?.name}" dagli scarti.`); render(); }
-function discardToDeck(pi,idx,pos){ const p=S.players[pi]; const id=p.discard.splice(idx,1)[0]; if(id===undefined) return; if(pos==='top') p.deck.unshift(id); else p.deck.push(id); logMsg(`${p.name} rimette "${cardById(id)?.name}" dagli scarti ${pos==='top'?'in cima':'in fondo'} al mazzo.`); render(); }
-function discardToRemoved(pi,idx){ const p=S.players[pi]; const id=p.discard.splice(idx,1)[0]; if(id===undefined) return; p.removed.push(id); logMsg(`${p.name} rimuove manualmente "${cardById(id)?.name}" dagli scarti.`); render(); }
-function removedToHand(pi,idx){ const p=S.players[pi]; const id=p.removed.splice(idx,1)[0]; if(id===undefined) return; p.hand.push(id); logMsg(`${p.name} riprende in mano "${cardById(id)?.name}" dalle carte rimosse.`); render(); }
-function removedToDiscard(pi,idx){ const p=S.players[pi]; const id=p.removed.splice(idx,1)[0]; if(id===undefined) return; p.discard.push(id); logMsg(`${p.name} sposta "${cardById(id)?.name}" dalle rimosse agli scarti.`); render(); }
-function removedToDeck(pi,idx,pos){ const p=S.players[pi]; const id=p.removed.splice(idx,1)[0]; if(id===undefined) return; if(pos==='top') p.deck.unshift(id); else p.deck.push(id); logMsg(`${p.name} rimette "${cardById(id)?.name}" dalle rimosse ${pos==='top'?'in cima':'in fondo'} al mazzo.`); render(); }
-function shuffleDeck(pi){ S.players[pi].deck=shuffle(S.players[pi].deck); logMsg(`${S.players[pi].name} mischia il mazzo.`); render(); }
-function peekTop(pi){ const p=S.players[pi]; if(!p.deck.length){ showToast('Mazzo vuoto.'); return; } showToast(`Prima carta del mazzo di ${p.name}: ${cardById(p.deck[0]).name}`); }
-
-/* ====================== POOL CARTE CRUD ====================== */
 let editingCard=null;
 function upsertCard(data){ if(editingCard){ Object.assign(cardById(editingCard),data); editingCard=null; } else S.pool.push({id:uid(),...data}); render(); }
 function askDeleteCard(id){ confirmingDelete[id]=true; render(); }
 function cancelDeleteCard(id){ confirmingDelete[id]=false; render(); }
-function deleteCard(id){ S.pool=S.pool.filter(c=>c.id!==id); S.decks.forEach(d=>{ const i=d.list.findIndex(e=>e.cardId===id); if(i>=0) d.list.splice(i,1); }); delete confirmingDelete[id]; render(); }
+function deleteCard(id){ S.pool=S.pool.filter(c=>c.id!==id); S.decklists.forEach(l=>{ const i=l.findIndex(e=>e.cardId===id); if(i>=0) l.splice(i,1); }); delete confirmingDelete[id]; render(); }
 
-/* ====================== EXPORT / IMPORT / SALVATAGGIO LOCALE ====================== */
-const SAVE_KEY = 'ceneri-del-divino-dati';
-function saveLocal(){ try{ localStorage.setItem(SAVE_KEY, JSON.stringify({pool:S.pool, decks:S.decks, playerDeck:S.playerDeck})); }catch(e){} }
-function loadLocal(){
-  try{
-    const raw=localStorage.getItem(SAVE_KEY); if(!raw) return;
-    const o=JSON.parse(raw);
-    if(o.pool) S.pool=o.pool.map(c=>({fazione:'Comune',tipologia:'',...c}));
-    if(o.decks) S.decks=o.decks;
-    if(o.playerDeck) S.playerDeck=o.playerDeck;
-  }catch(e){}
-}
-function clearLocal(){
-  if(!confirm('Cancellare pool carte e mazzi salvati in questo browser? La partita in corso non viene toccata.')) return;
-  try{ localStorage.removeItem(SAVE_KEY); }finally{ location.reload(); }
-}
 async function exportData(){
-  const data=JSON.stringify({pool:S.pool, decks:S.decks, playerDeck:S.playerDeck},null,2);
+  const data=JSON.stringify({pool:S.pool, decklists:S.decklists, deckFaction:S.deckFaction},null,2);
   try{ const d=await claude.use("downloads"); if(d){ await d.save({filename:"ceneri-del-divino-dati.json", data}); return; } }catch(e){}
   const blob=new Blob([data],{type:"application/json"}); const a=document.createElement('a');
   a.href=URL.createObjectURL(blob); a.download="ceneri-del-divino-dati.json"; a.click();
@@ -811,31 +349,26 @@ async function exportData(){
 function importData(file){
   const r=new FileReader();
   r.onload=()=>{ try{ const o=JSON.parse(r.result);
-      if(o.pool) S.pool=o.pool.map(c=>({fazione:'Comune',tipologia:'',...c}));
-      if(o.decks) S.decks=o.decks;
-      if(o.playerDeck) S.playerDeck=o.playerDeck;
-      saveLocal(); render();
+      if(o.pool) S.pool=o.pool.map(c=>({fazione:'',tipologia:'',...c}));
+      if(o.decklists) S.decklists=o.decklists;
+      if(o.deckFaction) S.deckFaction=o.deckFaction;
+      render();
     }catch(e){ showToast('File non valido.'); } };
   r.readAsText(file);
 }
 
-/* ====================== CARD FACE ====================== */
-function cardFace(c, inst, forceOpen=false){
+/* forceOpen=true mostra sempre testo effetto/dettagli senza dover cliccare
+   (usato per i Luoghi in campo, così l'effetto è sempre visibile). */
+function cardFace(c, inst, forceOpen){
   if(!c) return '';
   const key = inst? inst.instId : c.id;
   const isOpen = forceOpen || !!cardOpen[key];
-  const dmg = inst && inst.dmg? `<div class="gc-dmg">Danni subiti: ${inst.dmg}</div>`:'';
   let sub=[typeLabel(c.type)];
-  sub.push(c.fazione && c.fazione!=='Comune'? c.fazione : 'Comune');
+  sub.push(c.fazione? c.fazione : 'Mazzo Eventi / Mercato');
   if(c.tipologia) sub.push(c.tipologia);
   if(c.type==='luogo') sub.push('Prestigio prodotto: '+(c.prestigio||0));
   if(c.type==='rito') sub.push(c.ritoTipo==='persistente'?'Persistente':'Immediato');
-  if(c.costPre) sub.push('Costo Prestigio '+c.costPre);
   if(c.legendary) sub.push('Leggendaria');
-  const art = (c.imagePath||c.image) ? `<img class="gc-art" src="${esc(c.imagePath||c.image)}" onerror="this.style.display='none'">` : '';
-  const nameWords=(c.name||'').trim().split(/\s+/);
-  const firstWord=nameWords.shift()||'';
-  const remainingName=nameWords.join(' ');
   return `<div class="gamecard type-${c.type} ${isOpen?'open':''}">
     <div class="gc-rightcol">
       ${c.type==='personaggio'?`<div class="gc-stat">F ${c.forza||0}<br>R ${c.resistenza||0}</div>`:''}
@@ -844,19 +377,16 @@ function cardFace(c, inst, forceOpen=false){
         ${c.costCor?`<span class="gc-badge cor" title="Costo Corruzione">${c.costCor}</span>`:''}
       </div>
     </div>
-    <div class="gc-name"><span class="gc-firstline">${ICO.type[c.type]||''}<span>${esc(firstWord)}</span></span>${remainingName?` ${esc(remainingName)}`:''}
+    <div class="gc-name">${ICO.type[c.type]||''} ${esc(c.name)}
       ${forceOpen?'':`<button class="gc-toggle" onclick="event.stopPropagation();toggleCardOpen('${key}')" title="Mostra/nascondi dettagli">${isOpen?'▲':'ⓘ'}</button>`}
     </div>
     <div class="gc-full">
-      ${art}
       <div class="gc-sub">${sub.join(' · ')}</div>
       <div class="gc-effect">${esc(c.effetto||'')||'<span class=\"small\">(nessun testo effetto)</span>'}</div>
-      ${dmg}
     </div>
   </div>`;
 }
 
-/* ====================== RENDER ====================== */
 let activeTab='partita';
 function setTab(t){ activeTab=t; render(); }
 function render(){
@@ -866,174 +396,150 @@ function render(){
   document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
   document.getElementById('tab-'+activeTab).classList.add('active');
   renderPartita(); renderCarte(); renderMazzi(); renderDati();
-  saveLocal();
 }
 
 function handCardFooter(pi, idx, c){
   let h='';
-  if(S.stage==='manual'){
-    if(c.type==='personaggio'){
-      const built=S.locations.map((l,i)=>l.cardId?i:null).filter(i=>i!==null);
-      h += built.map(s=>`<button class="btn" onclick="deployCharacter(${pi},${idx},${s})">→ Luogo ${s+1}</button>`).join('')||'<span class="small">Posiziona prima un Luogo</span>';
-    }
-    if(c.type==='luogo'){
-      const empty=S.locations.map((l,i)=>l.cardId?null:i).filter(i=>i!==null);
-      h += empty.map(s=>`<button class="btn" onclick="playLocationFromHand(${pi},${idx},${s})">→ Spazio ${s+1}</button>`).join('')||'<span class="small">Fila piena</span>';
-    }
-    if(c.type==='rito') h += `<button class="btn" onclick="playRitoFromHand(${pi},${idx})">Sposta nei riti / scarti</button>`;
-    if(c.type==='evento') h += `<button class="btn" onclick="playEventFromHand(${pi},${idx})">Imposta come Evento attivo</button>`;
+  if(c.type==='personaggio'){
+    const built=S.locations.map((l,i)=>l.cardId?i:null).filter(i=>i!==null);
+    h += built.map(s=>`<button class="btn" onclick="deployCharacterToLocation(${pi},${idx},${s})">→ Luogo ${s+1}</button>`).join('')||'<span class="small">Posiziona prima un Luogo</span>';
   }
-  if(S.stage==='prep-place' && S.prepPlacer===pi && !S.ai[pi] && c.type==='luogo' && S.luoghiPlaced<3){
+  if(c.type==='luogo'){
     const empty=S.locations.map((l,i)=>l.cardId?null:i).filter(i=>i!==null);
-    h += empty.map(s=>`<button class="btn" onclick="placeLuogoPrep(${pi},${idx},${s})">Spazio ${s+1} (gratis)</button>`).join('');
+    h += empty.map(s=>`<button class="btn" onclick="placeLuogoInSlot(${pi},${idx},${s})">→ Spazio ${s+1}</button>`).join('')||'<span class="small">Fila piena</span>';
   }
-  if(S.stage==='play' && !S.ai[pi] && !S.pendingAIEffect && !sel.skirmishOffer && !sel.choosingDefender){
-    if(S.active===pi && !S.cardPlayedThisTurn){
-      if(c.type==='personaggio'){
-        const built=S.locations.map((l,i)=>l.cardId?i:null).filter(i=>i!==null);
-        h += built.map(s=>`<button class="btn" onclick="deployCharacter(${pi},${idx},${s})">→ Luogo ${s+1}</button>`).join('')||'<span class="small">Nessun Luogo in campo</span>';
-      }
-      if(c.type==='luogo'){
-        const empty=S.locations.map((l,i)=>l.cardId?null:i).filter(i=>i!==null);
-        h += empty.map(s=>`<button class="btn" onclick="playLocationFromHand(${pi},${idx},${s})">→ Spazio ${s+1}</button>`).join('')||'<span class="small">Fila piena</span>';
-      }
-      if(c.type==='rito') h += `<button class="btn" onclick="playRitoFromHand(${pi},${idx})">Esegui rito</button>`;
-      if(c.type==='evento') h += `<button class="btn" onclick="playEventFromHand(${pi},${idx})">Richiama evento</button>`;
-    }
-    if(S.active!==pi && c.type==='rito' && c.ritoTipo!=='persistente'){
-      h += `<button class="btn ghost" onclick="playRitoAsResponse(${pi},${idx})">⚡ Istantaneo (risposta)</button>`;
-    }
-  }
-  h += `<button class="btn ghost" onclick="discardFromHand(${pi},${idx})">Scarta</button>
-        <button class="btn ghost" onclick="handCardToDeck(${pi},${idx},'top')">⤒Cima</button>
-        <button class="btn ghost" onclick="handCardToDeck(${pi},${idx},'bottom')">⤓Fondo</button>
-        ${S.stage==='manual'?`<button class="btn ghost" onclick="discardFromHandToRemoved(${pi},${idx})">Rimuovi</button>`:''}`;
+  if(c.type==='rito') h += `<button class="btn" onclick="handRitoToPersistent(${pi},${idx})">→ Riti persistenti</button>`;
+  h += `<button class="btn ghost" onclick="moveHandCard(${pi},${idx},'discard')">→ Scarti</button>
+        <button class="btn ghost" onclick="moveHandCard(${pi},${idx},'removed')">→ Rimosse</button>
+        <button class="btn ghost" onclick="moveHandCard(${pi},${idx},'top')">⤒Cima mazzo</button>
+        <button class="btn ghost" onclick="moveHandCard(${pi},${idx},'bottom')">⤓Fondo mazzo</button>`;
   return h;
 }
+function deckCardButtons(pi,i){ return `<div class="manual-controls">
+  <button class="btn ghost" onclick="moveDeckCard(${pi},${i},'hand')">→ Mano</button>
+  <button class="btn ghost" onclick="moveDeckCard(${pi},${i},'discard')">→ Scarti</button>
+  <button class="btn ghost" onclick="moveDeckCard(${pi},${i},'removed')">→ Rimosse</button>
+  <button class="btn ghost" onclick="moveDeckCard(${pi},${i},'top')">→ Cima</button>
+  <button class="btn ghost" onclick="moveDeckCard(${pi},${i},'bottom')">→ Fondo</button>
+</div>`; }
 
 function renderPartita(){
   const el=document.getElementById('tab-partita');
   if(!S.started){
-    el.innerHTML = toastHtml() + `<div class="card"><h2>Imposta la partita</h2>
+    el.innerHTML = toastHtml() + `<div class="card"><h2>Imposta la sandbox</h2>
+      <p class="small">Regolamento v0.6.0 — 4 Luoghi, Mazzo di Fazione da 20 carte, Mazzo Eventi e Mercato Mercenario separati. Nessun turno, pesca, costo o controllo viene risolto in automatico: lo decidi tu con i pulsanti.</p>
       <div class="row">${[0,1].map(pi=>`
         <div class="col">
           <h3>${esc(S.players[pi].name)}</h3>
           <input value="${esc(S.players[pi].name)}" onchange="S.players[${pi}].name=this.value;render()" style="margin-bottom:6px;width:100%">
-          <label class="small">Mazzo —
-            <select onchange="setPlayerDeck(${pi}, this.value)">
+          <label class="small">Fazione mazzo —
+            <select onchange="setDeckFaction(${pi}, this.value)">
               <option value="">— scegli —</option>
-              ${S.decks.map(d=>`<option value="${d.id}" ${S.playerDeck[pi]===d.id?'selected':''}>${esc(d.name)} (${d.factions.join('/')||'—'}) ${deckValidFull(d)?'':'⚠'}</option>`).join('')}
+              ${FACTIONS.map(f=>`<option value="${f}" ${S.deckFaction[pi]===f?'selected':''}>${f}</option>`).join('')}
             </select></label>
-          <p class="small">La sandbox non avvia turni, pescate o fasi in automatico. Puoi iniziare anche con mazzi incompleti.</p>
-          <p class="small">${S.decks.length?'Crea o modifica mazzi nella scheda "Mazzi".':'Nessun mazzo ancora creato: vai nella scheda "Mazzi" per crearne uno.'}</p>
+          <p>Mazzo: <b>${deckCount(pi)}/20</b> ${deckValid(pi)?'✅':'❌'} <span class="small">(configuralo nella scheda "Mazzi"; puoi avviare anche con un mazzo incompleto)</span></p>
         </div>`).join('')}</div>
-      <button class="btn" ${S.playerDeck.every(id=>S.decks.some(d=>d.id===id))?'':'disabled'} onclick="startMatch()">Avvia sandbox manuale</button>
+      <button class="btn" onclick="startMatch()">Avvia sandbox</button>
       </div>`;
     return;
   }
   let html=toastHtml();
   html += `<div class="card flex-between">
-    <div class="manual-board">
-      <b>Sandbox · Round ${S.round}</b>
-      <button class="btn ghost" onclick="changeManualRound(-1)">Round −</button>
-      <button class="btn ghost" onclick="changeManualRound(1)">Round +</button>
-      ${S.players.map((p,i)=>`<span class="pill">${esc(p.name)} · punti ${S.matchScore[i]}
-        <button class="btn ghost" onclick="changeManualScore(${i},-1)">−</button>
-        <button class="btn ghost" onclick="changeManualScore(${i},1)">+</button></span>`).join('')}
+    <div><b>Round ${S.round}</b>
+      <button class="btn ghost" onclick="changeManualRound(-1)">−</button>
+      <button class="btn ghost" onclick="changeManualRound(1)">+</button>
     </div>
-    <label class="small">Giocatore selezionato
+    <label class="small">Giocatore attivo (solo per il registro)
       <select onchange="setManualActivePlayer(this.value)">
         ${S.players.map((p,i)=>`<option value="${i}" ${S.active===i?'selected':''}>${esc(p.name)}</option>`).join('')}
       </select>
     </label>
   </div>`;
 
-  if(S.matchOver){
-    html += `<div class="banner">Esito manuale: ${S.matchOver==='Pareggio'?'pareggio':'vince '+esc(S.matchOver)}.</div>`;
-  }
-  html += `<div class="card">
-    <b>Gestione manuale partita</b>
-    <span class="small">Nessun turno, pesca, costo, effetto, combattimento o passaggio di round viene risolto automaticamente. Usa i controlli per applicare ogni modifica.</span>
+  html += `<div class="card"><b>Esito partita</b>
     <div class="manual-controls">
-      <button class="btn ghost" onclick="setManualWinner(0)">Segna vittoria ${esc(S.players[0].name)}</button>
-      <button class="btn ghost" onclick="setManualWinner(1)">Segna vittoria ${esc(S.players[1].name)}</button>
-      <button class="btn ghost" onclick="setManualWinner(null)">Segna pareggio</button>
-      ${S.matchOver?`<button class="btn ghost" onclick="S.matchOver=null;render()">Annulla esito</button>`:''}
+      <button class="btn ghost" onclick="setMatchWinner(0)">Segna vittoria ${esc(S.players[0].name)}</button>
+      <button class="btn ghost" onclick="setMatchWinner(1)">Segna vittoria ${esc(S.players[1].name)}</button>
+      <button class="btn ghost" onclick="setMatchWinner(null)">Segna pareggio</button>
+      ${S.matchOver?`<button class="btn ghost" onclick="clearMatchWinner()">Annulla esito</button>`:''}
     </div>
+    ${S.matchOver?`<div class="banner" style="margin-top:6px">🏆 ${S.matchOver==='Pareggio'?'Partita in parità':'Vince: '+esc(S.matchOver)}</div>`:''}
   </div>`;
-  if(S.activeEvent){
-    const activeEventCard=cardById(S.activeEvent);
-    html += `<div class="card"><h3>Evento attivo${S.activeEventOwner!==null?' — '+esc(S.players[S.activeEventOwner].name):''}</h3>
-      ${cardFace(activeEventCard)}
-      <div class="manual-controls">
-        <button class="btn ghost" onclick="moveActiveEvent('hand')">→ Mano</button>
-        <button class="btn ghost" onclick="moveActiveEvent('discard')">→ Scarti</button>
-        <button class="btn ghost" onclick="moveActiveEvent('top')">→ Cima mazzo</button>
-        <button class="btn ghost" onclick="moveActiveEvent('bottom')">→ Fondo mazzo</button>
-        <button class="btn ghost" onclick="moveActiveEvent('removed')">→ Rimosse</button>
-      </div>
+
+  html += `<div class="card"><div class="flex-between"><h3>Mazzo Eventi (${S.eventDeck.length}, scarti ${S.eventDiscard.length})</h3>
+    <div><button class="btn ghost" onclick="revealNextEvent()">Rivela prossimo</button></div></div>
+    ${S.activeEvent? `<div>${cardFace(cardById(S.activeEvent))}
+      <div class="manual-controls"><button class="btn ghost" onclick="discardActiveEvent()">Scarta Evento attivo</button></div></div>`
+      : '<span class="small">Nessun Evento attivo.</span>'}
+  </div>`;
+
+  html += `<div class="card"><div class="flex-between"><h3>Mercato Mercenario</h3>
+    <span class="small">Mazzo: ${S.mercenarioDeck.length} · Scarti: ${S.mercenarioDiscard.length}
+      <button class="btn ghost" onclick="shuffleMercDiscardIntoDeck()">Mischia scarti nel mazzo</button>
+      <button class="btn ghost" onclick="S.showMercDeck=!S.showMercDeck;render()">${S.showMercDeck?'Nascondi mazzo':'Mostra mazzo'}</button></span></div>
+    <div class="row">`;
+  S.market.forEach((id,slot)=>{
+    const c=id?cardById(id):null;
+    html += `<div class="marketslot">${c?cardFace(c):'<span class="small">— vuoto —</span>'}
+      ${c? `<div class="manual-controls">
+          <button class="btn ghost" onclick="moveMarketCard(${slot},'p0hand')">→ Mano ${esc(S.players[0].name)}</button>
+          <button class="btn ghost" onclick="moveMarketCard(${slot},'p1hand')">→ Mano ${esc(S.players[1].name)}</button>
+          <button class="btn ghost" onclick="moveMarketCard(${slot},'mercDiscard')">→ Scarti Mercenari</button>
+        </div>` : `<button class="btn ghost" onclick="refillMarketSlot(${slot})">Rifornisci</button>`}
     </div>`;
-  }
+  });
+  html += `</div>
+    ${S.showMercDeck? `<div class="zone-cards">${S.mercenarioDeck.map((id,i)=>{ const c=cardById(id); if(!c) return '';
+      return `<div class="minicard">${cardFace(c)}<div class="manual-controls">
+        <button class="btn ghost" onclick="moveMercDeckCard(${i},0)">→ Mano ${esc(S.players[0].name)}</button>
+        <button class="btn ghost" onclick="moveMercDeckCard(${i},1)">→ Mano ${esc(S.players[1].name)}</button>
+      </div></div>`; }).join('')||'<span class="small">Vuoto</span>'}</div>`:''}
+  </div>`;
 
   html += `<div class="row">`;
   for(let pi=0;pi<2;pi++){
     const p=S.players[pi];
-    html += `<div class="col playerpanel p${pi+1} ${S.active===pi?'active':''}">
+    html += `<div class="col playerpanel p${pi+1}">
       <h3>${esc(p.name)}</h3>
       <div class="resline">
-        <span class="pill">${ICO.inf} Influenza <input class="manual-value" type="number" min="0" value="${p.influence}" onchange="setManualResource(${pi},'influence',this.value)"></span>
-        <span class="pill">${ICO.cor} Corruzione <input class="manual-value" type="number" min="0" value="${p.corruption}" onchange="setManualResource(${pi},'corruption',this.value)"></span>
-        <span class="pill">${ICO.pre} Prestigio <input class="manual-value" type="number" min="0" value="${p.prestige}" onchange="setManualResource(${pi},'prestige',this.value)"></span>
+        <span class="pill">${ICO.inf} <input type="number" min="0" value="${p.influence}" onchange="setManualResource(${pi},'influence',this.value)"> <button class="btn ghost" onclick="bumpResource(${pi},'influence',1)">+</button><button class="btn ghost" onclick="bumpResource(${pi},'influence',-1)">−</button></span>
+        <span class="pill">${ICO.cor} <input type="number" min="0" value="${p.corruption}" onchange="setManualResource(${pi},'corruption',this.value)"> <button class="btn ghost" onclick="bumpResource(${pi},'corruption',1)">+</button><button class="btn ghost" onclick="bumpResource(${pi},'corruption',-1)">−</button></span>
+        <span class="pill">${ICO.pre} <input type="number" min="0" value="${p.prestige}" onchange="setManualResource(${pi},'prestige',this.value)"> <button class="btn ghost" onclick="bumpResource(${pi},'prestige',1)">+</button><button class="btn ghost" onclick="bumpResource(${pi},'prestige',-1)">−</button></span>
       </div>
       <div class="small">Mazzo: ${p.deck.length}
-        <button class="btn ghost" onclick="drawManualCard(${pi})">Pesca 1</button>
+        <button class="btn ghost" onclick="drawCard(${pi})">Pesca 1</button>
         <button class="btn ghost" onclick="shuffleDeck(${pi})">Mischia</button>
         <button class="btn ghost" onclick="shuffleDiscardIntoDeck(${pi})">Mischia scarti nel mazzo</button>
         <button class="btn ghost" onclick="peekTop(${pi})">Vedi cima</button>
         <button class="btn ghost" onclick="S.showDeck[${pi}]=!S.showDeck[${pi}];render()">${S.showDeck[pi]?'Nascondi mazzo':'Mostra carte del mazzo'}</button>
       </div>
-      ${S.showDeck[pi]?`<div class="zone-cards">${p.deck.map((id,i)=>{ const c=cardById(id); if(!c) return '';
-        return `<div class="minicard">${cardFace(c)}<div class="manual-controls">
-          <button class="btn ghost" onclick="moveDeckCard(${pi},${i},'hand')">→ Mano</button>
-          <button class="btn ghost" onclick="moveDeckCard(${pi},${i},'discard')">→ Scarti</button>
-          <button class="btn ghost" onclick="moveDeckCard(${pi},${i},'removed')">→ Rimosse</button>
-          <button class="btn ghost" onclick="moveDeckCard(${pi},${i},'top')">→ Cima</button>
-          <button class="btn ghost" onclick="moveDeckCard(${pi},${i},'bottom')">→ Fondo</button>
-        </div></div>`;
-      }).join('')||'<span class="small">Mazzo vuoto</span>'}</div>`:''}
+      ${S.showDeck[pi]? `<div class="zone-cards">${p.deck.map((id,i)=>{ const c=cardById(id); if(!c) return '';
+        return `<div class="minicard">${cardFace(c)}${deckCardButtons(pi,i)}</div>`; }).join('')||'<span class="small">Mazzo vuoto</span>'}</div>`:''}
       <h4>Mano (${p.hand.length})</h4>
       <div class="handlist">${p.hand.map((id,i)=>{ const c=cardById(id); if(!c) return '';
         return `<div class="minicard">${cardFace(c)}<div style="margin-top:3px">${handCardFooter(pi,i,c)}</div></div>`;
       }).join('')||'<span class="small">—</span>'}</div>
-      ${S.stage==='prep-place' && S.prepPlacer===pi && !S.ai[pi] ? `<button class="btn ghost" onclick="passPrepPlacement(${pi})">Passa piazzamento</button>`:''}
-      ${S.stage==='prep-mulligan' && !S.mulliganDone[pi] && !S.ai[pi] ? `
-        <div class="small">Seleziona fino a 2 carte da sostituire (clic sulla carta), poi conferma.</div>
-        <div class="handlist">${p.hand.map((id,i)=>{ const c=cardById(id); if(!c) return '';
-          return `<div class="minicard ${S.mulliganSel[pi].includes(i)?'sel':''}" style="outline:${S.mulliganSel[pi].includes(i)?'2px solid var(--warn)':'none'}" onclick="toggleMulliganPick(${pi},${i})">${cardFace(c)}</div>`;
-        }).join('')}</div>
-        <button class="btn" onclick="confirmMulligan(${pi})">Conferma mulligan (${S.mulliganSel[pi].length})</button>`:''}
-      ${S.stage==='play' && S.active===pi && !S.cardPlayedThisTurn && !S.ai[pi] && !sel.skirmishOffer && !sel.choosingDefender && !S.pendingAIEffect ? `<button class="btn ghost" onclick="passTurn(${pi})">Passa il turno</button>`:''}
-      <div class="flex-between"><h4>Riti persistenti (${p.persistentRiti.length})</h4></div>
-      <div class="areaist">${p.persistentRiti.map((id,i)=>{ const c=cardById(id); return `<div class="minicard">${cardFace(c)}${S.stage==='manual'?`<div class="manual-controls">
-        <button class="btn ghost" onclick="movePersistentRito(${pi},${i},'hand')">→ Mano</button>
+      <h4>Riti persistenti (${p.persistentRiti.length})</h4>
+      <div class="areaist">${p.persistentRiti.map((id,i)=>{ const c=cardById(id); return `<div class="minicard">${cardFace(c)}<div class="manual-controls">
         <button class="btn ghost" onclick="movePersistentRito(${pi},${i},'discard')">→ Scarti</button>
-        <button class="btn ghost" onclick="movePersistentRito(${pi},${i},'top')">→ Cima mazzo</button>
-        <button class="btn ghost" onclick="movePersistentRito(${pi},${i},'bottom')">→ Fondo mazzo</button>
+        <button class="btn ghost" onclick="movePersistentRito(${pi},${i},'hand')">→ Mano</button>
         <button class="btn ghost" onclick="movePersistentRito(${pi},${i},'removed')">→ Rimosse</button>
-      </div>`:`<button class="btn ghost" onclick="removePersistentRito(${pi},${i})">Rimuovi</button>`}</div>`; }).join('')||'<span class="small">—</span>'}</div>
+      </div></div>`; }).join('')||'<span class="small">—</span>'}</div>
       <div class="flex-between"><h4>Scarti (${p.discard.length})</h4><button class="btn ghost" onclick="S.showDiscard[${pi}]=!S.showDiscard[${pi}];render()">${S.showDiscard[pi]?'Nascondi':'Mostra'}</button></div>
       ${S.showDiscard[pi]? `<div class="areaist">${p.discard.map((id,i)=>{ const c=cardById(id); if(!c) return '';
-        return `<div class="minicard">${cardFace(c)}<div style="margin-top:3px"><button class="btn ghost" onclick="discardToHand(${pi},${i})">→ Mano</button>
-        <button class="btn ghost" onclick="discardToDeck(${pi},${i},'top')">→ Cima</button>
-        <button class="btn ghost" onclick="discardToDeck(${pi},${i},'bottom')">→ Fondo</button>
-        ${S.stage==='manual'?`<button class="btn ghost" onclick="discardToRemoved(${pi},${i})">→ Rimosse</button>`:''}</div></div>`; }).join('')||'<span class="small">Vuoto</span>'}</div>`:''}
+        return `<div class="minicard">${cardFace(c)}<div class="manual-controls">
+        <button class="btn ghost" onclick="moveDiscardCard(${pi},${i},'hand')">→ Mano</button>
+        <button class="btn ghost" onclick="moveDiscardCard(${pi},${i},'top')">→ Cima mazzo</button>
+        <button class="btn ghost" onclick="moveDiscardCard(${pi},${i},'bottom')">→ Fondo mazzo</button>
+        <button class="btn ghost" onclick="moveDiscardCard(${pi},${i},'removed')">→ Rimosse</button>
+        </div></div>`; }).join('')||'<span class="small">Vuoto</span>'}</div>`:''}
       <div class="flex-between"><h4>Rimosse dalla partita (${p.removed.length})</h4><button class="btn ghost" onclick="S.showRemoved[${pi}]=!S.showRemoved[${pi}];render()">${S.showRemoved[pi]?'Nascondi':'Mostra'}</button></div>
       ${S.showRemoved[pi]? `<div class="areaist">${p.removed.map((id,i)=>{ const c=cardById(id); if(!c) return '';
         return `<div class="minicard">${cardFace(c)}<div class="manual-controls">
-          <button class="btn ghost" onclick="removedToHand(${pi},${i})">→ Mano</button>
-          <button class="btn ghost" onclick="removedToDiscard(${pi},${i})">→ Scarti</button>
-          <button class="btn ghost" onclick="removedToDeck(${pi},${i},'top')">→ Cima mazzo</button>
-          <button class="btn ghost" onclick="removedToDeck(${pi},${i},'bottom')">→ Fondo mazzo</button>
+        <button class="btn ghost" onclick="moveRemovedCard(${pi},${i},'hand')">→ Mano</button>
+        <button class="btn ghost" onclick="moveRemovedCard(${pi},${i},'discard')">→ Scarti</button>
+        <button class="btn ghost" onclick="moveRemovedCard(${pi},${i},'top')">→ Cima mazzo</button>
+        <button class="btn ghost" onclick="moveRemovedCard(${pi},${i},'bottom')">→ Fondo mazzo</button>
         </div></div>`; }).join('')||'<span class="small">Vuoto</span>'}</div>`:''}
     </div>`;
   }
@@ -1041,44 +547,40 @@ function renderPartita(){
 
   html += `<div class="card"><h3>Fila dei luoghi</h3><div class="locrow">`;
   S.locations.forEach((l,slot)=>{
-    const st=locStatus(l); const c=l.cardId?cardById(l.cardId):null;
-    html += `<div class="loc ${st}"><div class="loc-heading"><b>Luogo ${slot+1}</b><span class="small">${st}</span></div>`;
+    const f0=l.chars.filter(c=>c.owner===0).reduce((s,c)=>{const cc=cardById(c.cardId);return s+(cc?(cc.forza||0):0);},0);
+    const f1=l.chars.filter(c=>c.owner===1).reduce((s,c)=>{const cc=cardById(c.cardId);return s+(cc?(cc.forza||0):0);},0);
+    const st = l.controller===0?'occ1':l.controller===1?'occ2':(f0&&f1&&f0===f1?'conteso':'');
+    const c=l.cardId?cardById(l.cardId):null;
+    html += `<div class="loc ${st}"><div class="loc-heading"><b>Luogo ${slot+1}</b>${c?`<span class="small">Forza ${f0}-${f1}${l.controller!=null?' · controllato: '+esc(S.players[l.controller].name):''}</span>`:''}</div>`;
     if(c){
-      html += `<div class="loc-card">${cardFace(c,null,true)}
+      html += `${cardFace(c,null,true)}
         <div class="manual-controls">
           <button class="btn ghost" onclick="moveLocationCard(${slot},'hand')">→ Mano</button>
           <button class="btn ghost" onclick="moveLocationCard(${slot},'discard')">→ Scarti</button>
+          <button class="btn ghost" onclick="moveLocationCard(${slot},'removed')">→ Rimosse</button>
           <button class="btn ghost" onclick="moveLocationCard(${slot},'top')">→ Cima mazzo</button>
           <button class="btn ghost" onclick="moveLocationCard(${slot},'bottom')">→ Fondo mazzo</button>
-          <button class="btn ghost" onclick="moveLocationCard(${slot},'removed')">→ Rimosse</button>
-          ${S.players.map((player,pi)=>`<button class="btn ghost" onclick="changeLocationOwner(${slot},${pi})">Controllo: ${esc(player.name)}</button>`).join('')}
-          ${S.locations.map((target,i)=>i!==slot&&!S.locations[i].cardId&&!S.locations[i].chars.length?`<button class="btn ghost" onclick="moveLocationToSlot(${slot},${i})">→ Spazio ${i+1}</button>`:'').join('')}
-        </div>
-      </div>`;
-    }
-    else html += `<div class="small">Slot libero</div>`;
-    l.chars.forEach(ch=>{ const cc=cardById(ch.cardId);
-      if(!cc) return;
-      const player = S.players[ch.owner];
-      const seat = ch.owner===0?'p1':'p2';
-      html += `<div class="minicard" style="max-width:190px">${cardFace(cc,ch)}<span class="player-tag ${seat}">${esc(player.name)}</span>
+          ${S.players.map((pl,pi)=>`<button class="btn ghost" onclick="setLocationController(${slot},${pi})">Controllo: ${esc(pl.name)}</button>`).join('')}
+          <button class="btn ghost" onclick="setLocationController(${slot},null)">Controllo: nessuno</button>
+          ${S.locations.map((t,i)=>i!==slot&&!S.locations[i].cardId&&!S.locations[i].chars.length?`<button class="btn ghost" onclick="moveLocationToSlot(${slot},${i})">→ Spazio ${i+1}</button>`:'').join('')}
+        </div>`;
+    } else html += `<div class="small">Slot libero</div>`;
+    l.chars.forEach(ch=>{ const cc=cardById(ch.cardId); if(!cc) return;
+      html += `<div class="minicard" style="max-width:190px">${cardFace(cc,ch)}<span class="player-tag p${ch.owner+1}">${esc(S.players[ch.owner].name)}</span>
         <div class="manual-controls">
-          <span class="small">Danni: ${ch.dmg||0}</span>
-          <button class="btn ghost" onclick="adjustCharacterDamage(${slot},'${ch.instId}',-1)">− danno</button>
-          <button class="btn ghost" onclick="adjustCharacterDamage(${slot},'${ch.instId}',1)">+ danno</button>
-          ${S.locations.map((target,i)=>i!==slot?`<button class="btn ghost" onclick="moveCharacterToLocation(${slot},'${ch.instId}',${i})">→ Luogo ${i+1}</button>`:'').join('')}
-          ${S.players.map((player,pi)=>`<button class="btn ghost" onclick="changeCharacterOwner(${slot},'${ch.instId}',${pi})">Controllo: ${esc(player.name)}</button>`).join('')}
+          ${S.locations.map((t,i)=>i!==slot?`<button class="btn ghost" onclick="moveCharacterToLocation(${slot},'${ch.instId}',${i})">→ Luogo ${i+1}</button>`:'').join('')}
+          ${S.players.map((pl,pi)=>`<button class="btn ghost" onclick="changeCharacterOwner(${slot},'${ch.instId}',${pi})">Controllo: ${esc(pl.name)}</button>`).join('')}
           <button class="btn ghost" onclick="moveCharacterFromLocation(${slot},'${ch.instId}','hand')">→ Mano</button>
           <button class="btn ghost" onclick="moveCharacterFromLocation(${slot},'${ch.instId}','discard')">→ Scarti</button>
+          <button class="btn ghost" onclick="moveCharacterFromLocation(${slot},'${ch.instId}','removed')">→ Rimosse</button>
           <button class="btn ghost" onclick="moveCharacterFromLocation(${slot},'${ch.instId}','top')">→ Cima mazzo</button>
           <button class="btn ghost" onclick="moveCharacterFromLocation(${slot},'${ch.instId}','bottom')">→ Fondo mazzo</button>
-          <button class="btn ghost" onclick="moveCharacterFromLocation(${slot},'${ch.instId}','removed')">→ Rimosse</button>
         </div>
       </div>`;
     });
     html += `</div>`;
   });
-  html += `</div><button class="btn ghost" onclick="stopManualMatch()">Termina sandbox</button></div>`;
+  html += `</div><button class="btn ghost" style="margin-top:8px" onclick="stopMatch()">Termina sandbox</button></div>`;
 
   html += `<div class="card"><h3>Registro</h3><div id="log">${S.log.map(esc).join('<br>')}</div></div>`;
   el.innerHTML=html;
@@ -1091,17 +593,15 @@ function renderCarte(){
     <form id="cardForm" class="formgrid" onsubmit="return false">
       <input name="name" placeholder="Nome" value="${editing?esc(editing.name):''}" required>
       <select name="type">${['personaggio','luogo','rito','evento'].map(t=>`<option value="${t}" ${editing&&editing.type===t?'selected':''}>${typeLabel(t)}</option>`).join('')}</select>
-      <select name="fazione"><option value="Comune" ${!editing||editing.fazione==='Comune'?'selected':''}>Comune</option>${FACTIONS.map(f=>`<option value="${f}" ${editing&&editing.fazione===f?'selected':''}>${f}</option>`).join('')}</select>
+      <select name="fazione"><option value="">— nessuna (Evento) —</option>${CARD_FACTIONS.map(f=>`<option value="${f}" ${editing&&editing.fazione===f?'selected':''}>${f}</option>`).join('')}</select>
       <input name="tipologia" placeholder="Tipologia (es. Umano, Non morto)" value="${editing?esc(editing.tipologia||''):''}">
       <label class="small"><input type="checkbox" name="legendary" ${editing&&editing.legendary?'checked':''}> Leggendaria</label>
       <input name="costInf" type="number" min="0" placeholder="Costo Influenza" value="${editing?editing.costInf||0:0}">
       <input name="costCor" type="number" min="0" placeholder="Costo Corruzione" value="${editing?editing.costCor||0:0}">
-      <input name="costPre" type="number" min="0" placeholder="Costo Prestigio" value="${editing?editing.costPre||0:0}">
       <input name="forza" type="number" min="0" placeholder="Forza" value="${editing?editing.forza||0:0}">
       <input name="resistenza" type="number" min="0" placeholder="Resistenza" value="${editing?editing.resistenza||0:0}">
       <input name="prestigio" type="number" min="0" placeholder="Prestigio prodotto" value="${editing?editing.prestigio||0:0}">
       <select name="ritoTipo"><option value="immediato" ${editing&&editing.ritoTipo==='immediato'?'selected':''}>Rito immediato</option><option value="persistente" ${editing&&editing.ritoTipo==='persistente'?'selected':''}>Rito persistente</option></select>
-      <input name="imagePath" placeholder="Percorso immagine (es. img/nome.png)" value="${editing?esc(editing.imagePath||''):''}" style="grid-column:1/-1">
       <textarea name="effetto" placeholder="Testo effetto" style="grid-column:1/-1">${editing?esc(editing.effetto||''):''}</textarea>
       <div style="grid-column:1/-1"><button class="btn" onclick="submitCardForm()">${editing?'Salva modifiche':'Aggiungi al pool'}</button>${editing?'<button class="btn ghost" onclick="editingCard=null;render()">Annulla</button>':''}</div>
     </form></div>
@@ -1115,55 +615,34 @@ function renderCarte(){
 function submitCardForm(){
   const f=document.getElementById('cardForm');
   upsertCard({ name:f.name.value.trim()||'Senza nome', type:f.type.value, fazione:f.fazione.value, tipologia:f.tipologia.value.trim(),
-    legendary:f.legendary.checked, costInf:+f.costInf.value||0, costCor:+f.costCor.value||0, costPre:+f.costPre.value||0,
+    legendary:f.legendary.checked, costInf:+f.costInf.value||0, costCor:+f.costCor.value||0, costPre:0,
     forza:+f.forza.value||0, resistenza:+f.resistenza.value||0, prestigio:+f.prestigio.value||0,
-    ritoTipo:f.ritoTipo.value, imagePath:f.imagePath.value.trim(), effetto:f.effetto.value.trim() });
+    ritoTipo:f.ritoTipo.value, fase:'', effetto:f.effetto.value.trim() });
 }
 
 function renderMazzi(){
   const el=document.getElementById('tab-mazzi');
-  if(mazziView.mode==='edit'){
-    const deck=S.decks.find(d=>d.id===mazziView.deckId);
-    if(!deck){ mazziView={mode:'list'}; el.innerHTML=''; return; }
-    const avail=S.pool.filter(c=>c.fazione==='Comune'||deck.factions.includes(c.fazione));
-    el.innerHTML = toastHtml() + `<div class="card">
-      <button class="btn ghost" onclick="backToDeckList()">← Torna ai mazzi</button>
-      <div class="row" style="align-items:center;margin-top:8px">
-        <input value="${esc(deck.name)}" oninput="renameDeck('${deck.id}',this.value)" style="font-size:1rem;font-weight:bold;max-width:260px">
-        <span class="small">${deckCountOf(deck)}/30 ${deckValidFull(deck)?'✅':'❌'}</span>
-      </div>
-      <div class="small" style="margin:8px 0 2px">Fazioni del mazzo (massimo 2, oltre alle carte Comuni):</div>
-      <div class="row">${FACTIONS.map(f=>`<label class="small"><input type="checkbox" style="width:auto" ${deck.factions.includes(f)?'checked':''} ${(!deck.factions.includes(f)&&deck.factions.length>=2)?'disabled':''} onchange="toggleDeckFaction('${deck.id}','${f}')"> ${f}</label>`).join('')}</div>
-      <div class="row" style="margin-top:10px">
-        <div class="col"><h4>Pool disponibile (Comune${deck.factions.length?' + '+deck.factions.join(', '):''})</h4>
-          ${avail.map(c=>`<div class="minicard" onclick="addCardToDeck('${deck.id}','${c.id}')">${cardFace(c)}</div>`).join('')||'<span class="small">Nessuna carta: seleziona almeno una fazione.</span>'}</div>
-        <div class="col"><h4>Nel mazzo</h4>
-          ${deck.list.map(e=>{const c=cardById(e.cardId); if(!c) return ''; return `<div class="minicard"><div class="small">×${e.qty}</div>${cardFace(c)}<button class="btn ghost" onclick="removeCardFromDeck('${deck.id}','${c.id}')">− Rimuovi</button></div>`}).join('')||'<span class="small">Vuoto</span>'}</div>
-      </div>
-    </div>`;
-    return;
+  let html=toastHtml();
+  for(let pi=0;pi<2;pi++){
+    const fac=S.deckFaction[pi];
+    const avail=S.pool.filter(c=>c.type!=='evento' && c.fazione!=='Mercenario' && (!fac || c.fazione===fac));
+    html += `<div class="card"><h2>Mazzo — ${esc(S.players[pi].name)} (${deckCount(pi)}/20) ${deckValid(pi)?'✅':''}</h2>
+    <label class="small">Fazione: <select onchange="setDeckFaction(${pi}, this.value)"><option value="">— scegli —</option>${FACTIONS.map(f=>`<option value="${f}" ${fac===f?'selected':''}>${f}</option>`).join('')}</select></label>
+    <div class="row">
+      <div class="col"><h4>Pool disponibile (${fac||'scegli fazione'})</h4>${avail.map(c=>`<div class="minicard" onclick="addToDeck(${pi},'${c.id}')">${cardFace(c)}</div>`).join('')||'<span class="small">Nessuna carta.</span>'}</div>
+      <div class="col"><h4>Nel mazzo</h4>${S.decklists[pi].map(e=>{const c=cardById(e.cardId); if(!c) return ''; return `<div class="minicard"><div class="small">×${e.qty}</div>${cardFace(c)}<button class="btn ghost" onclick="removeFromDeck(${pi},'${e.cardId}')">− Rimuovi</button></div>`}).join('')||'<span class="small">Vuoto</span>'}</div>
+    </div></div>`;
   }
-  el.innerHTML = toastHtml() + `<div class="card">
-    <div class="flex-between"><h2>Mazzi (${S.decks.length})</h2><button class="btn" onclick="createDeck()">+ Nuovo mazzo</button></div>
-    <div class="row">${S.decks.map(d=>`<div class="col" style="border:1px solid var(--border);border-radius:8px;padding:8px;background:var(--surface2);max-width:260px">
-      <b>${esc(d.name)}</b><br><span class="small">${d.factions.join(', ')||'nessuna fazione'} — ${deckCountOf(d)}/30 ${deckValidFull(d)?'✅':'❌'}</span><br>
-      <button class="btn ghost" onclick="openDeckEditor('${d.id}')">✎ Modifica</button>
-      <button class="btn ghost" onclick="duplicateDeck('${d.id}')">⧉ Duplica</button>
-      <button class="btn ghost" onclick="deleteDeck('${d.id}')">🗑 Elimina</button>
-    </div>`).join('')||'<span class="small">Nessun mazzo ancora: crealo con il pulsante qui sopra.</span>'}</div>
-  </div>`;
+  el.innerHTML=html;
 }
 function renderDati(){
   document.getElementById('tab-dati').innerHTML = toastHtml() + `<div class="card"><h2>Esporta / Importa dati</h2>
-    <p class="small">Pool carte e mazzi vengono salvati automaticamente nel browser (localStorage): non serve importare il file ad ogni apertura. Usa Esporta/Importa per backup o per trasferire i dati su un altro browser o dispositivo — è lo stesso formato usato da Stampa Carte.</p>
+    <p class="small">Salva pool carte, mazzi e fazioni scelte come file JSON.</p>
     <button class="btn" onclick="exportData()">⬇ Esporta dati</button>
     <div style="margin-top:10px"><label class="small">Importa file: <input type="file" accept=".json" onchange="importData(this.files[0])"></label></div>
-    <p class="small" style="margin-top:10px">Nota: la partita in corso non viene esportata né salvata automaticamente, solo pool carte e mazzi.</p>
-    <button class="btn ghost" style="margin-top:6px" onclick="clearLocal()">🗑 Cancella dati salvati nel browser</button>
-    </div>`;
+    <p class="small" style="margin-top:10px">Nota: la partita/sandbox in corso non viene esportata, solo pool carte, mazzi e fazioni.</p></div>`;
 }
 
-loadLocal();
 render();
 </script>
 </body>
