@@ -6,6 +6,7 @@
 <title>Le Ceneri del Divino — Sandbox (v0.6.0)</title>
 <style>
 :root{
+  zoom: 1.25; /* Imposta lo zoom */
   --bg:#f5f2ec; --surface:#ffffff; --surface2:#eee9df; --border:#d8d0c0;
   --text:#2a2420; --muted:#726a5e; --accent:#7a2e2e; --accent2:#2e4a3f;
   --warn:#a85c1f; --p1:#2e4a3f; --p2:#5a2e6b;
@@ -61,8 +62,8 @@ textarea{width:100%;min-height:40px}
 .playerpanel.p1{border-color:var(--p1)}
 .playerpanel.p2{border-color:var(--p2)}
 .resline{display:flex;gap:8px;flex-wrap:wrap;margin:6px 0}
-.handlist,.areaist,.zone-cards{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0}
-.minicard{border:none;padding:0;background:transparent;max-width:190px;cursor:default;margin-bottom:6px;display:inline-block;vertical-align:top}
+.handlist,.areaist,.zone-cards{display:flex;flex-direction:column;gap:6px;margin:6px 0}
+.minicard{border:none;padding:0;background:transparent;max-width:none;width:100%;cursor:default;margin-bottom:0;display:block}
 .gamecard{position:relative;border:1px solid var(--border);border-left:5px solid var(--type-color);border-radius:8px;
   padding:7px 8px 8px;background:var(--surface2);font-size:.72rem;min-height:38px;cursor:pointer}
 .gamecard.type-personaggio{--type-color:var(--t-pers)}
@@ -75,7 +76,7 @@ textarea{width:100%;min-height:40px}
 .gc-badge.inf{background:#000;color:#ffd21a;border-color:#ffd21a}
 .gc-badge.cor{background:#000;color:#ff6a6a;border-color:#ff6a6a}
 .gc-icon{width:13px;height:13px;flex:none;color:var(--type-color);vertical-align:-2px}
-.gc-name{font-variant:small-caps;font-weight:bold;font-size:.88rem;letter-spacing:.3px;
+.gc-name{font-variant:small-caps;font-weight:bold;font-size:.6rem;letter-spacing:.3px;
   margin-right:50px;line-height:1.3}
 .gc-toggle{background:none;border:none;color:var(--muted);font-size:.78rem;cursor:pointer;padding:0 0 0 4px;line-height:1;vertical-align:middle}
 .gc-full{display:none;margin-top:5px;padding-top:4px;border-top:1px dashed var(--border)}
@@ -103,6 +104,16 @@ textarea{width:100%;min-height:40px}
 .manual-controls{display:flex;flex-wrap:wrap;gap:3px;margin-top:4px}
 .marketslot{border:1px dashed var(--border);border-radius:8px;padding:4px;min-width:170px}
 .navlink{display:inline-block;background:transparent;border:1px solid var(--border);color:var(--text);padding:6px 12px;border-radius:6px;font-size:.85rem;text-decoration:none}
+.icon-btn{display:inline-flex;align-items:center;justify-content:center;width:26px;height:26px;padding:0}
+.icon-btn svg{width:14px;height:14px}
+.icon-btn.p1{border-color:var(--p1);color:var(--p1)}
+.icon-btn.p2{border-color:var(--p2);color:var(--p2)}
+.btn-slot{display:inline-flex;align-items:center;justify-content:center;background:#d4af37;color:#1b1815;border:none;border-radius:6px;min-width:26px;height:26px;padding:0 6px;font-weight:bold;font-size:.8rem;cursor:pointer;margin:2px}
+.btn-slot:hover{background:#e3bf4e}
+.token-row{display:flex;align-items:center;gap:4px;margin-top:3px}
+.token-badge{border:1px solid var(--border);border-radius:5px;padding:1px 7px;font-size:.68rem;background:var(--surface);font-weight:bold}
+.onecol{display:flex;flex-direction:column;gap:6px;margin:6px 0}
+.onecol .minicard{max-width:none;width:100%;display:block}
 </style>
 </head>
 <body>
@@ -139,6 +150,36 @@ const ICO = {
    evento:`<svg class="gc-icon" viewBox="0 0 24 24"><path d="M13 2L4 14h6l-1 8 9-12h-6z" fill="currentColor"/></svg>`,
  },
 };
+/* Icone compatte per i pulsanti di spostamento: niente testo in pagina, il nome
+   dell'azione si legge al passaggio del mouse/dito (attributo title). */
+const MICO = {
+ hand:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M8 13V5a1.8 1.8 0 013.5 0v6m0-5a1.8 1.8 0 013.5 0v5m0-4a1.8 1.8 0 013.5 0v8c0 4-2.8 7-6.5 7-3 0-4.8-1.2-6-3.5l-2.2-4.3a1.4 1.4 0 012.5-1.3L8 13"/></svg>`,
+ discard:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M9 7V5a2 2 0 012-2h2a2 2 0 012 2v2M6 7l1 13a2 2 0 002 2h6a2 2 0 002-2l1-13"/></svg>`,
+ removed:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="9"/><path d="M6.5 6.5l11 11" stroke-linecap="round"/></svg>`,
+ top:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V7M6 12l6-6 6 6"/><path d="M5 20h14" stroke-width="2"/></svg>`,
+ bottom:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v12M6 12l6 6 6-6"/><path d="M5 4h14" stroke-width="2"/></svg>`,
+ rito:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2.5" stroke-linecap="round"/></svg>`,
+ shuffle:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7h3.5L17 17h4M3 17h3.5l2-2M15 7h6"/><path d="M19 4l3 3-3 3M19 14l3 3-3 3"/></svg>`,
+ draw:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3" width="12" height="16" rx="2"/><path d="M18 9v8M22 13h-8"/></svg>`,
+ eye:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"><path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="2.6"/></svg>`,
+ edit:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round"><path d="M4 20l1-4L16 5l3 3L8 19l-4 1z"/></svg>`,
+ refresh:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12a8 8 0 0114-5M20 12a8 8 0 01-14 5"/><path d="M18 3v5h-5M6 21v-5h5"/></svg>`,
+ flag:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round"><path d="M6 21V4"/><path d="M6 5l11 2.2L6 11.5"/></svg>`,
+ flagOff:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round"><path d="M6 21V4"/><path d="M6 5l11 2.2L6 11.5"/><path d="M3 3l18 18"/></svg>`,
+ plus:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>`,
+ minus:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M5 12h14"/></svg>`,
+ copy:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"><rect x="8" y="8" width="12" height="12" rx="1.5"/><path d="M5 16H4.5A1.5 1.5 0 013 14.5v-10A1.5 1.5 0 014.5 3h10A1.5 1.5 0 0116 4.5V5"/></svg>`,
+};
+function ibtn(icon,title,onclick,cls){ return `<button class="btn ghost icon-btn ${cls||''}" title="${esc(title)}" onclick="${onclick}">${MICO[icon]}</button>`; }
+const ZONE_ICON = {hand:'hand', discard:'discard', removed:'removed', top:'top', bottom:'bottom'};
+const ZONE_TITLE = {hand:'Sposta in mano', discard:'Scarta', removed:'Rimuovi dalla partita', top:'Sposta in cima al mazzo', bottom:'Sposta in fondo al mazzo'};
+function zoneBtns(callPrefix, dests){ return dests.map(d=>ibtn(ZONE_ICON[d], ZONE_TITLE[d], `${callPrefix}'${d}')`)).join(''); }
+function slotBtn(label,title,onclick){ return `<button class="btn-slot" title="${esc(title)}" onclick="${onclick}">${label}</button>`; }
+function controllerBtns(callPrefix,noneTitle){
+  let h=S.players.map((pl,pi)=>ibtn('flag', `Controllo: ${pl.name}`, `${callPrefix}${pi})`, 'p'+(pi+1))).join('');
+  if(noneTitle!==false) h += ibtn('flagOff', (typeof noneTitle==='string'?noneTitle:'Nessun controllore'), `${callPrefix}null)`);
+  return h;
+}
 const FACTIONS = ["La Comunione","Creature della notte","Devoti dei Primi Figli","Gli Spontanei","Le Accademie del Velo","Le Terre Contese"];
 const CARD_FACTIONS = [...FACTIONS, "Mercenario"];
 const LOCATION_COUNT = 4;
@@ -290,8 +331,14 @@ function placeLuogoInSlot(pi,handIdx,slot){
 function deployCharacterToLocation(pi,handIdx,slot){
   const p=S.players[pi]; const id=p.hand[handIdx]; const c=cardById(id);
   if(!c||c.type!=='personaggio'||!S.locations[slot].cardId) return;
-  p.hand.splice(handIdx,1); S.locations[slot].chars.push({instId:uid(), cardId:id, owner:pi});
+  p.hand.splice(handIdx,1); S.locations[slot].chars.push({instId:uid(), cardId:id, owner:pi, tokenMod:0});
   logMsg(`${p.name} schiera "${c.name}" nel luogo ${slot+1}.`);
+  render();
+}
+function changeCharacterToken(slot,instId,delta){
+  const inst=S.locations[slot].chars.find(c=>c.instId===instId); if(!inst) return;
+  inst.tokenMod=(inst.tokenMod||0)+delta;
+  logMsg(`"${cardById(inst.cardId)?.name||'?'}" nel luogo ${slot+1}: segnalino Forza a ${inst.tokenMod>=0?'+':''}${inst.tokenMod}.`);
   render();
 }
 function moveLocationCard(slot,dest){
@@ -394,7 +441,7 @@ function cardFace(c, inst, forceOpen){
   if(c.legendary) sub.push('Leggendaria');
   return `<div class="gamecard type-${c.type} ${isOpen?'open':''}">
     <div class="gc-rightcol">
-      ${c.type==='personaggio'?`<div class="gc-stat">F ${c.forza||0}<br>R ${c.resistenza||0}</div>`:''}
+      ${c.type==='personaggio'?`<div class="gc-stat">F ${c.forza||0}</div>`:''}
       <div class="gc-badges">
         <span class="gc-badge inf" title="Costo Influenza">${c.costInf||0}</span>
         ${c.costCor?`<span class="gc-badge cor" title="Costo Corruzione">${c.costCor}</span>`:''}
@@ -426,26 +473,17 @@ function handCardFooter(pi, idx, c){
   let h='';
   if(c.type==='personaggio'){
     const built=S.locations.map((l,i)=>l.cardId?i:null).filter(i=>i!==null);
-    h += built.map(s=>`<button class="btn" onclick="deployCharacterToLocation(${pi},${idx},${s})">→ Luogo ${s+1}</button>`).join('')||'<span class="small">Posiziona prima un Luogo</span>';
+    h += built.map(s=>slotBtn(s+1,`Schiera nel Luogo ${s+1}`,`deployCharacterToLocation(${pi},${idx},${s})`)).join('')||'<span class="small">Posiziona prima un Luogo</span>';
   }
   if(c.type==='luogo'){
     const empty=S.locations.map((l,i)=>l.cardId?null:i).filter(i=>i!==null);
-    h += empty.map(s=>`<button class="btn" onclick="placeLuogoInSlot(${pi},${idx},${s})">→ Spazio ${s+1}</button>`).join('')||'<span class="small">Fila piena</span>';
+    h += empty.map(s=>slotBtn(s+1,`Costruisci nello Spazio ${s+1}`,`placeLuogoInSlot(${pi},${idx},${s})`)).join('')||'<span class="small">Fila piena</span>';
   }
-  if(c.type==='rito') h += `<button class="btn" onclick="handRitoToPersistent(${pi},${idx})">→ Riti persistenti</button>`;
-  h += `<button class="btn ghost" onclick="moveHandCard(${pi},${idx},'discard')">→ Scarti</button>
-        <button class="btn ghost" onclick="moveHandCard(${pi},${idx},'removed')">→ Rimosse</button>
-        <button class="btn ghost" onclick="moveHandCard(${pi},${idx},'top')">⤒Cima mazzo</button>
-        <button class="btn ghost" onclick="moveHandCard(${pi},${idx},'bottom')">⤓Fondo mazzo</button>`;
+  if(c.type==='rito') h += ibtn('rito','Sposta nei Riti persistenti',`handRitoToPersistent(${pi},${idx})`);
+  h += zoneBtns(`moveHandCard(${pi},${idx},`, ['discard','removed','top','bottom']);
   return h;
 }
-function deckCardButtons(pi,i){ return `<div class="manual-controls">
-  <button class="btn ghost" onclick="moveDeckCard(${pi},${i},'hand')">→ Mano</button>
-  <button class="btn ghost" onclick="moveDeckCard(${pi},${i},'discard')">→ Scarti</button>
-  <button class="btn ghost" onclick="moveDeckCard(${pi},${i},'removed')">→ Rimosse</button>
-  <button class="btn ghost" onclick="moveDeckCard(${pi},${i},'top')">→ Cima</button>
-  <button class="btn ghost" onclick="moveDeckCard(${pi},${i},'bottom')">→ Fondo</button>
-</div>`; }
+function deckCardButtons(pi,i){ return `<div class="manual-controls">${zoneBtns(`moveDeckCard(${pi},${i},`, ['hand','discard','removed','top','bottom'])}</div>`; }
 
 function renderPartita(){
   const el=document.getElementById('tab-partita');
@@ -492,32 +530,32 @@ function renderPartita(){
   </div>`;
 
   html += `<div class="card"><div class="flex-between"><h3>Mazzo Eventi (${S.eventDeck.length}, scarti ${S.eventDiscard.length})</h3>
-    <div><button class="btn ghost" onclick="revealNextEvent()">Rivela prossimo</button></div></div>
+    <div>${ibtn('eye','Rivela il prossimo Evento','revealNextEvent()')}</div></div>
     ${S.activeEvent? `<div>${cardFace(cardById(S.activeEvent))}
-      <div class="manual-controls"><button class="btn ghost" onclick="discardActiveEvent()">Scarta Evento attivo</button></div></div>`
+      <div class="manual-controls">${ibtn('discard','Scarta Evento attivo','discardActiveEvent()')}</div></div>`
       : '<span class="small">Nessun Evento attivo.</span>'}
   </div>`;
 
   html += `<div class="card"><div class="flex-between"><h3>Mercato Mercenario</h3>
     <span class="small">Mazzo: ${S.mercenarioDeck.length} · Scarti: ${S.mercenarioDiscard.length}
-      <button class="btn ghost" onclick="shuffleMercDiscardIntoDeck()">Mischia scarti nel mazzo</button>
+      ${ibtn('refresh','Mischia gli scarti nel mazzo Mercenario','shuffleMercDiscardIntoDeck()')}
       <button class="btn ghost" onclick="S.showMercDeck=!S.showMercDeck;render()">${S.showMercDeck?'Nascondi mazzo':'Mostra mazzo'}</button></span></div>
-    <div class="row">`;
+    <div class="onecol">`;
   S.market.forEach((id,slot)=>{
     const c=id?cardById(id):null;
     html += `<div class="marketslot">${c?cardFace(c):'<span class="small">— vuoto —</span>'}
       ${c? `<div class="manual-controls">
-          <button class="btn ghost" onclick="moveMarketCard(${slot},'p0hand')">→ Mano ${esc(S.players[0].name)}</button>
-          <button class="btn ghost" onclick="moveMarketCard(${slot},'p1hand')">→ Mano ${esc(S.players[1].name)}</button>
-          <button class="btn ghost" onclick="moveMarketCard(${slot},'mercDiscard')">→ Scarti Mercenari</button>
-        </div>` : `<button class="btn ghost" onclick="refillMarketSlot(${slot})">Rifornisci</button>`}
+          ${ibtn('hand',`Prendi in mano a ${esc(S.players[0].name)}`,`moveMarketCard(${slot},'p0hand')`,'p1')}
+          ${ibtn('hand',`Prendi in mano a ${esc(S.players[1].name)}`,`moveMarketCard(${slot},'p1hand')`,'p2')}
+          ${ibtn('discard','Scarta negli Scarti Mercenari',`moveMarketCard(${slot},'mercDiscard')`)}
+        </div>` : ibtn('refresh','Rifornisci lo slot',`refillMarketSlot(${slot})`)}
     </div>`;
   });
   html += `</div>
     ${S.showMercDeck? `<div class="zone-cards">${S.mercenarioDeck.map((id,i)=>{ const c=cardById(id); if(!c) return '';
       return `<div class="minicard">${cardFace(c)}<div class="manual-controls">
-        <button class="btn ghost" onclick="moveMercDeckCard(${i},0)">→ Mano ${esc(S.players[0].name)}</button>
-        <button class="btn ghost" onclick="moveMercDeckCard(${i},1)">→ Mano ${esc(S.players[1].name)}</button>
+        ${ibtn('hand',`Prendi in mano a ${esc(S.players[0].name)}`,`moveMercDeckCard(${i},0)`,'p1')}
+        ${ibtn('hand',`Prendi in mano a ${esc(S.players[1].name)}`,`moveMercDeckCard(${i},1)`,'p2')}
       </div></div>`; }).join('')||'<span class="small">Vuoto</span>'}</div>`:''}
   </div>`;
 
@@ -532,10 +570,10 @@ function renderPartita(){
         <span class="pill">${ICO.pre} <input type="number" min="0" value="${p.prestige}" onchange="setManualResource(${pi},'prestige',this.value)"> <button class="btn ghost" onclick="bumpResource(${pi},'prestige',1)">+</button><button class="btn ghost" onclick="bumpResource(${pi},'prestige',-1)">−</button></span>
       </div>
       <div class="small">Mazzo: ${p.deck.length}
-        <button class="btn ghost" onclick="drawCard(${pi})">Pesca 1</button>
-        <button class="btn ghost" onclick="shuffleDeck(${pi})">Mischia</button>
-        <button class="btn ghost" onclick="shuffleDiscardIntoDeck(${pi})">Mischia scarti nel mazzo</button>
-        <button class="btn ghost" onclick="peekTop(${pi})">Vedi cima</button>
+        ${ibtn('draw','Pesca 1 carta',`drawCard(${pi})`)}
+        ${ibtn('shuffle','Mischia il mazzo',`shuffleDeck(${pi})`)}
+        ${ibtn('refresh','Mischia gli scarti nel mazzo',`shuffleDiscardIntoDeck(${pi})`)}
+        ${ibtn('eye','Guarda la prima carta del mazzo',`peekTop(${pi})`)}
         <button class="btn ghost" onclick="S.showDeck[${pi}]=!S.showDeck[${pi}];render()">${S.showDeck[pi]?'Nascondi mazzo':'Mostra carte del mazzo'}</button>
       </div>
       ${S.showDeck[pi]? `<div class="zone-cards">${p.deck.map((id,i)=>{ const c=cardById(id); if(!c) return '';
@@ -545,61 +583,44 @@ function renderPartita(){
         return `<div class="minicard">${cardFace(c)}<div style="margin-top:3px">${handCardFooter(pi,i,c)}</div></div>`;
       }).join('')||'<span class="small">—</span>'}</div>
       <h4>Riti persistenti (${p.persistentRiti.length})</h4>
-      <div class="areaist">${p.persistentRiti.map((id,i)=>{ const c=cardById(id); return `<div class="minicard">${cardFace(c)}<div class="manual-controls">
-        <button class="btn ghost" onclick="movePersistentRito(${pi},${i},'discard')">→ Scarti</button>
-        <button class="btn ghost" onclick="movePersistentRito(${pi},${i},'hand')">→ Mano</button>
-        <button class="btn ghost" onclick="movePersistentRito(${pi},${i},'removed')">→ Rimosse</button>
-      </div></div>`; }).join('')||'<span class="small">—</span>'}</div>
+      <div class="areaist">${p.persistentRiti.map((id,i)=>{ const c=cardById(id); return `<div class="minicard">${cardFace(c)}<div class="manual-controls">${zoneBtns(`movePersistentRito(${pi},${i},`, ['hand','discard','removed'])}</div></div>`; }).join('')||'<span class="small">—</span>'}</div>
       <div class="flex-between"><h4>Scarti (${p.discard.length})</h4><button class="btn ghost" onclick="S.showDiscard[${pi}]=!S.showDiscard[${pi}];render()">${S.showDiscard[pi]?'Nascondi':'Mostra'}</button></div>
       ${S.showDiscard[pi]? `<div class="areaist">${p.discard.map((id,i)=>{ const c=cardById(id); if(!c) return '';
-        return `<div class="minicard">${cardFace(c)}<div class="manual-controls">
-        <button class="btn ghost" onclick="moveDiscardCard(${pi},${i},'hand')">→ Mano</button>
-        <button class="btn ghost" onclick="moveDiscardCard(${pi},${i},'top')">→ Cima mazzo</button>
-        <button class="btn ghost" onclick="moveDiscardCard(${pi},${i},'bottom')">→ Fondo mazzo</button>
-        <button class="btn ghost" onclick="moveDiscardCard(${pi},${i},'removed')">→ Rimosse</button>
-        </div></div>`; }).join('')||'<span class="small">Vuoto</span>'}</div>`:''}
+        return `<div class="minicard">${cardFace(c)}<div class="manual-controls">${zoneBtns(`moveDiscardCard(${pi},${i},`, ['hand','top','bottom','removed'])}</div></div>`; }).join('')||'<span class="small">Vuoto</span>'}</div>`:''}
       <div class="flex-between"><h4>Rimosse dalla partita (${p.removed.length})</h4><button class="btn ghost" onclick="S.showRemoved[${pi}]=!S.showRemoved[${pi}];render()">${S.showRemoved[pi]?'Nascondi':'Mostra'}</button></div>
       ${S.showRemoved[pi]? `<div class="areaist">${p.removed.map((id,i)=>{ const c=cardById(id); if(!c) return '';
-        return `<div class="minicard">${cardFace(c)}<div class="manual-controls">
-        <button class="btn ghost" onclick="moveRemovedCard(${pi},${i},'hand')">→ Mano</button>
-        <button class="btn ghost" onclick="moveRemovedCard(${pi},${i},'discard')">→ Scarti</button>
-        <button class="btn ghost" onclick="moveRemovedCard(${pi},${i},'top')">→ Cima mazzo</button>
-        <button class="btn ghost" onclick="moveRemovedCard(${pi},${i},'bottom')">→ Fondo mazzo</button>
-        </div></div>`; }).join('')||'<span class="small">Vuoto</span>'}</div>`:''}
+        return `<div class="minicard">${cardFace(c)}<div class="manual-controls">${zoneBtns(`moveRemovedCard(${pi},${i},`, ['hand','discard','top','bottom'])}</div></div>`; }).join('')||'<span class="small">Vuoto</span>'}</div>`:''}
     </div>`;
   }
   html += `</div>`;
 
   html += `<div class="card"><h3>Fila dei luoghi</h3><div class="locrow">`;
   S.locations.forEach((l,slot)=>{
-    const f0=l.chars.filter(c=>c.owner===0).reduce((s,c)=>{const cc=cardById(c.cardId);return s+(cc?(cc.forza||0):0);},0);
-    const f1=l.chars.filter(c=>c.owner===1).reduce((s,c)=>{const cc=cardById(c.cardId);return s+(cc?(cc.forza||0):0);},0);
+    const f0=l.chars.filter(c=>c.owner===0).reduce((s,c)=>{const cc=cardById(c.cardId);return s+(cc?(cc.forza||0):0)+(c.tokenMod||0);},0);
+    const f1=l.chars.filter(c=>c.owner===1).reduce((s,c)=>{const cc=cardById(c.cardId);return s+(cc?(cc.forza||0):0)+(c.tokenMod||0);},0);
     const st = l.controller===0?'occ1':l.controller===1?'occ2':(f0&&f1&&f0===f1?'conteso':'');
     const c=l.cardId?cardById(l.cardId):null;
     html += `<div class="loc ${st}"><div class="loc-heading"><b>Luogo ${slot+1}</b>${c?`<span class="small">Forza ${f0}-${f1}${l.controller!=null?' · controllato: '+esc(S.players[l.controller].name):''}</span>`:''}</div>`;
     if(c){
       html += `${cardFace(c,null,true)}
         <div class="manual-controls">
-          <button class="btn ghost" onclick="moveLocationCard(${slot},'hand')">→ Mano</button>
-          <button class="btn ghost" onclick="moveLocationCard(${slot},'discard')">→ Scarti</button>
-          <button class="btn ghost" onclick="moveLocationCard(${slot},'removed')">→ Rimosse</button>
-          <button class="btn ghost" onclick="moveLocationCard(${slot},'top')">→ Cima mazzo</button>
-          <button class="btn ghost" onclick="moveLocationCard(${slot},'bottom')">→ Fondo mazzo</button>
-          ${S.players.map((pl,pi)=>`<button class="btn ghost" onclick="setLocationController(${slot},${pi})">Controllo: ${esc(pl.name)}</button>`).join('')}
-          <button class="btn ghost" onclick="setLocationController(${slot},null)">Controllo: nessuno</button>
-          ${S.locations.map((t,i)=>i!==slot&&!S.locations[i].cardId&&!S.locations[i].chars.length?`<button class="btn ghost" onclick="moveLocationToSlot(${slot},${i})">→ Spazio ${i+1}</button>`:'').join('')}
+          ${zoneBtns(`moveLocationCard(${slot},`, ['hand','discard','removed','top','bottom'])}
+          ${controllerBtns(`setLocationController(${slot},`, 'Nessun controllore')}
+          ${S.locations.map((t,i)=>i!==slot&&!S.locations[i].cardId&&!S.locations[i].chars.length?slotBtn(i+1,`Sposta il Luogo nello Spazio ${i+1}`,`moveLocationToSlot(${slot},${i})`):'').join('')}
         </div>`;
     } else html += `<div class="small">Slot libero</div>`;
     l.chars.forEach(ch=>{ const cc=cardById(ch.cardId); if(!cc) return;
-      html += `<div class="minicard" style="max-width:190px">${cardFace(cc,ch)}<span class="player-tag p${ch.owner+1}">${esc(S.players[ch.owner].name)}</span>
+      const mod=ch.tokenMod||0;
+      html += `<div class="minicard">${cardFace(cc,ch)}<span class="player-tag p${ch.owner+1}">${esc(S.players[ch.owner].name)}</span>
+        <div class="token-row">
+          <span class="token-badge" title="Forza base ${cc.forza||0} ${mod?(mod>0?'+':'')+mod+' da segnalini':'(nessun segnalino)'}">Forza ${((cc.forza||0)+mod)}${mod?` (${mod>0?'+':''}${mod})`:''}</span>
+          ${ibtn('minus','Segnalino −1 Forza',`changeCharacterToken(${slot},'${ch.instId}',-1)`)}
+          ${ibtn('plus','Segnalino +1 Forza',`changeCharacterToken(${slot},'${ch.instId}',1)`)}
+        </div>
         <div class="manual-controls">
-          ${S.locations.map((t,i)=>i!==slot?`<button class="btn ghost" onclick="moveCharacterToLocation(${slot},'${ch.instId}',${i})">→ Luogo ${i+1}</button>`:'').join('')}
-          ${S.players.map((pl,pi)=>`<button class="btn ghost" onclick="changeCharacterOwner(${slot},'${ch.instId}',${pi})">Controllo: ${esc(pl.name)}</button>`).join('')}
-          <button class="btn ghost" onclick="moveCharacterFromLocation(${slot},'${ch.instId}','hand')">→ Mano</button>
-          <button class="btn ghost" onclick="moveCharacterFromLocation(${slot},'${ch.instId}','discard')">→ Scarti</button>
-          <button class="btn ghost" onclick="moveCharacterFromLocation(${slot},'${ch.instId}','removed')">→ Rimosse</button>
-          <button class="btn ghost" onclick="moveCharacterFromLocation(${slot},'${ch.instId}','top')">→ Cima mazzo</button>
-          <button class="btn ghost" onclick="moveCharacterFromLocation(${slot},'${ch.instId}','bottom')">→ Fondo mazzo</button>
+          ${S.locations.map((t,i)=>i!==slot?slotBtn(i+1,`Sposta nel Luogo ${i+1}`,`moveCharacterToLocation(${slot},'${ch.instId}',${i})`):'').join('')}
+          ${controllerBtns(`changeCharacterOwner(${slot},'${ch.instId}',`, false)}
+          ${zoneBtns(`moveCharacterFromLocation(${slot},'${ch.instId}',`, ['hand','discard','removed','top','bottom'])}
         </div>
       </div>`;
     });
@@ -624,7 +645,6 @@ function renderCarte(){
       <input name="costInf" type="number" min="0" placeholder="Costo Influenza" value="${editing?editing.costInf||0:0}">
       <input name="costCor" type="number" min="0" placeholder="Costo Corruzione" value="${editing?editing.costCor||0:0}">
       <input name="forza" type="number" min="0" placeholder="Forza" value="${editing?editing.forza||0:0}">
-      <input name="resistenza" type="number" min="0" placeholder="Resistenza" value="${editing?editing.resistenza||0:0}">
       <input name="prestigio" type="number" min="0" placeholder="Prestigio prodotto" value="${editing?editing.prestigio||0:0}">
       <select name="ritoTipo"><option value="immediato" ${editing&&editing.ritoTipo==='immediato'?'selected':''}>Rito immediato</option><option value="persistente" ${editing&&editing.ritoTipo==='persistente'?'selected':''}>Rito persistente</option></select>
       <textarea name="effetto" placeholder="Testo effetto" style="grid-column:1/-1">${editing?esc(editing.effetto||''):''}</textarea>
@@ -634,14 +654,14 @@ function renderCarte(){
     <div class="handlist">${S.pool.map(c=>`<div class="minicard">${cardFace(c)}<div style="margin-top:3px">
       ${confirmingDelete[c.id]?
         `<span class="small">Eliminare "${esc(c.name)}"?</span> <button class="btn alt" onclick="deleteCard('${c.id}')">Conferma</button><button class="btn ghost" onclick="cancelDeleteCard('${c.id}')">Annulla</button>`
-        :`<button class="btn ghost" onclick="editingCard='${c.id}';render()">✎ Modifica</button><button class="btn ghost" onclick="askDeleteCard('${c.id}')">🗑 Elimina</button>`}
+        :`${ibtn('edit','Modifica carta',`editingCard='${c.id}';render()`)}${ibtn('discard','Elimina carta',`askDeleteCard('${c.id}')`)}`}
       </div></div>`).join('')||'<span class="small">Nessuna carta.</span>'}</div></div>`;
 }
 function submitCardForm(){
   const f=document.getElementById('cardForm');
   upsertCard({ name:f.name.value.trim()||'Senza nome', type:f.type.value, fazione:f.fazione.value, tipologia:f.tipologia.value.trim(),
     legendary:f.legendary.checked, costInf:+f.costInf.value||0, costCor:+f.costCor.value||0, costPre:0,
-    forza:+f.forza.value||0, resistenza:+f.resistenza.value||0, prestigio:+f.prestigio.value||0,
+    forza:+f.forza.value||0, prestigio:+f.prestigio.value||0,
     ritoTipo:f.ritoTipo.value, fase:'', effetto:f.effetto.value.trim() });
 }
 
@@ -665,7 +685,7 @@ function renderMazzi(){
       ${d.list.length?'<p class="small">Cambiare fazione svuota il mazzo.</p>':''}
       <div class="row">
         <div class="col"><h4>Pool disponibile (${d.faction||'scegli una fazione'})</h4>${avail.map(c=>`<div class="minicard" onclick="addCardToDeck('${d.id}','${c.id}')">${cardFace(c)}</div>`).join('')||'<span class="small">Nessuna carta.</span>'}</div>
-        <div class="col"><h4>Nel mazzo</h4>${d.list.map(e=>{const c=cardById(e.cardId); if(!c) return ''; return `<div class="minicard"><div class="small">×${e.qty}</div>${cardFace(c)}<button class="btn ghost" onclick="removeCardFromDeck('${d.id}','${e.cardId}')">− Rimuovi</button></div>`}).join('')||'<span class="small">Vuoto</span>'}</div>
+        <div class="col"><h4>Nel mazzo</h4>${d.list.map(e=>{const c=cardById(e.cardId); if(!c) return ''; return `<div class="minicard"><div class="small">×${e.qty}</div>${cardFace(c)}${ibtn('minus','Togli una copia',`removeCardFromDeck('${d.id}','${e.cardId}')`)}</div>`}).join('')||'<span class="small">Vuoto</span>'}</div>
       </div>
     </div>`;
     el.innerHTML=html;
@@ -677,14 +697,11 @@ function renderMazzi(){
       <h3>${esc(d.name)}</h3>
       <p class="small">${d.faction||'nessuna fazione scelta'} — ${deckCountOf(d)}/20 ${deckValidOf(d)?'✅':'❌'}</p>
       <div class="manual-controls">
-        <button class="btn ghost" onclick="deckEditor={mode:'edit',id:'${d.id}'};render()">✎ Apri/Modifica</button>
-        <button class="btn ghost" onclick="duplicateDeck('${d.id}')">⧉ Duplica</button>
-        <button class="btn ghost" onclick="if(confirm('Eliminare il mazzo \\'${esc(d.name).replace(/'/g,"\\'")}\\'
-?')) deleteDeck('${d.id}')">🗑 Elimina</button>
-      </div>
-      <div class="manual-controls">
-        <button class="btn ghost" onclick="setPlayerDeck(0,'${d.id}')">Usa per ${esc(S.players[0].name)}</button>
-        <button class="btn ghost" onclick="setPlayerDeck(1,'${d.id}')">Usa per ${esc(S.players[1].name)}</button>
+        ${ibtn('edit','Apri/Modifica mazzo',`deckEditor={mode:'edit',id:'${d.id}'};render()`)}
+        ${ibtn('copy','Duplica mazzo',`duplicateDeck('${d.id}')`)}
+        ${ibtn('discard','Elimina mazzo',`if(confirm('Eliminare il mazzo \\'${esc(d.name).replace(/'/g,"\\'")}\\'?')) deleteDeck('${d.id}')`)}
+        ${ibtn('flag',`Usa per ${esc(S.players[0].name)}`,`setPlayerDeck(0,'${d.id}')`,'p1')}
+        ${ibtn('flag',`Usa per ${esc(S.players[1].name)}`,`setPlayerDeck(1,'${d.id}')`,'p2')}
       </div>
     </div>`).join('')||'<p class="small">Nessun mazzo creato — premi "+ Nuovo mazzo" per iniziare.</p>'}</div>`;
   el.innerHTML=html;
