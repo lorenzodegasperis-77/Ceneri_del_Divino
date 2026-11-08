@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="it"><head><meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Ceneri del Divino — Simulatore</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<style>
+:root{--bg:#f5f2ec;--sf:#fff;--bd:#d8d0c0;--tx:#2a2420;--mut:#726a5e;--ac:#7a2e2e;--g1:#2e4a3f;--g2:#5a2e6b;color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#1b1815;--sf:#262220;--bd:#443d36;--tx:#ece6dd;--mut:#a89d8d;--ac:#d98a8a;--g1:#8fd1b8;--g2:#d6a8e8;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#1b1815;--sf:#262220;--bd:#443d36;--tx:#ece6dd;--mut:#a89d8d;--ac:#d98a8a;--g1:#8fd1b8;--g2:#d6a8e8;color-scheme:dark}
+*{box-sizing:border-box}html,body{height:100%}
+body{margin:0;background:var(--bg);color:var(--tx);font:14px Georgia,serif}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);background:var(--bg);z-index:10}
+h1{font-size:1.1rem;color:var(--ac);margin:0;padding:12px 14px;border-bottom:2px solid var(--ac)}
+h2{font-size:1rem;margin:0 0 8px}main{padding:10px 14px;max-width:1000px;margin:auto}
+.card{background:var(--sf);border:1px solid var(--bd);border-radius:10px;padding:10px;margin-bottom:10px}
+label{display:block;margin:4px 0;font-size:.85rem}.m{color:var(--mut);font-size:.8rem}
+button,select,input{font:inherit;font-size:.85rem;background:var(--sf);color:var(--tx);border:1px solid var(--bd);border-radius:6px;padding:5px 9px}
+button{cursor:pointer}button.p{background:var(--g1);color:var(--bg);border-color:var(--g1)}button:disabled{opacity:.4}
+.row{display:flex;gap:8px;flex-wrap:wrap}.col{flex:1;min-width:230px}
+.scroll{overflow-x:auto}table{border-collapse:collapse;font-size:.78rem;width:100%}th,td{border-bottom:1px solid var(--bd);padding:3px 6px;text-align:right;white-space:nowrap}th:first-child,td:first-child{text-align:left}
+pre{background:var(--bg);border:1px solid var(--bd);border-radius:8px;padding:8px;max-height:420px;overflow:auto;font-size:.72rem;white-space:pre-wrap}
+.warn{color:var(--ac);font-weight:bold}details{margin:6px 0}summary{cursor:pointer;font-weight:bold}
+progress{width:100%}
+</style></head><body>
+<h1>⚜ Ceneri del Divino · Simulatore (regole v0.6.2)</h1>
+<main>
+<div class="card"><h2>1 · Carte e mazzi</h2>
+<label>Carte (Excel .xlsx, foglio «Tutte le carte») <input type="file" id="fx" accept=".xlsx,.xls"></label>
+<label>Mazzi (JSON) <input type="file" id="fj" accept=".json"></label>
+<button id="ba">Genera mazzi automatici</button> <button id="bt">Scarica modello JSON</button>
+<p class="m" id="st">Carica prima l’Excel delle carte.</p></div>
+<div class="card"><h2>2 · Simulazione</h2><div class="row">
+<div class="col"><b>Giocatore A</b><label>Mazzo <select id="da"></select></label><label>IA <select id="aa"><option value="euristica">Euristica</option><option value="casuale">Casuale (baseline)</option></select></label></div>
+<div class="col"><b>Giocatore B</b><label>Mazzo <select id="db"></select></label><label>IA <select id="ab"><option value="euristica">Euristica</option><option value="casuale">Casuale (baseline)</option></select></label></div></div>
+<label>Partite <input type="number" id="n" value="1000" min="1" max="100000" style="width:90px"> · log dettagliati per le prime <input type="number" id="nl" value="5" min="0" max="50" style="width:60px"> partite</label>
+<button class="p" id="go" disabled>Avvia simulazione</button><progress id="pg" value="0" max="1" hidden></progress></div>
+<div id="out"></div>
+</main>
+<script>
+const $=i=>document.getElementById(i);
+const EXC=['La Comunione','Devoti dei Primi Figli','Gli Spontanei'];
+const DEAD=[];
+const N=v=>parseFloat(String(v==null?'':v).replace(',','.'))||0;
+const shuf=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.random()*(i+1)|0;[a[i],a[j]]=[a[j],a[i]]}return a};
+let CARDS=[],DECKS=[],g;
+const cb=n=>CARDS.find(c=>c.n===n);
+function parseCards(rows){CARDS=rows.filter(r=>r.nome&&!EXC.includes(String(r.fazione||'').trim())).map(r=>({n:String(r.nome).trim(),t:String(r.categoria||'').trim(),leg:!!r.legendario,f:String(r.fazione||'').trim(),i:N(r.influenza),c:N(r.corruzione),ty:String(r.tipologia||'').replace('-','').trim(),F:N(r.forza),p:N(r.prestigio),per:/Persistente/.test(r.categ_tipo||'')}))}
+function autoDecks(){const fs=[...new Set(CARDS.filter(c=>!['Comune','N/A'].includes(c.f)).map(c=>c.f))];
+ return fs.map(f=>{const l=[];[...CARDS.filter(c=>c.f===f&&c.t!=='Evento'),...CARDS.filter(c=>c.f==='Comune'&&c.t!=='Evento')].forEach(c=>{for(let k=0;k<(c.leg?1:2);k++)l.push(c.n)});return{nome:'Auto · '+f,fazione:f,l:l.slice(0,20)}})}
+const toJson=ds=>JSON.stringify({decks:ds.map(d=>({nome:d.nome,fazione:d.fazione,carte:Object.entries(d.l.reduce((o,n)=>(o[n]=(o[n]||0)+1,o),{})).map(([nome,qty])=>({nome,qty}))}))},null,1);
+
+/* ============ MOTORE ============ */
+const lg=s=>{if(g.v)g.log.push(s)};
+const O=p=>g.P[1-p.i];const evn=()=>g.ev?g.ev.n:'';
+function draw(p,n=1){for(;n>0;n--){if(!p.deck.length){if(!p.disc.length)return;p.deck=shuf(p.disc);p.disc=[];lg(`  ${p.n}: scarti rimescolati nel mazzo`)}const c=p.deck.shift();p.hand.push(c);p.seen.add(c.n);lg(`  ${p.n} pesca «${c.n}»`)}}
+const gain=(p,n)=>{p.inf=Math.min(9,p.inf+n)};
+function addCor(p,n){if(n>0){if(g.L.some(l=>l.c&&l.c.n==="Santuario dimenticato"&&l.ctrl===p.i)&&!p.sant){p.sant=1;n=Math.max(0,n-1)}if(n>0)p.corT=1}
+ p.cor=Math.max(0,p.cor+n);while(p.cor>9){p.cor-=10;p.pre-=2;p.src.cor-=2;p.wrap++;lg(`  ⚠ ${p.n} supera 9 di Corruzione: −2 Prestigio, indicatore a ${p.cor}`)}}
+function hf(l,h){const c=h.c,o=h.o,P=g.P[o],ln=l.c?l.c.n:'';let f=c.F+h.b;
+ if((c.n==='Lupo'||c.n==='Spettro')&&l.c&&l.c.f===P.fz)f++;
+ if(c.n==="Il Guardiano Contorto")f+=l.ch.filter(x=>x!==h&&x.o===o&&/Bestia|Non morto/.test(x.c.ty)).length;
+ if(c.ty==='Non morto'&&l.ch.some(x=>x!==h&&x.o===o&&x.c.n==='Custode dei sepolcri'))f++;
+ if(l.ctrl===o){if(ln==='Forte Miramare')f++;if(ln==='Strada del Re'&&c.f===P.fz)f++;if(ln==='Tana'&&c.ty==='Bestia')f++}
+ return f}
+const FT=(l,o)=>l.ch.reduce((s,h)=>s+(h.o===o?hf(l,h):0),0);
+function ctrlOf(l){const f=[FT(l,0),FT(l,1)],m=Math.max(...f);if(m<=0)return -1;if(f[0]===f[1])return 2;const o=f[0]>f[1]?0:1;if(evn()==='Rivolta dei contadini'&&m-f[1-o]<2)return -1;return o}
+const V=(l,o)=>{const c=ctrlOf(l);return c===o?l.c.p+1:c===1-o?-(l.c.p+1):0};
+const tot=o=>g.L.reduce((s,l)=>l.c?s+V(l,o):0,0);
+const swingC=(l,o,c)=>{const b=V(l,o);l.ch.push({c,o,b:0});const a=V(l,o);l.ch.pop();return a-b};
+const swing=(l,o,d)=>swingC(l,o,{F:d,ty:'',n:'x',f:'',p:0,c:0,i:0});
+const ownCh=p=>g.L.flatMap(l=>l.ch.filter(h=>h.o===p.i).map(h=>({l,h})));
+const enCh=p=>g.L.flatMap(l=>l.ch.filter(h=>h.o!==p.i).map(h=>({l,h})));
+const corTgt=p=>enCh(p).filter(x=>x.h.c.c>0);
+function kill(l,h,why){l.ch.splice(l.ch.indexOf(h),1);g.P[h.o].disc.push(h.c);lg(`  ✖ «${h.c.n}» di ${g.P[h.o].n} scartato [${why}]`)}
+function rmLoc(l){l.ch.forEach(h=>g.P[h.o].disc.push(h.c));g.P[l.b].disc.push(l.c);lg(`  ✖ Luogo «${l.c.n}» scartato con i personaggi presenti`);l.c=null;l.ch=[];l.ctrl=-1}
+function killBest(p,max,why){const t=enCh(p).filter(x=>hf(x.l,x.h)<=max).sort((a,b)=>hf(b.l,b.h)+b.l.c.p-hf(a.l,a.h)-a.l.c.p)[0];if(t)kill(t.l,t.h,why);return!!t}
+function boost(p,n){const t=ownCh(p).map(x=>({...x,s:swing(x.l,p.i,n)})).sort((a,b)=>b.s-a.s)[0];if(t){t.h.b+=n;lg(`  «${t.h.c.n}» +${n}💪 (luogo ${g.L.indexOf(t.l)+1})`)}return!!t}
+const cap=p=>evn()==='La Caccia'&&g.L.filter(l=>l.ctrl===p.i).length>=g.L.filter(l=>l.ctrl===1-p.i).length;
+function cost(p,c){let i=c.i,k=c.c;
+ if(c.t==='Rito'){if(evn()==='Concilio di Zamorbelle')i--;if(evn()==='Nasce il Supremo Consiglio Arcano'&&!p.ritE){i--;k--}if(p.rd)i--}
+ if(c.t==='Personaggio'){const e=evn();if(e==="Scoperta dell'Acciaio Nero"&&!p.chE&&!p.corT)i--;if(e==='Morbo a Scaglie'&&!p.chT&&g.L.some(l=>l.ctrl===p.i&&l.ch.some(h=>h.o!==p.i)))i++}
+ return[Math.max(0,i),Math.max(0,k)]}
+function peek(p,mode){const t=p.deck[0];if(t&&((t.t==='Luogo'&&!g.L.some(l=>!l.c))||t.i>p.inf+4)){if(mode==='scarta')p.disc.push(p.deck.shift());else p.deck.push(p.deck.shift());lg(`  ${p.n} guarda «${t.n}» e la ${mode==='scarta'?'scarta':'mette in fondo'}`)}}
+function dep(p,c,l,o={}){
+ let ci=0,ck=0;if(!o.free){[ci,ck]=cost(p,c);ci=Math.max(0,ci-(o.red||0));p.inf-=ci;addCor(p,ck)}
+ const ix=p.hand.indexOf(c);if(ix>=0)p.hand.splice(ix,1);
+ const h={c,o:p.i,b:0,tmp:o.tmp};l.ch.push(h);p.plays[c.n]=(p.plays[c.n]||0)+1;
+ const en=l.ch.some(x=>x.o!==p.i),e=evn();
+ lg(`  ${p.n} schiera «${c.n}» (F${c.F}${o.free?', gratis':`, −${ci}🪙${ck?` +${ck}🟣`:''}`}) nel luogo ${g.L.indexOf(l)+1} «${l.c.n}»${o.tmp?' [temporaneo]':''}`);
+ if(!o.free&&!o.tmp){
+  if(e==='Fondazione di Imaskar'&&!en&&!p.fc1){p.fc1=1;h.b++;lg('  Evento: +1💪')}
+  if(e==='Guerra dei Tre Passi'&&en&&!p.fc2){p.fc2=1;h.b++;lg('  Evento: +1💪')}
+  if(e==='Notte delle Luci Danzanti'&&en&&p.cor<7){addCor(p,1);h.b++;lg('  Evento: +1🟣 per +1💪')}
+  if(c.i<=2&&!p.minT&&g.L.some(x=>x.c&&x.c.n==='Miniere di Luminaria'&&x.ctrl===p.i)){p.minT=1;gain(p,1);lg('  Miniere di Luminaria: +1🪙')}
+  p.chE=1;p.chT=1}
+ if(!o.noFx&&FX[c.n])FX[c.n](p,l,h)}
+function build(p,c,s,free){const[i,k]=free?[0,0]:cost(p,c);p.inf-=i;addCor(p,k);const ix=p.hand.indexOf(c);if(ix>=0)p.hand.splice(ix,1);
+ const l=g.L[s];l.c=c;l.b=p.i;l.ch=[];l.ctrl=-1;p.plays[c.n]=(p.plays[c.n]||0)+1;
+ lg(`  ${p.n} costruisce «${c.n}» nello spazio ${s+1}${free?' (gratis)':` (−${i}🪙${k?` +${k}🟣`:''})`}`);
+ if((evn()==='Fondazione di Zegroshtak'||evn()==='Spedizione di Jugo')&&!p.lcE){p.lcE=1;gain(p,2);lg('  Evento: +2🪙')}
+ const ch=p.hand.filter(x=>x.t==='Personaggio'&&p.inf>=cost(p,x)[0]&&!(cap(p)&&p.chT)).map(x=>({c:x,s:swingC(l,p.i,x)+.15*x.F})).sort((a,b)=>b.s-a.s)[0];
+ if(ch&&(p.ai==='casuale'||ch.s>0)){lg('  (schieramento contestuale: costo pagato, nessuna azione consumata)');dep(p,ch.c,l)}}
+const silBest=p=>{let best=null;g.L.forEach((a,i)=>{const m=a.ch.filter(h=>h.o===p.i);if(!m.length)return;[i-1,i+1].forEach(j=>{const b=g.L[j];if(!b||!b.c)return;const t0=tot(p.i),sa=a.ch.slice(),sb=b.ch.slice();a.ch=a.ch.filter(h=>h.o!==p.i);m.forEach(h=>{h.b++;b.ch.push(h)});const t1=tot(p.i);a.ch=sa;b.ch=sb;m.forEach(h=>h.b--);if(!best||t1-t0>best.g)best={g:t1-t0,a,b,m}})});return best};
+const ddBest=p=>{let b=null;p.disc.filter(c=>c.t==='Personaggio').forEach(c=>g.L.forEach(l=>{if(!l.c)return;const s=swingC(l,p.i,c);if(!b||s>b.s)b={c,l,s}}));return b};
+const FX={
+"Adepto dell'Accademia":p=>{if(p.cor<7){addCor(p,1);draw(p)}},
+"Resti che camminano":p=>{if(p.cor<7){addCor(p,1);draw(p)}},
+"Tessitore":p=>{if(p.cor<6){addCor(p,1);gain(p,1)}},
+"Esploratore":p=>peek(p,'fondo'),
+"Il Primo di Zamorbelle":p=>gain(p,g.L.filter(l=>l.ctrl===p.i).length),
+"Messaggero":p=>addCor(p,-2),
+"Mercenario veterano":(p,l,h)=>{if(p.inf>=1&&l.ch.some(x=>x.o!==p.i)){p.inf--;h.b++;lg('  paga 1🪙: +1💪')}},
+"Lupo feroce":(p,l)=>{const w=p.deck.filter(c=>c.n==='Lupo');if(p.inf>=2&&w.length){p.inf-=2;p.deck=shuf(p.deck.filter(c=>c.n!=='Lupo'));w.forEach(c=>l.ch.push({c,o:p.i,b:0}));lg(`  paga 2🪙: schiera ${w.length} Lupo dal mazzo`)}},
+"Duellante mercenario":(p,l,h)=>{const t=l.ch.filter(x=>x.o!==p.i&&hf(l,x)<=hf(l,h)).sort((a,b)=>hf(l,a)-hf(l,b))[0];if(t)kill(l,t,'Duellante')},
+"Ombra":(p,l)=>l.ch.filter(h=>h.o!==p.i&&h.c.F<=2).forEach(h=>kill(l,h,'Ombra')),
+"Profanatore":(p,l,h0)=>{const t=l.ch.filter(h=>h!==h0&&h.o!==p.i&&hf(l,h)<=3).sort((a,b)=>hf(l,b)-hf(l,a))[0];if(t)kill(l,t,'Profanatore')},
+"Necromante":(p,l)=>{const c=p.disc.filter(x=>x.ty==='Non morto').sort((a,b)=>b.F-a.F)[0];if(c&&p.cor<8){addCor(p,1);p.disc.splice(p.disc.indexOf(c),1);dep(p,c,l,{free:1,noFx:1})}},
+"Gli Sposi della Notte":p=>{const c=p.disc.filter(x=>x.ty==='Bestia').sort((a,b)=>b.F-a.F)[0];if(c){p.disc.splice(p.disc.indexOf(c),1);p.hand.push(c);lg(`  riprende «${c.n}» dagli scarti`)}},
+"Cristiano Dirimetti, Conte di Midesta":(p,l0,h0)=>{const s=g.L.findIndex(l=>!l.c),b=p.hand.length;draw(p,2);const nw=p.hand.slice(b),lu=nw.find(x=>x.t==='Luogo');if(lu&&s>=0&&nw.length>1){const o=nw[nw.indexOf(lu)===0?1:0];p.hand.splice(p.hand.indexOf(o),1);p.disc.push(o);build(p,lu,s,1);const x=moveBest(p,g.L[s],h0);if(x)moveChar(p,x,'Cristiano Dirimetti')}},
+"Elenoire, estirpatrice di eretici":p=>{const c=[...corTgt(p).map(x=>({v:hf(x.l,x.h),f:()=>kill(x.l,x.h,'Elenoire')})),...g.L.filter(l=>l.c&&l.b!==p.i&&l.c.c>0).map(l=>({v:l.c.p*2+l.ch.filter(h=>h.o!==p.i).length-l.ch.filter(h=>h.o===p.i).length,f:()=>rmLoc(l)}))].sort((a,b)=>b.v-a.v)[0];if(c)c.f()}};
+const RT={
+"Accordo precario":p=>{draw(p,2);gain(p,1)},
+"Martello della Redenzione":p=>boost(p,3),
+"Tessitura proibita":p=>{addCor(p,1);boost(p,2)},
+"Squarcio nel Velo":p=>killBest(p,4,'Squarcio nel Velo'),
+"Ritirata strategica":p=>{const t=g.L.filter(l=>l.c&&l.ch.some(h=>h.o===p.i)).sort((a,b)=>V(a,p.i)-V(b,p.i))[0];if(!t)return;const m=t.ch.filter(h=>h.o===p.i);t.ch=t.ch.filter(h=>h.o!==p.i);m.forEach(h=>p.hand.push(h.c));gain(p,2*m.length);lg(`  ritira ${m.length} personaggi dal luogo ${g.L.indexOf(t)+1}: +${2*m.length}🪙`)},
+"Silenzio della Mietitrice":p=>{const b=silBest(p);if(b){b.a.ch=b.a.ch.filter(h=>h.o!==p.i);b.m.forEach(h=>{h.b++;b.b.ch.push(h)});lg(`  sposta ${b.m.length} personaggi dal luogo ${g.L.indexOf(b.a)+1} al ${g.L.indexOf(b.b)+1} (+1💪)`)}},
+"Difesa disperata":p=>{const d=ddBest(p);if(d){p.disc.splice(p.disc.indexOf(d.c),1);dep(p,d.c,d.l,{free:1,tmp:1,noFx:1})}},
+"Richiamo della Notte":p=>{const c=p.disc.filter(x=>/Non morto|Bestia/.test(x.ty)).sort((a,b)=>b.F-a.F)[0];if(!c)return;p.disc.splice(p.disc.indexOf(c),1);p.hand.push(c);lg(`  riprende «${c.n}»`);const a=bestOf(p,c);if(a&&a.k==='char'&&a.s>.3)dep(p,c,a.l)},
+"Sciame di Mezzanotte":p=>{const b=p.hand.length;draw(p,2);const c=p.hand.slice(b).find(x=>x.t==='Personaggio'&&x.F<=2);if(c){const a=cardActs(p,c).map(x=>({...x,s:swingC(x.l,p.i,c)})).sort((x,y)=>y.s-x.s)[0];if(a&&p.inf>=Math.max(0,cost(p,c)[0]-1))dep(p,c,a.l,{red:1})}}};
+function rs(p,c){const my=ownCh(p),en=enCh(p),n=c.n;
+ if(n==='Accordo precario')return p.inf<7&&p.cor<7?1.4:-9;
+ if(n==='Martello della Redenzione'||n==='Tessitura proibita'){const s=Math.max(-9,...my.map(x=>swing(x.l,p.i,n[0]==='M'?3:2)));return s>0?s+.2:-9}
+ if(n==='Squarcio nel Velo'){const t=en.filter(x=>hf(x.l,x.h)<=4);return t.length?1+Math.max(...t.map(x=>hf(x.l,x.h)*.4+x.l.c.p*.3)):-9}
+ if(n==='Ritirata strategica')return g.L.some(l=>l.c&&V(l,p.i)<0&&l.ch.some(h=>h.o===p.i))?.8:-9;
+ if(n==='Silenzio della Mietitrice'){const s=silBest(p);return s&&s.g>0?s.g+.3:-9}
+ if(n==='Difesa disperata'){const d=ddBest(p);return d&&d.s>0?d.s*.9:-9}
+ if(n==='Richiamo della Notte')return p.disc.some(x=>/Non morto|Bestia/.test(x.ty))?1:-9;
+ if(n==='Sciame di Mezzanotte')return 1.2;
+ if(n.startsWith('E-don'))return .4+corTgt(p).length;
+ if(n==='Prova di Ghyza')return .9;
+ if(n==='Studi architetturali')return .7;
+ if(n==='Furia della Bestia')return my.some(x=>/Bestia|Non morto/.test(x.h.c.ty))||p.hand.some(x=>/Bestia|Non morto/.test(x.ty))?.9:.3;
+ return .5}
+function cardActs(p,c){const r=[],[i]=cost(p,c);if(p.inf<i)return r;
+ if(c.t==='Personaggio'){if(!(cap(p)&&p.chT))g.L.forEach(l=>l.c&&r.push({k:'char',c,l}))}
+ else if(c.t==='Luogo')g.L.forEach((l,s)=>!l.c&&r.push({k:'loc',c,sl:s}));
+ else if(c.t==='Rito'&&!(evn()==='Concilio di Zamorbelle'&&p.ritT)&&rs(p,c)>-9)r.push({k:'rit',c});
+ return r}
+function score(p,a){const[i,k]=cost(p,a.c);let s=-i*.12-k*.35-(p.cor>6?k*.5:0)-(p.cor+k>9?2.2:0);
+ if(a.k==='char')s+=swingC(a.l,p.i,a.c)+.15*a.c.F+.4+(FX[a.c.n]?.4:0)+(a.l.ch.some(h=>h.o!==p.i)?.2:0);
+ if(a.k==='loc')s+=a.c.p*1.3+1.2+(a.sl===1&&a.c.n==="L'Imboccatura"?1.5:0);
+ if(a.k==='rit')s+=rs(p,a.c);
+ return s}
+const bestOf=(p,c)=>{const a=cardActs(p,c);a.forEach(x=>x.s=score(p,x));return a.sort((x,y)=>y.s-x.s)[0]};
+function doRit(p,c){const[i,k]=cost(p,c);p.inf-=i;addCor(p,k);p.hand.splice(p.hand.indexOf(c),1);p.ritT=1;p.ritE=1;p.rd=0;p.plays[c.n]=(p.plays[c.n]||0)+1;
+ lg(`  ${p.n} esegue il Rito ${c.per?'persistente':'immediato'} «${c.n}» (−${i}🪙${k?` +${k}🟣`:''})`);
+ if(RT[c.n])RT[c.n](p,c);
+ if(c.per){p.rit.push(c);if(p.rit.length>3){const x=p.rit.shift();p.disc.push(x);lg(`  oltre 3 riti: scarta «${x.n}»`)}}else p.disc.push(c);giada(p)}
+function buy(p,m){g.mk.splice(g.mk.indexOf(m),1);if(g.mkd.length)g.mk.push(g.mkd.shift());addCor(p,1);p.hand.push(m);p.seen.add(m.n);p.bought[m.n]=(p.bought[m.n]||0)+1;
+ lg(`  ${p.n} acquista dal Mercato «${m.n}» (+1🟣). Mercato: ${g.mk.map(x=>x.n).join(', ')}`);
+ const a=bestOf(p,m);if(a&&(p.ai==='casuale'||a.s>.3)){lg('  (giocata immediata senza azione)');a.k==='char'?dep(p,a.c,a.l):a.k==='loc'?build(p,a.c,a.sl):doRit(p,a.c)}}
+function act(p){const o=p.hand.flatMap(c=>cardActs(p,c));let b=null;
+ if(p.ai==='casuale'){const all=[...o];if(g.mk.length)all.push({k:'buy'});all.push(null);b=all[Math.random()*all.length|0]}
+ else{o.forEach(a=>a.s=score(p,a));o.sort((x,y)=>y.s-x.s);if(o[0]&&o[0].s>.3)b=o[0];
+  if(g.mk.length&&p.cor<8){let bm=null;g.mk.forEach(m=>{const a=bestOf(p,m);if(a){const v=a.s-.5-(p.cor>4?.6:0);if(!bm||v>bm.v)bm={v,m}}});if(bm&&bm.v>.3&&(!b||bm.v>b.s))b={k:'buy',m:bm.m}}}
+ if(!b){lg(`  ${p.n} non compie altre azioni`);return false}
+ if(b.k==='buy')buy(p,b.m||g.mk[Math.random()*g.mk.length|0]);else if(b.k==='char')dep(p,b.c,b.l);else if(b.k==='loc')build(p,b.c,b.sl);else doRit(p,b.c);
+ return true}
+const jv=(p,c)=>(c.t==='Luogo'&&!g.L.some(l=>!l.c))?-9:c.F*.3+(c.t==='Luogo'?1:0)-(c.i+c.c)*.2;
+const junk=p=>[...p.hand].sort((a,b)=>jv(p,a)-jv(p,b))[0];
+function recur(p,fl){if(p[fl]||p.inf<1)return;const c=p.disc.filter(x=>x.ty==='Non morto').sort((a,b)=>b.F-a.F)[0];if(!c)return;p[fl]=1;p.inf--;p.disc.splice(p.disc.indexOf(c),1);p.hand.push(c);lg(`  ${p.n} paga 1🪙 e riprende «${c.n}» dagli scarti`)}
+function mvGain(p,l,h,b){const t0=tot(p.i);l.ch.splice(l.ch.indexOf(h),1);b.ch.push(h);const t1=tot(p.i);b.ch.pop();l.ch.push(h);return t1-t0}
+function moveBest(p,dest,excl){let b=null;g.L.forEach(l=>{if(l===dest||!l.c)return;l.ch.filter(h=>h.o===p.i&&h!==excl).forEach(h=>{const gn=mvGain(p,l,h,dest);if(gn>0&&(!b||gn>b.g))b={l,h,b:dest,g:gn}})});return b}
+function moveChar(p,x,why){x.l.ch.splice(x.l.ch.indexOf(x.h),1);x.b.ch.push(x.h);lg(`  ${why}: ${p.n} sposta «${x.h.c.n}» dal luogo ${g.L.indexOf(x.l)+1} al luogo ${g.L.indexOf(x.b)+1}`)}
+function torre(p){if(p.trT)return;let best=null;g.L.forEach((l,i)=>{if(!l.c||l.c.n!=='Vecchia torre dei corvi'||l.ctrl!==p.i)return;l.ch.filter(h=>h.o===p.i).forEach(h=>[i-1,i+1].forEach(j=>{const b=g.L[j];if(!b||!b.c)return;const gn=mvGain(p,l,h,b);if(gn>.5&&(!best||gn>best.g))best={l,h,b,g:gn}}))});if(best){p.trT=1;moveChar(p,best,'Vecchia torre dei corvi')}}
+function giada(p){if(p.gdT||p.cor>6||!g.L.some(l=>l.c&&l.c.n==='Accademia di Giada'&&l.ctrl===p.i))return;p.gdT=1;addCor(p,2);draw(p,2);const t=[...p.hand].sort((a,b)=>jv(p,a)-jv(p,b)),d=t[0],bt=t[1];
+ if(d){p.hand.splice(p.hand.indexOf(d),1);p.disc.push(d)}if(bt){p.hand.splice(p.hand.indexOf(bt),1);p.deck.push(bt)}
+ lg(`  Accademia di Giada: ${p.n} accumula 2🟣, pesca 2, scarta «${d?d.n:'—'}» e mette in fondo al mazzo «${bt?bt.n:'—'}»`)}
+function studiBest(p){let b=null;p.hand.filter(c=>c.t==='Luogo').forEach(c=>{const[i,k]=cost(p,c);if(p.inf<i)return;g.L.forEach((l,s)=>{if(!l.c)return;const old=l.c,bf=V(l,p.i);l.c=c;const af=V(l,p.i);l.c=old;const v=af-bf-i*.12-k*.35-(l.b===p.i?.5:0);if(v>.8&&(!b||v>b.v))b={c,l,s,v,i,k}})});return b}
+function studi(p){if(p.stR)return;const b=studiBest(p);if(!b)return;p.stR=1;const old=b.l.c;g.P[b.l.b].disc.push(old);p.hand.splice(p.hand.indexOf(b.c),1);p.inf-=b.i;addCor(p,b.k);b.l.c=b.c;b.l.b=p.i;b.l.ctrl=-1;p.plays[b.c.n]=(p.plays[b.c.n]||0)+1;
+ lg(`  Studi architetturali: ${p.n} costruisce «${b.c.n}» al posto di «${old.n}» nello spazio ${b.s+1} (−${b.i}🪙${b.k?` +${b.k}🟣`:''}); i personaggi restano`)}
+function furia(p){if(p.fuT||p.cor+3>9)return;let b=null;ownCh(p).filter(x=>/Bestia|Non morto/.test(x.h.c.ty)).forEach(x=>{const f=hf(x.l,x.h)+1;x.l.ch.filter(e=>e.o!==p.i&&hf(x.l,e)<f).forEach(e=>{const v=hf(x.l,e)+x.l.c.p;if(v>=3&&(!b||v>b.v))b={x,e,v}})});
+ if(b){p.fuT=1;addCor(p,3);b.x.h.b++;lg(`  Furia della Bestia: ${p.n} accumula 3🟣, «${b.x.h.c.n}» +1💪`);kill(b.x.l,b.e,'Furia della Bestia')}}
+function persist(p){p.rit.forEach(c=>{
+ if(c.n==='Studi architetturali')studi(p);
+ if(c.n==='Furia della Bestia')furia(p);
+ if(c.n.startsWith('E-don')){const t=corTgt(p).slice(0,2);if(t.length){gain(O(p),2);t.forEach(x=>kill(x.l,x.h,'E-don'));lg(`  E-don: ${O(p).n} ottiene 2🪙`)}}
+ if(c.n==='Prova di Ghyza'&&!p.pgR&&p.hand.length>1){p.pgR=1;const j=junk(p);p.hand.splice(p.hand.indexOf(j),1);p.disc.push(j);gain(p,1);addCor(p,-1);lg(`  Prova di Ghyza: scarta «${j.n}», +1🪙, −1🟣`)}});
+ if(p.fz==='Creature della notte')recur(p,'fbR');
+ if(g.L.some(l=>l.c&&l.c.n==="L'Inframondo"&&l.ctrl===p.i))recur(p,'infR');
+ if(p.fz==='Le Accademie del Velo'&&!p.fbR&&p.hand.length>3&&p.hand.some(c=>c.t==='Rito')){const j=junk(p);if(j.t!=='Rito'){p.fbR=1;p.rd=1;p.hand.splice(p.hand.indexOf(j),1);p.disc.push(j);lg(`  Bonus Accademie: scarta «${j.n}», prossimo Rito −1🪙`)}}}
+function turn(p){draw(p);gain(p,3);p.chT=p.ritT=p.sant=p.minT=p.corT=p.fuT=p.gdT=p.trT=0;
+ lg(`▸ Turno di ${p.n} — 🪙${p.inf} 🟣${p.cor} Prestigio ${p.pre} · mano: ${p.hand.map(c=>c.n).join(', ')||'—'}`);
+ if(evn()==='Unificazione di Zune'&&!p.ufR&&g.L.some(l=>l.ctrl===p.i)){p.ufR=1;gain(p,1);lg('  Evento: +1🪙')}
+ persist(p);
+ for(let a=0;a<2;a++)if(!act(p))break;
+ torre(p);
+ if(evn()==='Guerra degli Elfi Vetala'&&!p.efR&&p.cor<8){const t=ownCh(p).filter(x=>x.l.ch.some(h=>h.o!==p.i)).map(x=>({...x,s:swing(x.l,p.i,2)})).sort((a,b)=>b.s-a.s)[0];if(t&&t.s>0){p.efR=1;addCor(p,1);t.h.b+=2;lg(`  Evento: +1🟣 per dare +2💪 a «${t.h.c.n}»`)}}}
+function round(){g.rd++;const f=g.first;lg(`\n═══ ROUND ${g.rd} ═══ Primo giocatore: ${g.P[f].n}`);
+ g.P.forEach(p=>{p.fc1=p.fc2=p.chE=p.ritE=p.lcE=p.ufR=p.fbR=p.infR=p.pgR=p.efR=p.stR=p.rd=0;draw(p,Math.max(0,4-p.hand.length))});
+ g.ev=g.evd.shift();lg(`📜 Evento: ${g.ev.n}`);
+ if(g.ev.n==='Il morso del Kraken')g.P.forEach(p=>{const t=ownCh(p).sort((a,b)=>hf(a.l,a.h)-hf(b.l,b.h))[0];if(t){t.h.b--;lg(`  Kraken: «${t.h.c.n}» di ${p.n} −1💪`)}});
+ g.L.forEach(l=>{if(!l.c||l.ctrl<0||l.ctrl>1)return;const p=g.P[l.ctrl],n=l.c.n;
+  if(n==='Zamorbelle'){const q=O(p);if(l.ch.some(h=>h.o===q.i)){q.inf=Math.max(0,q.inf-1);lg(`  Zamorbelle: ${q.n} perde 1🪙`)}}
+  if(n==='Lago Occhi di Giada')peek(p,'fondo');if(n==='Piramide Ovale')peek(p,'scarta')});
+ const ord=evn()==='Morte del Re'?[1-f,f]:[f,1-f];
+ for(let t=0;t<2;t++)ord.forEach(i=>turn(g.P[i]));
+ lg('— Valutazione dei Luoghi —');const gn=[0,0];
+ g.L.forEach((l,s)=>{if(!l.c)return;l.ctrl=ctrlOf(l);const c=l.ctrl;
+  if(c<0)lg(`  Luogo ${s+1} «${l.c.n}»: neutrale`);else if(c===2)lg(`  Luogo ${s+1} «${l.c.n}»: conteso (F ${FT(l,0)}–${FT(l,1)})`);
+  else{let pt=l.c.p;if(l.c.n==="L'Imboccatura"&&s===1)pt+=2;if(evn()==='Guerra dei Re delle Stelle')pt++;gn[c]+=pt;g.P[c].src.loc+=pt;lg(`  Luogo ${s+1} «${l.c.n}»: controllato da ${g.P[c].n} (F ${FT(l,0)}–${FT(l,1)}) → +${pt} Prestigio`)}});
+ g.P.forEach(p=>{if(p.fz==='Le Terre Contese'){const n=g.L.filter(l=>l.ctrl===p.i&&l.c&&l.c.f==='Le Terre Contese').length;if(n){gn[p.i]+=n;p.src.bonus+=n;lg(`  Bonus Terre Contese: ${p.n} +${n}`)}}p.pre+=gn[p.i]});
+ g.rg.push({ev:g.ev.n,d:gn});lg(`  Totale Round: ${g.P[0].n} ${g.P[0].pre} · ${g.P[1].n} ${g.P[1].pre}`);
+ g.L.forEach(l=>{l.ch=l.ch.filter(h=>{h.b=0;if(h.tmp){g.P[h.o].disc.push(h.c);return false}return true})});
+ g.first=ord[1]}
+function playGame(dk,ai,first,v){const all=CARDS.filter(c=>c.t==='Evento');let ev=[];while(ev.length<9)ev.push(...shuf(all));
+ const mc=[];CARDS.filter(c=>c.f==='Comune'&&c.t!=='Evento').forEach(c=>{for(let k=0;k<(c.leg?1:2);k++)mc.push(c)});
+ g={v,log:[],rd:0,first,first0:first,ev:null,L:Array.from({length:4},()=>({c:null,b:-1,ch:[],ctrl:-1})),evd:ev.slice(0,9),mkd:shuf(mc),mk:[],rg:[],
+  P:[0,1].map(i=>({i,n:i?'B':'A',fz:dk[i].fazione,ai:ai[i],inf:6,cor:0,pre:0,deck:shuf(dk[i].l.map(cb)),hand:[],disc:[],rit:[],seen:new Set(),plays:{},bought:{},src:{loc:0,bonus:0,cor:0},wrap:0}))};
+ for(let k=0;k<3;k++)g.mk.push(g.mkd.shift());
+ lg(`PARTITA — A: ${dk[0].nome} (IA ${ai[0]}) vs B: ${dk[1].nome} (IA ${ai[1]}). Mercato iniziale: ${g.mk.map(c=>c.n).join(', ')}`);
+ for(let r=0;r<9;r++)round();
+ const[a,b]=g.P;const w=a.pre>b.pre?0:b.pre>a.pre?1:a.cor<b.cor?0:b.cor<a.cor?1:2;
+ lg(`\n★ RISULTATO: ${a.n} ${a.pre} Prestigio (🟣${a.cor}) — ${b.n} ${b.pre} Prestigio (🟣${b.cor}) → ${w===2?'PAREGGIO (vittoria condivisa)':'vince '+g.P[w].n}`);
+ return{g,w}}
+/*UI*/
+const mkA=()=>({n:0,w:[0,0,0],pre:[0,0],cor:[0,0],wrap:[0,0],fw:0,fd:0,mg:0,hist:Array(25).fill(0),src:[{loc:0,bonus:0,cor:0},{loc:0,bonus:0,cor:0}],cs:[{},{}],mk:{},ev:{}});
+function agg(A,g,w){A.n++;A.w[w]++;g.P.forEach(p=>{A.pre[p.i]+=p.pre;A.cor[p.i]+=p.cor;A.wrap[p.i]+=p.wrap;['loc','bonus','cor'].forEach(k=>A.src[p.i][k]+=p.src[k]);
+ const cs=A.cs[p.i],e=n=>cs[n]||(cs[n]={s:0,w:0,p:0});
+ p.seen.forEach(n=>{const s=e(n);s.s++;if(w===p.i)s.w++});for(const n in p.plays)e(n).p+=p.plays[n];
+ for(const n in p.bought){const m=A.mk[n]||(A.mk[n]={b:0,g:0,w:0});m.b+=p.bought[n];m.g++;if(w===p.i)m.w++}});
+ if(w<2){A.fd++;if(w===g.first0)A.fw++}
+ const[a,b]=g.P;A.hist[Math.max(-12,Math.min(12,a.pre-b.pre))+12]++;A.mg+=Math.abs(a.pre-b.pre);
+ g.rg.forEach(r=>{const e=A.ev[r.ev]||(A.ev[r.ev]={n:0,t:0,d:0});e.n++;e.t+=r.d[0]+r.d[1];e.d+=Math.abs(r.d[0]-r.d[1])})}
+const pc=(a,b)=>b?(100*a/b).toFixed(1)+'%':'—',f2=(a,b)=>b?(a/b).toFixed(2):'—';
+const tbl=(h,r)=>`<div class="scroll"><table><tr>${h.map(x=>`<th>${x}</th>`).join('')}</tr>${r.map(x=>`<tr>${x.map(y=>`<td>${y}</td>`).join('')}</tr>`).join('')}</table></div>`;
+function bars(v,lab,col,h=100){const w=320,m=Math.max(...v,1),bw=w/v.length;return`<svg viewBox="0 0 ${w} ${h+18}" width="100%" role="img">`+v.map((x,i)=>`<rect x="${i*bw+1.5}" y="${h-x/m*h}" width="${bw-3}" height="${x/m*h}" fill="${col[i%col.length]}"/>${lab[i]!==''?`<text x="${i*bw+bw/2}" y="${h+13}" font-size="9" text-anchor="middle" fill="var(--mut)">${lab[i]}</text>`:''}`).join('')+'</svg>'}
+function report(A,dk,ai){const n=A.n;let h=`<div class="card"><h2>Risultati (${n} partite)</h2>`;
+ h+=tbl(['','A · '+dk[0].nome,'B · '+dk[1].nome],[['Vittorie',pc(A.w[0],n),pc(A.w[1],n)],['Prestigio medio',f2(A.pre[0],n),f2(A.pre[1],n)],['Corruzione finale media',f2(A.cor[0],n),f2(A.cor[1],n)],['Giri del dado Corruzione / partita',f2(A.wrap[0],n),f2(A.wrap[1],n)],['Prestigio da Luoghi / partita',f2(A.src[0].loc,n),f2(A.src[1].loc,n)],['Bonus di fazione / partita',f2(A.src[0].bonus,n),f2(A.src[1].bonus,n)],['Penalità Corruzione / partita',f2(A.src[0].cor,n),f2(A.src[1].cor,n)]]);
+ h+=`<p>Pareggi: <b>${pc(A.w[2],n)}</b> · Vittoria di chi inizia il primo Round: <b>${pc(A.fw,A.fd)}</b> · Margine medio: <b>${f2(A.mg,n)}</b> Prestigio</p>`;
+ h+=`<div class="row"><div class="col"><b class="m">Vittorie % (A · B · pareggio)</b>${bars(A.w.map(x=>x/n*100),['A','B','=' ],['var(--g1)','var(--g2)','var(--mut)'])}</div><div class="col"><b class="m">Margine di Prestigio (A − B)</b>${bars(A.hist,A.hist.map((_,i)=>i%4===0?i-12:''),['var(--ac)'])}</div></div>`;
+ [0,1].forEach(i=>{const cnt=dk[i].l.reduce((o,x)=>(o[x]=(o[x]||0)+1,o),{}),dw=A.w[i]/n;
+  const rows=Object.keys(cnt).map(c=>{const s=A.cs[i][c]||{s:0,w:0,p:0};return{c,s,wr:s.s?s.w/s.s:0}}).sort((a,b)=>b.wr-a.wr).map(r=>[r.c,cnt[r.c],pc(r.s.s,n),pc(r.s.w,r.s.s),((r.wr-dw)*100>=0?'+':'')+((r.wr-dw)*100).toFixed(1),f2(r.s.p,n)]);
+  h+=`<details><summary>Carte del mazzo ${i?'B':'A'} — ${dk[i].nome}</summary>${tbl(['Carta','Copie','Pescata','Vittorie se pescata','Δ vs mazzo (pt)','Giocate/partita'],rows)}</details>`});
+ h+=`<details><summary>Mercato Mercenario</summary>${tbl(['Carta','Acquisti/partita','Partite con acquisto','Vittorie se acquistata'],Object.entries(A.mk).sort((a,b)=>b[1].b-a[1].b).map(([k,m])=>[k,f2(m.b,n),pc(m.g,2*n),pc(m.w,m.g)]))}</details>`;
+ h+=`<details><summary>Eventi</summary>${tbl(['Evento','Volte','Prestigio medio/round (totale)','Scarto medio A–B/round'],Object.entries(A.ev).sort((a,b)=>b[1].d/b[1].n-a[1].d/a[1].n).map(([k,e])=>[k,e.n,f2(e.t,e.n),f2(e.d,e.n)]))}</details>`;
+ const dead=[0,1].flatMap(i=>dk[i].l.filter(c=>DEAD.includes(c)));
+ if(dead.length)h+=`<p class="warn">Attenzione: i mazzi contengono carte non ancora implementate (${[...new Set(dead)].join(', ')}): l’IA non le gioca, quindi falsano le statistiche.</p>`;
+ return h+'</div>'}
+let LOGS=[];
+function showLog(i){$('lg').textContent=LOGS[i]||''}
+function status(t){$('st').textContent=t}
+function fillSel(){['da','db'].forEach((id,k)=>{$(id).innerHTML=DECKS.map((d,i)=>`<option value="${i}">${d.nome} (${d.l.length})</option>`).join('');if(DECKS.length>1)$(id).value=Math.min(k,DECKS.length-1)});$('go').disabled=!DECKS.length}
+const dl=(name,txt,type)=>{const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([txt],{type}));a.download=name;a.click()};
+$('fx').addEventListener('change',async e=>{try{const f=e.target.files[0];if(!f)return;const wb=XLSX.read(await f.arrayBuffer());parseCards(XLSX.utils.sheet_to_json(wb.Sheets['Tutte le carte']||wb.Sheets[wb.SheetNames[0]],{defval:''}));
+ status(`${CARDS.length} carte caricate (escluse Comunione, Devoti, Spontanei): ${CARDS.filter(c=>c.t==='Evento').length} eventi, ${CARDS.filter(c=>c.f==='Comune'&&c.t!=='Evento').length} carte Comuni nel Mercato. Ora carica un JSON di mazzi o genera quelli automatici.`)}catch(x){status('Errore nella lettura dell’Excel: '+x.message)}});
+$('fj').addEventListener('change',async e=>{try{if(!CARDS.length)return status('Carica prima l’Excel.');const j=JSON.parse(await e.target.files[0].text()),ds=j.decks||j,bad=new Set();
+ DECKS=ds.map(d=>({nome:d.nome,fazione:d.fazione,l:d.carte.flatMap(c=>{if(!cb(c.nome)){bad.add(c.nome);return[]}return Array(c.qty||1).fill(c.nome)})}));fillSel();
+ status(`${DECKS.length} mazzi caricati.`+(bad.size?` Carte non trovate (ignorate): ${[...bad].join(', ')}.`:''))}catch(x){status('JSON non valido: '+x.message)}});
+$('ba').addEventListener('click',()=>{if(!CARDS.length)return status('Carica prima l’Excel.');DECKS=autoDecks();fillSel();status(`${DECKS.length} mazzi automatici (carte di fazione ×2, leggendarie ×1, completati con Comuni fino a 20).`)});
+$('bt').addEventListener('click',()=>{if(!CARDS.length)return status('Carica prima l’Excel.');dl('modello-mazzi.json',toJson(autoDecks()),'application/json')});
+$('go').addEventListener('click',async()=>{const b=$('go'),pg=$('pg');b.disabled=true;pg.hidden=false;
+ try{const dk=[DECKS[+$('da').value],DECKS[+$('db').value]],ai=[$('aa').value,$('ab').value],n=Math.max(1,+$('n').value||1),nl=Math.min(n,+$('nl').value||0),A=mkA();LOGS=[];
+  for(let k=0;k<n;k++){const r=playGame(dk,ai,Math.random()<.5?0:1,k<nl);agg(A,r.g,r.w);if(k<nl)LOGS.push(r.g.log.join('\n'));if(k%25===24){pg.value=k/n;await new Promise(r=>setTimeout(r))}}
+  $('out').innerHTML=report(A,dk,ai)+(nl?`<div class="card"><h2>Log dettagliati</h2><label>Partita <select id="ls">${LOGS.map((_,i)=>`<option value="${i}">#${i+1}</option>`).join('')}</select></label><button id="dlb">Scarica tutti i log (.txt)</button><pre id="lg"></pre></div>`:'');
+  if(nl){showLog(0);$('ls').addEventListener('change',e=>showLog(+e.target.value));$('dlb').addEventListener('click',()=>dl('log-partite.txt',LOGS.join('\n\n##########\n\n'),'text/plain'))}
+ }catch(x){$('out').innerHTML='<div class="card warn">Errore: '+x.message+'</div>';console.error(x)}finally{b.disabled=false;pg.hidden=true}});
+</script></body></html>
